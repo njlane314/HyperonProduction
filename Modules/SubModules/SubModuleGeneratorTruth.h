@@ -26,10 +26,15 @@ struct GeneratorTruth {
 
    double Weight = 1.0;
    int NMCTruths;
-   std::string Mode;
+   //std::string Mode;
+   std::vector<std::string> Mode;
    std::vector<SimParticle> Neutrino;
-   TVector3 TruePrimaryVertex;
-   std::string CCNC;
+   //TVector3 TruePrimaryVertex;
+   std::vector<double> TruePrimaryVertex_X;
+   std::vector<double> TruePrimaryVertex_Y;
+   std::vector<double> TruePrimaryVertex_Z;
+   //std::string CCNC;
+   std::vector<std::string> CCNC;
 
 };
 

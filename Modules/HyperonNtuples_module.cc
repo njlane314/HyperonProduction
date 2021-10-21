@@ -97,8 +97,10 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
 
       int t_NMCTruths=0;	
 
-      std::string t_Mode; //interaction mode
-      std::string t_CCNC; //charged current/neutral current
+      std::vector<std::string> t_Mode;
+      //std::string t_Mode; //interaction mode
+      std::vector<std::string> t_CCNC;
+      //std::string t_CCNC; //charged current/neutral current
 
       bool t_IsLambda;
       bool t_IsHyperon;
@@ -120,7 +122,10 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<SimParticle> t_SigmaZeroDecayLambda;
       std::vector<SimParticle> t_KaonDecay;
 
-      TVector3 t_TruePrimaryVertex;
+      std::vector<double> t_TruePrimaryVertex_X;
+      std::vector<double> t_TruePrimaryVertex_Y;
+      std::vector<double> t_TruePrimaryVertex_Z;
+      //TVector3 t_TruePrimaryVertex;
       TVector3 t_DecayVertex;
 
       int t_NPrimaryDaughters;
@@ -220,7 +225,9 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    //begin by resetting everything
 
    t_Weight = 1.0;
-   t_Mode = "NONE";
+   //t_Mode = "NONE";
+   t_Mode.clear();
+   t_CCNC.clear();
    t_NMCTruths = 0;
    t_IsHyperon = false;
    t_IsSigmaZero = false;
@@ -242,7 +249,10 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_SigmaZeroDecayPhoton.clear();
    t_SigmaZeroDecayLambda.clear();
 
-   t_TruePrimaryVertex.SetXYZ(-1000,-1000,-1000);
+   t_TruePrimaryVertex_X.clear();
+   t_TruePrimaryVertex_Y.clear();
+   t_TruePrimaryVertex_Z.clear();
+   //t_TruePrimaryVertex.SetXYZ(-1000,-1000,-1000);
    t_DecayVertex.SetXYZ(-1000,-1000,-1000);
  
    t_NPrimaryDaughters = 0; //number of primary daughters
@@ -293,7 +303,11 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_Mode = GenT.Mode;
       t_NMCTruths = GenT.NMCTruths;
       t_Neutrino = GenT.Neutrino;
-      t_TruePrimaryVertex = GenT.TruePrimaryVertex;
+      //t_TruePrimaryVertex = GenT.TruePrimaryVertex;
+      t_TruePrimaryVertex_X = GenT.TruePrimaryVertex_X;
+      t_TruePrimaryVertex_Y = GenT.TruePrimaryVertex_Y;
+      t_TruePrimaryVertex_Z = GenT.TruePrimaryVertex_Z;
+
       delete Generator_SM;
    }
 
@@ -324,7 +338,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_SigmaZeroDecayLambda = G4T.SigmaZeroDecayLambda;
       t_DecayVertex = G4T.DecayVertex;
 
-      t_IsSignal = t_Neutrino.size() == 1 && t_Mode == "HYP" && t_Neutrino.at(0).PDG == -14 && t_IsLambdaCharged;
+      t_IsSignal = t_Neutrino.size() == 1 && t_Mode.at(0) == "HYP" && t_Neutrino.at(0).PDG == -14 && t_IsLambdaCharged;
         
       delete G4_SM;
    }
@@ -436,8 +450,10 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("event",&event);
 
    OutputTree->Branch("Weight",&t_Weight);
-   OutputTree->Branch("Mode",&t_Mode);
-   OutputTree->Branch("CCNC",&t_CCNC);
+   //OutputTree->Branch("Mode",&t_Mode);
+   OutputTree->Branch("Mode","vector<string>",&t_Mode);
+   //OutputTree->Branch("CCNC",&t_CCNC);
+   OutputTree->Branch("CCNC","vector<string>",&t_CCNC);
    OutputTree->Branch("NMCTruths",&t_NMCTruths);
    OutputTree->Branch("IsHyperon",&t_IsHyperon);
    OutputTree->Branch("IsSigmaZero",&t_IsSigmaZero);
@@ -458,7 +474,10 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("SigmaZeroDecayPhoton","vector<SimParticle>",&t_SigmaZeroDecayPhoton);
    OutputTree->Branch("SigmaZeroDecayLambda","vector<SimParticle>",&t_SigmaZeroDecayLambda);
    OutputTree->Branch("KaonDecay","vector<SimParticle>",&t_KaonDecay);
-   OutputTree->Branch("TruePrimaryVertex","TVector3",&t_TruePrimaryVertex);
+   //OutputTree->Branch("TruePrimaryVertex","TVector3",&t_TruePrimaryVertex);
+   OutputTree->Branch("TruePrimaryVertex",&t_TruePrimaryVertex_X);
+   OutputTree->Branch("TruePrimaryVertex",&t_TruePrimaryVertex_Y);
+   OutputTree->Branch("TruePrimaryVertex",&t_TruePrimaryVertex_Z);
    OutputTree->Branch("DecayVertex","TVector3",&t_DecayVertex); //position ot_ hyperon decay vertex
 
    OutputTree->Branch("RecoPrimaryVertex","TVector3",&t_RecoPrimaryVertex);

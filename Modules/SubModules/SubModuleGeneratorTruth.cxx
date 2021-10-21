@@ -27,42 +27,63 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
 
    theTruth.NMCTruths = Vect_MCTruth.size();
 
-   art::Ptr<simb::MCTruth> theMCTruth = Vect_MCTruth.at(0);
+   for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){
 
-   simb::MCNeutrino Nu = theMCTruth->GetNeutrino();
+      simb::MCNeutrino Nu = theMCTruth->GetNeutrino();
 
-   int mode = Nu.Mode();
-   int ccnc = Nu.CCNC();
+      int mode = Nu.Mode();
+      int ccnc = Nu.CCNC();
 
-   if(ccnc == 0) theTruth.CCNC = "CC";
-   else theTruth.CCNC = "NC";
+      if(ccnc == 0) theTruth.CCNC.push_back("CC");
+      else theTruth.CCNC.push_back("NC");
 
-   // NOTE: Hyperon events produced in GENIE use 0, NuWro uses 1095
-   if(mode == 0) theTruth.Mode = "QEL";
-   else if(mode == 1) theTruth.Mode = "RES";
-   else if(mode == 2) theTruth.Mode = "DIS";
-   else if(mode == 3) theTruth.Mode = "COH";
-   else if(mode == 5) theTruth.Mode = "ElectronScattering";
-   else if(mode == 10) theTruth.Mode = "MEC";
-   else if(mode == 11) theTruth.Mode = "Diffractive";
-   else if(mode == 1095) theTruth.Mode = "HYP";
-   else theTruth.Mode = "Other";	
+      /*
+      // NOTE: Hyperon events produced in GENIE use 0, NuWro uses 1095
+      if(mode == 0) theTruth.Mode = "QEL";
+      else if(mode == 1) theTruth.Mode = "RES";
+      else if(mode == 2) theTruth.Mode = "DIS";
+      else if(mode == 3) theTruth.Mode = "COH";
+      else if(mode == 5) theTruth.Mode = "ElectronScattering";
+      else if(mode == 10) theTruth.Mode = "MEC";
+      else if(mode == 11) theTruth.Mode = "Diffractive";
+      else if(mode == 1095) theTruth.Mode = "HYP";
+      else theTruth.Mode = "Other";	
+      */
 
-   for(int k_particles=0;k_particles<theMCTruth->NParticles();k_particles++){
+      if(mode == 0) theTruth.Mode.push_back("QEL");
+      else if(mode == 1) theTruth.Mode.push_back("RES");
+      else if(mode == 2) theTruth.Mode.push_back("DIS");
+      else if(mode == 3) theTruth.Mode.push_back("COH");
+      else if(mode == 5) theTruth.Mode.push_back("ElectronScattering");
+      else if(mode == 10) theTruth.Mode.push_back("MEC");
+      else if(mode == 11) theTruth.Mode.push_back("Diffractive");
+      else if(mode == 1095) theTruth.Mode.push_back("HYP");
+      else theTruth.Mode.push_back("Other");	
 
-      simb::MCParticle Part = theMCTruth->GetParticle(k_particles);
+      for(int k_particles=0;k_particles<theMCTruth->NParticles();k_particles++){
 
-      if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) 
-         theTruth.TruePrimaryVertex.SetXYZ(Part.Vx(),Part.Vy(),Part.Vz());
+         simb::MCParticle Part = theMCTruth->GetParticle(k_particles);
 
-      if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){
-         SimParticle P = MakeSimParticle(Part);
-         P.Origin = 0;
-         theTruth.Neutrino.push_back(P);
+         //if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) 
+         // theTruth.TruePrimaryVertex.SetXYZ(Part.Vx(),Part.Vy(),Part.Vz());
+
+
+         if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) {
+            theTruth.TruePrimaryVertex_X.push_back(Part.Vx());
+            theTruth.TruePrimaryVertex_Y.push_back(Part.Vy());
+            theTruth.TruePrimaryVertex_Z.push_back(Part.Vz());
+         }
+
+
+         if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){
+            SimParticle P = MakeSimParticle(Part);
+            P.Origin = 0;
+            theTruth.Neutrino.push_back(P);
+         }
+
+         // If there is a hyperon i the final state in a QEL event, change mode to HYP
+         if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode.back() = "HYP";
       }
-
-      // If there is a hyperon i the final state in a QEL event, change mode to HYP
-      if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode = "HYP";
    }
 
    return theTruth;

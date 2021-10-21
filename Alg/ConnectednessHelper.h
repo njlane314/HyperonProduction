@@ -76,14 +76,14 @@ struct Wiremap {
 
 struct CTSingleOutcome {
 
-int Plane;
+   int Plane;
 
-std::vector<int> SeedIndexes;
-std::vector<int> OutputIndexes;
-std::vector<int> OutputSizes;
+   std::vector<int> SeedIndexes;
+   std::vector<int> OutputIndexes;
+   std::vector<int> OutputSizes;
 
-std::vector<int> SeedChannels;
-std::vector<int> SeedTicks;
+   std::vector<int> SeedChannels;
+   std::vector<int> SeedTicks;
 
 };
 
@@ -94,23 +94,23 @@ std::vector<int> SeedTicks;
 
 struct CTOutcome {
 
-      std::vector<std::vector<int>> SeedIndexes_Plane0;
-      std::vector<std::vector<int>> OutputIndexes_Plane0;
-      std::vector<std::vector<int>> OutputSizes_Plane0;
-      std::vector<std::vector<int>> SeedChannels_Plane0;
-      std::vector<std::vector<int>> SeedTicks_Plane0;
+   std::vector<std::vector<int>> SeedIndexes_Plane0;
+   std::vector<std::vector<int>> OutputIndexes_Plane0;
+   std::vector<std::vector<int>> OutputSizes_Plane0;
+   std::vector<std::vector<int>> SeedChannels_Plane0;
+   std::vector<std::vector<int>> SeedTicks_Plane0;
 
-      std::vector<std::vector<int>> SeedIndexes_Plane1;
-      std::vector<std::vector<int>> OutputIndexes_Plane1;
-      std::vector<std::vector<int>> OutputSizes_Plane1;
-      std::vector<std::vector<int>> SeedChannels_Plane1;
-      std::vector<std::vector<int>> SeedTicks_Plane1;
+   std::vector<std::vector<int>> SeedIndexes_Plane1;
+   std::vector<std::vector<int>> OutputIndexes_Plane1;
+   std::vector<std::vector<int>> OutputSizes_Plane1;
+   std::vector<std::vector<int>> SeedChannels_Plane1;
+   std::vector<std::vector<int>> SeedTicks_Plane1;
 
-      std::vector<std::vector<int>> SeedIndexes_Plane2;
-      std::vector<std::vector<int>> OutputIndexes_Plane2;
-      std::vector<std::vector<int>> OutputSizes_Plane2;
-      std::vector<std::vector<int>> SeedChannels_Plane2;
-      std::vector<std::vector<int>> SeedTicks_Plane2;
+   std::vector<std::vector<int>> SeedIndexes_Plane2;
+   std::vector<std::vector<int>> OutputIndexes_Plane2;
+   std::vector<std::vector<int>> OutputSizes_Plane2;
+   std::vector<std::vector<int>> SeedChannels_Plane2;
+   std::vector<std::vector<int>> SeedTicks_Plane2;
 
 };
 
@@ -131,9 +131,7 @@ class ConnectednessHelper {
       CTOutcome PrepareAndTestEvent(art::Event const& e,std::string wirelabel,std::vector<TVector3> trackstarts);
 
    private: 
-
-      
-
+     
       Connectedness::ClusterBuilder C_Plane0;
       Connectedness::ClusterBuilder C_Plane1;
       Connectedness::ClusterBuilder C_Plane2;
@@ -143,7 +141,6 @@ class ConnectednessHelper {
       Wiremap WM_Plane0;
       Wiremap WM_Plane1;
       Wiremap WM_Plane2;
-
 
       // Starting positions of tracks in 3D (do not correct for SC)
       std::vector<TVector3> Positions_3D;   
