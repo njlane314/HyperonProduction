@@ -1,0 +1,46 @@
+BEGIN_PROLOG
+
+analyseEvents:
+
+{
+module_type: HyperonNtuples
+Debug: false
+
+Generator: {
+GeneratorModuleLabel: "generator"
+}
+
+
+Geant4: {
+G4ModuleLabel: "largeant"
+NeutronScatterProtonThresh: 0.15
+NeutronScatterPionThresh: 0.05
+DecayProtonThresh: 0.0
+DecayPionThresh: 0.0
+}
+
+Reco: {
+G4ModuleLabel: "largeant"
+PFParticleModuleLabel: "pandora"
+TrackModuleLabel: "pandora"
+VertexModuleLabel: "pandora"
+ShowerModuleLabel: "pandora"
+MetadataModuleLabel: "pandora" 
+PIDModuleLabel: "pandorapid"
+CaloModuleLabel: "pandoracali"
+HitModuleLabel: "gaushit"
+TrackHitAssnLabel: "pandora" 
+ShowerHitAssnLabel: "pandora"
+HitTruthAssnLabel: "gaushitTruthMatch"
+}
+
+WireLabel: "butcher"
+DrawConnectedness: false
+
+# WeightLabel: "eventweightreint"
+
+POTSummaryLabel: "generator"
+
+}
+
+END_PROLOG
