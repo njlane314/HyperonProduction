@@ -10,7 +10,7 @@ using namespace hyperon;
 SubModuleGeneratorTruth::SubModuleGeneratorTruth(art::Event const& e,fhicl::ParameterSet pset){
 
    if(!e.getByLabel(pset.get<std::string>("GeneratorModuleLabel","generator"),Handle_MCTruth))  
-      throw cet::exception("GeneratorTruthSubModule") << "No MC Truth data product!" << std::endl;
+      throw cet::exception("SubModuleGeneratorTruth") << "No MC Truth data product!" << std::endl;
 
    art::fill_ptr_vector(Vect_MCTruth,Handle_MCTruth);  
 
@@ -26,6 +26,8 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
    }
 
    theTruth.NMCTruths = Vect_MCTruth.size();
+
+   int i_truth=0;
 
    for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){
 
@@ -72,19 +74,26 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
             theTruth.TruePrimaryVertex_X.push_back(Part.Vx());
             theTruth.TruePrimaryVertex_Y.push_back(Part.Vy());
             theTruth.TruePrimaryVertex_Z.push_back(Part.Vz());
+            if(inActiveTPC(TVector3(Part.Vx(),Part.Vy(),Part.Vz()))) theTruth.NMCTruthsInTPC++;
          }
 
 
          if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){
             SimParticle P = MakeSimParticle(Part);
             P.Origin = 0;
+            P.MCTruthIndex = i_truth;
             theTruth.Neutrino.push_back(P);
          }
 
          // If there is a hyperon i the final state in a QEL event, change mode to HYP
          if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode.back() = "HYP";
       }
+
+      i_truth++;
    }
+
+      if(theTruth.Neutrino.size() != Vect_MCTruth.size())         
+         throw cet::exception("SubModuleGeneratorTruth") << "Sim Neutrino/MCTruth vector size mismatch" << std::endl;
 
    return theTruth;
 }

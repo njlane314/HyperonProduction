@@ -67,13 +67,13 @@ class SubModuleReco {
       SubModuleReco();
       SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                         string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                        string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string g4label);
+                        string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,string g4label);
 
       SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset);
 
       void PrepareInfo(); 
       TVector3 GetPrimaryVertex();
-      void SetIndices(bool IsSignal=false);
+      void SetIndices(std::vector<bool> IsSignal);
 
       RecoData GetInfo();
 

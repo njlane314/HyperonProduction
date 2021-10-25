@@ -16,6 +16,7 @@
 #include "nusimdata/SimulationBase/MCNeutrino.h"
 #include "cetlib_except/exception.h"
 
+#include "ubana/HyperonProduction/Headers/FV.h"
 #include "ubana/HyperonProduction/Headers/ParticleTypes.h"
 #include "ubana/HyperonProduction/Objects/SimParticle.h"
 #include "ubana/HyperonProduction/Objects/Helpers.h"
@@ -25,7 +26,8 @@ namespace hyperon {
 struct GeneratorTruth {
 
    double Weight = 1.0;
-   int NMCTruths;
+   int NMCTruths = 0;
+   int NMCTruthsInTPC = 0;
    //std::string Mode;
    std::vector<std::string> Mode;
    std::vector<SimParticle> Neutrino;

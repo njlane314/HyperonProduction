@@ -1,7 +1,7 @@
 #ifndef _ParticleTypes_h_
 #define _ParticleTypes_h_
 
-inline bool isHyperon(int pdg){ return pdg == 3122 || pdg == 3212 || pdg == 3222 || pdg == 3112; }
+inline bool isHyperon(int pdg){ return abs(pdg) == 3122 || abs(pdg) == 3212 || abs(pdg) == 3222 || abs(pdg) == 3112; }
 
 inline bool isPion(int pdg){ return pdg == 111 || abs(pdg) == 211; }
 

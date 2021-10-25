@@ -20,6 +20,8 @@ public:
 SimParticle() {}
 ~SimParticle() {}
 
+int MCTruthIndex=-1; // which MCTruth this particle is the child of
+
 int PDG=0;
 double E=0,Px=0,Py=0,Pz=0;
 double ModMomentum=0;

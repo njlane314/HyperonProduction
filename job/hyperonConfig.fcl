@@ -5,6 +5,7 @@ analyseEvents:
 {
 module_type: HyperonNtuples
 Debug: false
+IsData: false
 
 Generator: {
 GeneratorModuleLabel: "generator"
@@ -12,6 +13,7 @@ GeneratorModuleLabel: "generator"
 
 
 Geant4: {
+GeneratorModuleLabel: "generator"
 G4ModuleLabel: "largeant"
 NeutronScatterProtonThresh: 0.15
 NeutronScatterPionThresh: 0.05
@@ -20,6 +22,7 @@ DecayPionThresh: 0.0
 }
 
 Reco: {
+GeneratorModuleLabel: "generator"
 G4ModuleLabel: "largeant"
 PFParticleModuleLabel: "pandora"
 TrackModuleLabel: "pandora"
@@ -40,7 +43,6 @@ DrawConnectedness: false
 # WeightLabel: "eventweightreint"
 
 POTSummaryLabel: "generator"
-
 }
 
 END_PROLOG

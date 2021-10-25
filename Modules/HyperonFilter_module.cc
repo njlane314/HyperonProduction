@@ -61,11 +61,19 @@ bool hyperon::HyperonFilter::filter(art::Event& e)
       SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4);
       G4Truth G4T = G4_SM->GetG4Info();
 
-      bool IsHyperon = G4T.IsHyperon;       
-        
+      std::vector<bool> IsHyperon = G4T.IsHyperon;       
+      std::vector<bool> InActiveTPC = G4T.InActiveTPC;        
+
+      bool pass=false;
+
+      // Return true if there is at least one hyperon producing interaction
+      // in the active TPC
+      for(size_t i=0;i<IsHyperon.size();i++)
+         if(IsHyperon.at(i) && InActiveTPC.at(i)) pass = true;
+      
       delete G4_SM;
   
-      return IsHyperon;
+      return pass;
 }
 
 DEFINE_ART_MODULE(hyperon::HyperonFilter)

@@ -21,6 +21,7 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("HitTruthAssnLabel"),
                   pset.get<std::string>("TrackHitAssnLabel"),
                   pset.get<std::string>("MetadataModuleLabel"),
+                  pset.get<std::string>("GeneratorModuleLabel"),
                   pset.get<std::string>("G4ModuleLabel"))
 //dEdXCalc()
 {
@@ -31,7 +32,7 @@ SubModuleReco(e,isdata,
 
 SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                                      string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                                     string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string g4label) :
+                                     string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,string g4label) :
 dEdXCalc()
 {
 
@@ -76,7 +77,7 @@ dEdXCalc()
    llr_pid_calculator.set_lookup_tables(2, protonmuon_parameters.dedx_pdf_pl_2);
 
    if(!IsData){
-      G4T = new SubModuleG4Truth(e,g4label);
+      G4T = new SubModuleG4Truth(e,genlabel,g4label);
       G4T->GetParticleLists();
    }
 
@@ -343,7 +344,10 @@ void SubModuleReco::GetVertexData(art::Ptr<recob::PFParticle> pfp,RecoParticle &
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::SetIndices(bool IsSignal){
+void SubModuleReco::SetIndices(std::vector<bool> IsSignal){
+   
+   
+   bool ContainsSignal = std::find(IsSignal.begin(),IsSignal.end(),true) == IsSignal.end();
 
    bool found_muon=false,found_decayproton=false,found_decaypion=false;
 
@@ -356,12 +360,12 @@ void SubModuleReco::SetIndices(bool IsSignal){
          found_muon = true; 
       }
 
-      if(IsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
          theData.TrueDecayProtonIndex = P.Index;
          found_decayproton = true;
       }
 
-      if(IsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
          theData.TrueDecayPionIndex = P.Index;
          found_decaypion = true;
       }
@@ -378,18 +382,18 @@ void SubModuleReco::SetIndices(bool IsSignal){
          found_muon = true; 
       }
 
-      if(IsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
          theData.TrueDecayProtonIndex = P.Index;
          found_decayproton = true;
       }
 
-      if(IsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
          theData.TrueDecayPionIndex = P.Index;
          found_decaypion = true;
       }
    }
 
-if(IsSignal && found_decayproton && found_decaypion) theData.GoodReco = true;
+if(ContainsSignal && found_decayproton && found_decaypion) theData.GoodReco = true;
 
 }
 
