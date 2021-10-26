@@ -115,12 +115,14 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
 */
 
       std::vector<bool> t_InActiveTPC;
-      std::vector<bool> t_IsLambda;
       std::vector<bool> t_IsHyperon;
-      std::vector<bool> t_IsSigmaZero; 		
+      std::vector<bool> t_IsLambda;
       std::vector<bool> t_IsLambdaCharged;
+      std::vector<bool> t_IsSigmaZero; 		
+      std::vector<bool> t_IsSigmaZeroCharged; 		
       std::vector<bool> t_IsAssociatedHyperon;
       std::vector<bool> t_IsSignal;
+      std::vector<bool> t_IsSignalSigmaZero;
       bool t_GoodReco;
       bool t_HasNeutronScatter;
 
@@ -258,11 +260,13 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
    t_InActiveTPC.clear();
    t_IsHyperon.clear();
-   t_IsSigmaZero.clear();
    t_IsLambda.clear();
    t_IsLambdaCharged.clear();
+   t_IsSigmaZero.clear();
+   t_IsSigmaZeroCharged.clear();
    t_IsAssociatedHyperon.clear();
    t_IsSignal.clear();	
+   t_IsSignalSigmaZero.clear();	
    t_GoodReco = false;
    t_HasNeutronScatter = false;
 
@@ -354,9 +358,10 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       t_InActiveTPC = G4T.InActiveTPC;
       t_IsHyperon = G4T.IsHyperon;
-      t_IsSigmaZero = G4T.IsSigmaZero;
       t_IsLambda = G4T.IsLambda;
       t_IsLambdaCharged = G4T.IsLambdaCharged;
+      t_IsSigmaZero = G4T.IsSigmaZero;
+      t_IsSigmaZeroCharged = G4T.IsSigmaZeroCharged;
       t_IsAssociatedHyperon = G4T.IsAssociatedHyperon;
       t_HasNeutronScatter = G4T.HasNeutronScatter;       
       t_Weight *= G4T.Weight;
@@ -375,10 +380,14 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_DecayVertex_Z = G4T.DecayVertex_Z;
 
       t_IsSignal.resize(t_NMCTruths);
+      t_IsSignalSigmaZero.resize(t_NMCTruths);
 
       for(int i_t=0;i_t<t_NMCTruths;i_t++){
          if(t_Mode.at(i_t) == "HYP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == -14 && t_IsLambdaCharged.at(i_t) && !t_IsAssociatedHyperon.at(i_t)) t_IsSignal[i_t] = true;
          else t_IsSignal[i_t] = false;
+
+         if(t_Mode.at(i_t) == "HYP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == -14 && t_IsSigmaZeroCharged.at(i_t) && !t_IsAssociatedHyperon.at(i_t)) t_IsSignalSigmaZero[i_t] = true;
+         else t_IsSignalSigmaZero[i_t] = false;
       }
 
       //t_IsSignal = t_Neutrino.size() == 1 && t_Mode.at(0) == "HYP" && t_Neutrino.at(0).PDG == -14 && t_IsLambdaCharged;
@@ -513,11 +522,13 @@ void hyperon::HyperonNtuples::beginJob(){
 
    OutputTree->Branch("InActiveTPC","vector<bool>",&t_InActiveTPC);
    OutputTree->Branch("IsHyperon","vector<bool>",&t_IsHyperon);
-   OutputTree->Branch("IsSigmaZero","vector<bool>",&t_IsSigmaZero);
    OutputTree->Branch("IsLambda","vector<bool>",&t_IsLambda);
    OutputTree->Branch("IsLambdaCharged","vector<bool>",&t_IsLambdaCharged);
+   OutputTree->Branch("IsSigmaZero","vector<bool>",&t_IsSigmaZero);
+   OutputTree->Branch("IsSigmaZeroCharged","vector<bool>",&t_IsSigmaZeroCharged);
    OutputTree->Branch("IsAssociatedHyperon","vector<bool>",&t_IsAssociatedHyperon);
    OutputTree->Branch("IsSignal","vector<bool>",&t_IsSignal);
+   OutputTree->Branch("IsSignalSigmaZero","vector<bool>",&t_IsSignalSigmaZero);
    OutputTree->Branch("GoodReco",&t_GoodReco);
    OutputTree->Branch("HasNeutronScatter",&t_HasNeutronScatter);
 

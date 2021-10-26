@@ -124,6 +124,7 @@ G4Truth SubModuleG4Truth::GetG4Info(){
    theTruth.IsLambda.resize(NMCTruths);
    theTruth.IsLambdaCharged.resize(NMCTruths);
    theTruth.IsSigmaZero.resize(NMCTruths);
+   theTruth.IsSigmaZeroCharged.resize(NMCTruths);
    theTruth.IsAssociatedHyperon.resize(NMCTruths);
 
    theTruth.DecayVertex_X.resize(NMCTruths);
@@ -435,8 +436,6 @@ void SubModuleG4Truth::MCTruthMatch(SimParticle &P){
 
 void SubModuleG4Truth::SetFlags(){
 
-   std::cout << "Setting flags" << std::endl;
-
    /*
       if(theTruth.Hyperon.size()) theTruth.IsHyperon = true;
       if(theTruth.Hyperon.size() == 1 && theTruth.Hyperon.at(0).PDG == 3122) theTruth.IsLambda = true;
@@ -487,8 +486,9 @@ void SubModuleG4Truth::SetFlags(){
             if(theTruth.Decay.at(i_d).PDG == -211) hasPion = true;  
          }
       }
-
-      if(theTruth.IsLambda.at(i_t) && nProducts == 2 && hasProton && hasPion) theTruth.IsLambdaCharged[i_t] = true;
+     
+      if(nHyperons == 1 && theTruth.IsLambda.at(i_t) && nProducts == 2 && hasProton && hasPion) theTruth.IsLambdaCharged[i_t] = true;
+      if(nHyperons == 1 && theTruth.IsSigmaZero.at(i_t) && nProducts == 2 && hasProton && hasPion) theTruth.IsSigmaZeroCharged[i_t] = true;
 
       for(size_t i_k=0;i_k<theTruth.PrimaryKaon.size();i_k++)
          if(theTruth.PrimaryKaon.at(i_k).MCTruthIndex == i_t) nKaons++;

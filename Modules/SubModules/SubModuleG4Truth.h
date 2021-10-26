@@ -36,9 +36,10 @@ struct G4Truth {
 
    std::vector<bool> InActiveTPC;
    std::vector<bool> IsHyperon;
-   std::vector<bool> IsSigmaZero;
    std::vector<bool> IsLambda;
    std::vector<bool> IsLambdaCharged;
+   std::vector<bool> IsSigmaZero;
+   std::vector<bool> IsSigmaZeroCharged;
    std::vector<bool> IsAssociatedHyperon;
 
    bool HasNeutronScatter = false;
