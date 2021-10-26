@@ -7,11 +7,12 @@ module_type: HyperonNtuples
 Debug: false
 IsData: false
 
+# GeneratorTruth submodule config
 Generator: {
 GeneratorModuleLabel: "generator"
 }
 
-
+# G4Truth submodule config
 Geant4: {
 GeneratorModuleLabel: "generator"
 G4ModuleLabel: "largeant"
@@ -21,6 +22,7 @@ DecayProtonThresh: 0.0
 DecayPionThresh: 0.0
 }
 
+# Reco submodule config
 Reco: {
 GeneratorModuleLabel: "generator"
 G4ModuleLabel: "largeant"
@@ -37,12 +39,19 @@ ShowerHitAssnLabel: "pandora"
 HitTruthAssnLabel: "gaushitTruthMatch"
 }
 
+# Connectedness test config
 WireLabel: "butcher"
 DrawConnectedness: false
 
-# WeightLabel: "eventweightreint"
+#WeightCalculators: ["eventweight::EventWeightSept24",
+#                    "eventweight::EventWeightSept24ExtraGENIE1",
+#                    "eventweight::EventWeightSept24ExtraGENIE2",
+#                    "eventweight::EventWeightSept24ExtraGENIE3",
+#                    "eventweight::EventWeightSept24ExtraGENIE4",
+#                    "eventweight::EventWeightSept24ExtraGENIE5"]
 
 POTSummaryLabel: "generator"
+
 }
 
 END_PROLOG

@@ -200,7 +200,8 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       fhicl::ParameterSet f_Reco;
       std::string fWireLabel;
 
-      std::string fWeightLabel;
+      //std::string fWeightLabel;
+      std::vector<art::InputTag> fWeightLabels;
 
       bool fIsData;
 
@@ -225,13 +226,19 @@ hyperon::HyperonNtuples::HyperonNtuples(fhicl::ParameterSet const& p)
    f_Generator(p.get<fhicl::ParameterSet>("Generator")),
    f_G4(p.get<fhicl::ParameterSet>("Geant4")),
    f_Reco(p.get<fhicl::ParameterSet>("Reco")),
-   fWeightLabel(p.get<std::string>("WeightLabel","None")),
+   //fWeightLabel(p.get<std::string>("WeightLabel","None")),
+   fWeightLabels(p.get<std::vector<art::InputTag>>("WeightCalculators",{})),
    Conn_Helper(p.get<bool>("DrawConnectedness",false))   // ,
 {
    fIsData = p.get<bool>("IsData");
 
    fWireLabel = p.get<std::string>("WireLabel");
    fPOTSummaryLabel = p.get<std::string>("POTSummaryLabel");
+
+   if(fWeightLabels.size()){
+      std::cout << "Getting weights from data products with tags:" << std::endl;
+      for(size_t i=0;i<fWeightLabels.size();i++) std::cout << fWeightLabels.at(i) << std::endl;
+   }
 
    fDebug = p.get<bool>("Debug",false);
 }
@@ -434,7 +441,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_Conn_SeedTicks_Plane2 = ConnData.SeedTicks_Plane2;
 
    // Systematics weights if requested
-
+/*
    if(fWeightLabel != "None"){
 
       // Try to get some systematics info
@@ -442,6 +449,33 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
 
       if(!e.getByLabel(fWeightLabel,Handle_EventWeight)) 
+         throw cet::exception("HyperonNtuples") << "No EventWeight Found!" << std::endl;
+
+      art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
+
+      if(!Vect_EventWeight.size())
+         throw cet::exception("HyperonNtuples") << "Weight vector empty!" << std::endl;
+
+      std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(0)->fWeight;
+      std::map<std::string,std::vector<double>>::iterator it;
+
+      for(it = theWeights.begin(); it != theWeights.end();it++){
+         t_SysDials.push_back(it->first);
+         t_SysWeights.push_back(it->second);
+      }
+
+   }
+*/
+
+   for(size_t i_w=0;i_w<fWeightLabels.size();i_w++){
+
+      // Try to get some systematics info
+      art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
+      std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
+
+      //std::cout << "Process=" << fWeightLabel.process() << "  Label=" << fWeightLabel.label() << "  Instance=" << fWeightLabel.instance() << std::endl;
+
+      if(!e.getByLabel(fWeightLabels.at(i_w),Handle_EventWeight)) 
          throw cet::exception("HyperonNtuples") << "No EventWeight Found!" << std::endl;
 
       art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
