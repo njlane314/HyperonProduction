@@ -88,8 +88,8 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       TTree * MetaTree;
 
       // Basic event info
-      unsigned int fEventID;
-      int run,subrun,event;
+      unsigned int t_EventID;
+      int t_run,t_subrun,t_event;
 
       double t_Weight=1.0;
 
@@ -184,30 +184,31 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       // Metadata for sample //
       /////////////////////////
 
-      int fNEvents;
-      int fNHyperons;
-      int fNSignal;      
-      int fNGoodReco;
+      int m_NEvents;
+      int m_NHyperons;
+      int m_NSignal;      
+      int m_NGoodReco;
 
-      double fPOT = 0; //total POT of the sample
+      double m_POT = 0; //total POT of the sample
 
       //////////////////////////
       //   FHICL PARAMETERS   //
       //////////////////////////
 
+      bool f_GetGeneratorInfo;
+      bool f_GetG4Info;
+      bool f_GetRecoInfo;
+
       fhicl::ParameterSet f_Generator;
       fhicl::ParameterSet f_G4;
       fhicl::ParameterSet f_Reco;
-      std::string fWireLabel;
-
+      std::string f_WireLabel;
       //std::string fWeightLabel;
-      std::vector<art::InputTag> fWeightLabels;
+      std::vector<art::InputTag> f_WeightLabels;
+      std::string f_POTSummaryLabel;
 
-      bool fIsData;
-
-      std::string fPOTSummaryLabel;
-
-      bool fDebug = false;
+      bool f_IsData;
+      bool f_Debug = false;
 
       ///////////////////////
       //      Objects      //
@@ -223,29 +224,29 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
 
 hyperon::HyperonNtuples::HyperonNtuples(fhicl::ParameterSet const& p)
    : EDAnalyzer{p},
+   f_GetGeneratorInfo(p.get<bool>("GetGeneratorInfo",true)),   
+   f_GetG4Info(p.get<bool>("GetG4Info",true)),   
+   f_GetRecoInfo(p.get<bool>("GetRecoInfo",true)),   
    f_Generator(p.get<fhicl::ParameterSet>("Generator")),
    f_G4(p.get<fhicl::ParameterSet>("Geant4")),
    f_Reco(p.get<fhicl::ParameterSet>("Reco")),
+   f_WireLabel(p.get<std::string>("WireLabel")),
    //fWeightLabel(p.get<std::string>("WeightLabel","None")),
-   fWeightLabels(p.get<std::vector<art::InputTag>>("WeightCalculators",{})),
+   f_WeightLabels(p.get<std::vector<art::InputTag>>("WeightCalculators",{})),
+   f_POTSummaryLabel(p.get<std::string>("POTSummaryLabel")),
+   f_IsData(p.get<bool>("IsData")),
+   f_Debug(p.get<bool>("Debug",false)),
    Conn_Helper(p.get<bool>("DrawConnectedness",false))   // ,
 {
-   fIsData = p.get<bool>("IsData");
-
-   fWireLabel = p.get<std::string>("WireLabel");
-   fPOTSummaryLabel = p.get<std::string>("POTSummaryLabel");
-
-   if(fWeightLabels.size()){
+   if(f_WeightLabels.size()){
       std::cout << "Getting weights from data products with tags:" << std::endl;
-      for(size_t i=0;i<fWeightLabels.size();i++) std::cout << fWeightLabels.at(i) << std::endl;
+      for(size_t i=0;i<f_WeightLabels.size();i++) std::cout << f_WeightLabels.at(i) << std::endl;
    }
-
-   fDebug = p.get<bool>("Debug",false);
 }
 
 void hyperon::HyperonNtuples::analyze(art::Event const& e)
 {
-   if(fDebug) std::cout << "New Event" << std::endl;
+   if(f_Debug) std::cout << "New Event" << std::endl;
 
    //begin by resetting everything
 
@@ -326,16 +327,16 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
  
    // General Event Info
 
-   fEventID = e.id().event();
-   run = e.run();
-   subrun = e.subRun();
-   event = e.event();
+   t_EventID = e.id().event();
+   t_run = e.run();
+   t_subrun = e.subRun();
+   t_event = e.event();
 
    // Event Generator Info
 
-   if(!fIsData){
+   if(!f_IsData && f_GetGeneratorInfo){
 
-      if(fDebug) std::cout << "Getting EG Info" << std::endl;
+      if(f_Debug) std::cout << "Getting EG Info" << std::endl;
 
       SubModuleGeneratorTruth* Generator_SM = new SubModuleGeneratorTruth(e,f_Generator);
       GeneratorTruth GenT = Generator_SM->GetGeneratorTruth();
@@ -354,11 +355,12 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       delete Generator_SM;
    }
 
+
    // G4 Info
 
-   if(!fIsData){
+   if(!f_IsData && f_GetG4Info){
 
-      if(fDebug) std::cout << "Getting G4 Info" << std::endl;
+      if(f_Debug) std::cout << "Getting G4 Info" << std::endl;
 
       SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4);
       G4Truth G4T = G4_SM->GetG4Info();
@@ -402,43 +404,49 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       delete G4_SM;
    }
 
+
    // Reconstructed Info
 
-   if(fDebug) std::cout << "Getting Reconstructed Info" << std::endl;
+   if(f_GetRecoInfo){
 
-   SubModuleReco* Reco_SM = new SubModuleReco(e,fIsData,f_Reco);
-   Reco_SM->PrepareInfo();
-   Reco_SM->SetIndices(t_IsSignal);
-   RecoData RecoD =  Reco_SM->GetInfo();   
+      if(f_Debug) std::cout << "Getting Reconstructed Info" << std::endl;
 
-   t_NPrimaryDaughters = RecoD.NPrimaryDaughters;
-   t_NPrimaryTrackDaughters = RecoD.NPrimaryTrackDaughters;
-   t_NPrimaryShowerDaughters = RecoD.NPrimaryShowerDaughters;
-   t_TrackPrimaryDaughters = RecoD.TrackPrimaryDaughters;
-   t_ShowerPrimaryDaughters = RecoD.ShowerPrimaryDaughters;
-   t_RecoPrimaryVertex = RecoD.RecoPrimaryVertex;
+      SubModuleReco* Reco_SM = new SubModuleReco(e,f_IsData,f_Reco);
+      Reco_SM->PrepareInfo();
+      Reco_SM->SetIndices(t_IsSignal);
+      RecoData RecoD =  Reco_SM->GetInfo();   
 
-   // Results of connectedness test on different combinations of tracks
+      t_NPrimaryDaughters = RecoD.NPrimaryDaughters;
+      t_NPrimaryTrackDaughters = RecoD.NPrimaryTrackDaughters;
+      t_NPrimaryShowerDaughters = RecoD.NPrimaryShowerDaughters;
+      t_TrackPrimaryDaughters = RecoD.TrackPrimaryDaughters;
+      t_ShowerPrimaryDaughters = RecoD.ShowerPrimaryDaughters;
+      t_RecoPrimaryVertex = RecoD.RecoPrimaryVertex;
 
-   if(fDebug) std::cout << "Performing Connectedness Tests" << std::endl;
+      // Results of connectedness test on different combinations of tracks
 
-   CTOutcome ConnData = Conn_Helper.PrepareAndTestEvent(e,fWireLabel,RecoD.TrackStarts);   
+      if(f_Debug) std::cout << "Performing Connectedness Tests" << std::endl;
 
-   t_Conn_SeedIndexes_Plane0 = ConnData.SeedIndexes_Plane0;
-   t_Conn_OutputIndexes_Plane0 = ConnData.OutputIndexes_Plane0;
-   t_Conn_OutputSizes_Plane0 = ConnData.OutputSizes_Plane0;
-   t_Conn_SeedChannels_Plane0 = ConnData.SeedChannels_Plane0;
-   t_Conn_SeedTicks_Plane0 = ConnData.SeedTicks_Plane0;
-   t_Conn_SeedIndexes_Plane1 = ConnData.SeedIndexes_Plane1;
-   t_Conn_OutputIndexes_Plane1 = ConnData.OutputIndexes_Plane1;
-   t_Conn_OutputSizes_Plane1 = ConnData.OutputSizes_Plane1;
-   t_Conn_SeedChannels_Plane1 = ConnData.SeedChannels_Plane1;
-   t_Conn_SeedTicks_Plane1 = ConnData.SeedTicks_Plane1;
-   t_Conn_SeedIndexes_Plane2 = ConnData.SeedIndexes_Plane2;
-   t_Conn_OutputIndexes_Plane2 = ConnData.OutputIndexes_Plane2;
-   t_Conn_OutputSizes_Plane2 = ConnData.OutputSizes_Plane2;
-   t_Conn_SeedChannels_Plane2 = ConnData.SeedChannels_Plane2;
-   t_Conn_SeedTicks_Plane2 = ConnData.SeedTicks_Plane2;
+      CTOutcome ConnData = Conn_Helper.PrepareAndTestEvent(e,f_WireLabel,RecoD.TrackStarts);   
+
+      t_Conn_SeedIndexes_Plane0 = ConnData.SeedIndexes_Plane0;
+      t_Conn_OutputIndexes_Plane0 = ConnData.OutputIndexes_Plane0;
+      t_Conn_OutputSizes_Plane0 = ConnData.OutputSizes_Plane0;
+      t_Conn_SeedChannels_Plane0 = ConnData.SeedChannels_Plane0;
+      t_Conn_SeedTicks_Plane0 = ConnData.SeedTicks_Plane0;
+      t_Conn_SeedIndexes_Plane1 = ConnData.SeedIndexes_Plane1;
+      t_Conn_OutputIndexes_Plane1 = ConnData.OutputIndexes_Plane1;
+      t_Conn_OutputSizes_Plane1 = ConnData.OutputSizes_Plane1;
+      t_Conn_SeedChannels_Plane1 = ConnData.SeedChannels_Plane1;
+      t_Conn_SeedTicks_Plane1 = ConnData.SeedTicks_Plane1;
+      t_Conn_SeedIndexes_Plane2 = ConnData.SeedIndexes_Plane2;
+      t_Conn_OutputIndexes_Plane2 = ConnData.OutputIndexes_Plane2;
+      t_Conn_OutputSizes_Plane2 = ConnData.OutputSizes_Plane2;
+      t_Conn_SeedChannels_Plane2 = ConnData.SeedChannels_Plane2;
+      t_Conn_SeedTicks_Plane2 = ConnData.SeedTicks_Plane2;
+
+      delete Reco_SM;
+   }
 
    // Systematics weights if requested
 /*
@@ -467,15 +475,13 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    }
 */
 
-   for(size_t i_w=0;i_w<fWeightLabels.size();i_w++){
+   for(size_t i_w=0;i_w<f_WeightLabels.size();i_w++){
 
       // Try to get some systematics info
       art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
       std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
 
-      //std::cout << "Process=" << fWeightLabel.process() << "  Label=" << fWeightLabel.label() << "  Instance=" << fWeightLabel.instance() << std::endl;
-
-      if(!e.getByLabel(fWeightLabels.at(i_w),Handle_EventWeight)) 
+      if(!e.getByLabel(f_WeightLabels.at(i_w),Handle_EventWeight)) 
          throw cet::exception("HyperonNtuples") << "No EventWeight Found!" << std::endl;
 
       art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
@@ -490,12 +496,10 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
          t_SysDials.push_back(it->first);
          t_SysWeights.push_back(it->second);
       }
-
    }
 
    FinishEvent();
 
-   delete Reco_SM;
 }
 
 ///////////////////////////////////////////////////////////////	
@@ -504,16 +508,16 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
 void hyperon::HyperonNtuples::FinishEvent(){
 
-   if(fDebug) std::cout << "Finishing Event" << std::endl;
+   if(f_Debug) std::cout << "Finishing Event" << std::endl;
 
    OutputTree->Fill();
 
-   fNEvents++;
+   m_NEvents++;
 
-   if(std::find(t_IsHyperon.begin(), t_IsHyperon.end(), true) != t_IsHyperon.end()) fNHyperons++;
-   //if(t_IsHyperon) fNHyperons++;
-   //if(t_IsSignal) fNSignal++;
-   if(t_GoodReco) fNGoodReco++;
+   if(std::find(t_IsHyperon.begin(), t_IsHyperon.end(), true) != t_IsHyperon.end()) m_NHyperons++;
+   //if(t_IsHyperon) m_NHyperons++;
+   //if(t_IsSignal) m_NSignal++;
+   if(t_GoodReco) m_NGoodReco++;
 
 }
 
@@ -521,7 +525,7 @@ void hyperon::HyperonNtuples::FinishEvent(){
 
 void hyperon::HyperonNtuples::beginJob(){
 
-   if(fDebug) std::cout << "Begin job" << std::endl;
+   if(f_Debug) std::cout << "Begin job" << std::endl;
 
    art::ServiceHandle<art::TFileService> tfs;
 
@@ -531,11 +535,11 @@ void hyperon::HyperonNtuples::beginJob(){
 
    OutputTree=tfs->make<TTree>("OutputTree","Truth Info Tree");
 
-   OutputTree->Branch("IsData",&fIsData);
-   OutputTree->Branch("EventID",&fEventID);
-   OutputTree->Branch("run",&run);
-   OutputTree->Branch("subrun",&subrun);
-   OutputTree->Branch("event",&event);
+   OutputTree->Branch("IsData",&f_IsData);
+   OutputTree->Branch("EventID",&t_EventID);
+   OutputTree->Branch("run",&t_run);
+   OutputTree->Branch("subrun",&t_subrun);
+   OutputTree->Branch("event",&t_event);
 
    OutputTree->Branch("Weight",&t_Weight);
    //OutputTree->Branch("Mode",&t_Mode);
@@ -615,23 +619,23 @@ void hyperon::HyperonNtuples::beginJob(){
    //             Metadata Tree	           //
    //////////////////////////////////////////
 
-   fNEvents=0;
-   fNHyperons=0;
-   fNSignal=0;
-   fNGoodReco=0;
+   m_NEvents=0;
+   m_NHyperons=0;
+   m_NSignal=0;
+   m_NGoodReco=0;
 
-   fPOT=0;
+   m_POT=0;
 
    MetaTree=tfs->make<TTree>("MetaTree","Metadata Info Tree");
 
-   MetaTree->Branch("NEvents",&fNEvents);
-   MetaTree->Branch("NHyperons",&fNHyperons);
-   MetaTree->Branch("NSignal",&fNSignal);
-   MetaTree->Branch("NGoodReco",&fNGoodReco);
+   MetaTree->Branch("NEvents",&m_NEvents);
+   MetaTree->Branch("NHyperons",&m_NHyperons);
+   MetaTree->Branch("NSignal",&m_NSignal);
+   MetaTree->Branch("NGoodReco",&m_NGoodReco);
 
-   MetaTree->Branch("POT",&fPOT);
+   MetaTree->Branch("POT",&m_POT);
 
-   if(fDebug) std::cout << "Finished begin job" << std::endl;
+   if(f_Debug) std::cout << "Finished begin job" << std::endl;
 
 }
 
@@ -644,10 +648,10 @@ void hyperon::HyperonNtuples::endJob()
 
 void hyperon::HyperonNtuples::beginSubRun(const art::SubRun& sr)
 {
-   if(fDebug) std::cout << "Getting Subrun POT Info" << std::endl;
+   if(f_Debug) std::cout << "Getting Subrun POT Info" << std::endl;
 
    art::Handle<sumdata::POTSummary> POTHandle;
-   if(sr.getByLabel(fPOTSummaryLabel,POTHandle)) fPOT += POTHandle->totpot;	
+   if(sr.getByLabel(f_POTSummaryLabel,POTHandle)) m_POT += POTHandle->totpot;	
 }
 
 void hyperon::HyperonNtuples::endSubRun(const art::SubRun& sr){}

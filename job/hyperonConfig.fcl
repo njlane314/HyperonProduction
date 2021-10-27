@@ -6,6 +6,10 @@ analyseEvents:
 module_type: HyperonNtuples
 Debug: false
 IsData: false
+GetGeneratorInfo: true
+GetG4Info: true
+GetRecoInfo: true
+
 
 # GeneratorTruth submodule config
 Generator: {
