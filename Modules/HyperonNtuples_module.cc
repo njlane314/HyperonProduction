@@ -517,8 +517,8 @@ void hyperon::HyperonNtuples::FinishEvent(){
    m_NEvents++;
 
    if(std::find(t_IsHyperon.begin(), t_IsHyperon.end(), true) != t_IsHyperon.end()) m_NHyperons++;
-   if(std::find(t_IsSignal.begin(), t_IsSignal.end(), true) != t_IsHyperon.end()) m_NSignal++;
-   if(std::find(t_IsSignalSigmaZero.begin(), t_IsSignalSigmaZero.end(), true) != t_IsHyperon.end()) m_NSignalSigmaZero++;
+   if(std::find(t_IsSignal.begin(), t_IsSignal.end(), true) != t_IsSignal.end()) m_NSignal++;
+   if(std::find(t_IsSignalSigmaZero.begin(), t_IsSignalSigmaZero.end(), true) != t_IsSignalSigmaZero.end()) m_NSignalSigmaZero++;
    if(t_GoodReco) m_NGoodReco++;
 
 }
