@@ -73,7 +73,7 @@ class SubModuleReco {
 
       void PrepareInfo(); 
       TVector3 GetPrimaryVertex();
-      void SetIndices(std::vector<bool> IsSignal);
+      void SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero);
 
       RecoData GetInfo();
 

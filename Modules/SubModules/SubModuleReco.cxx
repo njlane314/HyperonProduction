@@ -344,10 +344,10 @@ void SubModuleReco::GetVertexData(art::Ptr<recob::PFParticle> pfp,RecoParticle &
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::SetIndices(std::vector<bool> IsSignal){
-   
-   
-   bool ContainsSignal = std::find(IsSignal.begin(),IsSignal.end(),true) == IsSignal.end();
+void SubModuleReco::SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero){
+      
+   bool ContainsSignal = std::find(IsSignal.begin(),IsSignal.end(),true) == IsSignal.end() 
+                      || std::find(IsSignalSigmaZero.begin(),IsSignalSigmaZero.end(),true) == IsSignalSigmaZero.end();
 
    bool found_muon=false,found_decayproton=false,found_decaypion=false;
 
@@ -365,7 +365,7 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal){
          found_decayproton = true;
       }
 
-      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == -211 && P.TrackTrueOrigin == 2){
          theData.TrueDecayPionIndex = P.Index;
          found_decaypion = true;
       }
@@ -387,7 +387,7 @@ void SubModuleReco::SetIndices(std::vector<bool> IsSignal){
          found_decayproton = true;
       }
 
-      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
+      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == -211 && P.TrackTrueOrigin == 2){
          theData.TrueDecayPionIndex = P.Index;
          found_decaypion = true;
       }

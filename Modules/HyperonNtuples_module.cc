@@ -187,6 +187,7 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       int m_NEvents;
       int m_NHyperons;
       int m_NSignal;      
+      int m_NSignalSigmaZero;      
       int m_NGoodReco;
 
       double m_POT = 0; //total POT of the sample
@@ -413,7 +414,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       SubModuleReco* Reco_SM = new SubModuleReco(e,f_IsData,f_Reco);
       Reco_SM->PrepareInfo();
-      Reco_SM->SetIndices(t_IsSignal);
+      Reco_SM->SetIndices(t_IsSignal,t_IsSignalSigmaZero);
       RecoData RecoD =  Reco_SM->GetInfo();   
 
       t_NPrimaryDaughters = RecoD.NPrimaryDaughters;
@@ -422,6 +423,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_TrackPrimaryDaughters = RecoD.TrackPrimaryDaughters;
       t_ShowerPrimaryDaughters = RecoD.ShowerPrimaryDaughters;
       t_RecoPrimaryVertex = RecoD.RecoPrimaryVertex;
+      t_GoodReco = RecoD.GoodReco;
 
       // Results of connectedness test on different combinations of tracks
 
@@ -515,8 +517,8 @@ void hyperon::HyperonNtuples::FinishEvent(){
    m_NEvents++;
 
    if(std::find(t_IsHyperon.begin(), t_IsHyperon.end(), true) != t_IsHyperon.end()) m_NHyperons++;
-   //if(t_IsHyperon) m_NHyperons++;
-   //if(t_IsSignal) m_NSignal++;
+   if(std::find(t_IsSignal.begin(), t_IsSignal.end(), true) != t_IsHyperon.end()) m_NSignal++;
+   if(std::find(t_IsSignalSigmaZero.begin(), t_IsSignalSigmaZero.end(), true) != t_IsHyperon.end()) m_NSignalSigmaZero++;
    if(t_GoodReco) m_NGoodReco++;
 
 }
@@ -622,6 +624,7 @@ void hyperon::HyperonNtuples::beginJob(){
    m_NEvents=0;
    m_NHyperons=0;
    m_NSignal=0;
+   m_NSignalSigmaZero=0;
    m_NGoodReco=0;
 
    m_POT=0;
@@ -631,6 +634,7 @@ void hyperon::HyperonNtuples::beginJob(){
    MetaTree->Branch("NEvents",&m_NEvents);
    MetaTree->Branch("NHyperons",&m_NHyperons);
    MetaTree->Branch("NSignal",&m_NSignal);
+   MetaTree->Branch("NSignalSigmaZero",&m_NSignalSigmaZero);
    MetaTree->Branch("NGoodReco",&m_NGoodReco);
 
    MetaTree->Branch("POT",&m_POT);
