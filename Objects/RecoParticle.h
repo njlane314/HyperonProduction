@@ -6,7 +6,7 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
-#include "ubana/HyperonProduction/Headers/FV.h"
+//#include "ubana/HyperonProduction/Headers/FV.h"
 
 #ifdef __MAKE_ROOT_DICT__
 #include "TObject.h"
@@ -36,7 +36,7 @@ double TrackLength=0;
 double TrackDirectionX=0,TrackDirectionY=0,TrackDirectionZ=0;
 double TrackStartX=0,TrackStartY=0,TrackStartZ=0;
 double TrackEndX=0,TrackEndY=0,TrackEndZ=0;
-double TrackContained;
+//double TrackContained;
 double TrackPID; // 3 plane PID score
 double MeandEdX_Plane0,MeandEdX_Plane1,MeandEdX_Plane2,MeandEdX_ThreePlane; // Mean dE/dX scores
 double Track_LLR_PID; // LLR PID
@@ -83,7 +83,7 @@ TrackEndZ = End.Z();
 
 
 // Set containment
-TrackContained = inActiveTPC(TVector3(TrackEndX,TrackEndY,TrackEndZ));
+//TrackContained = inActiveTPC(TVector3(TrackEndX,TrackEndY,TrackEndZ));
 
 }
 

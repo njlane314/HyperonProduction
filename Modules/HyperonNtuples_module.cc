@@ -103,16 +103,16 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<std::string> t_CCNC;
       //std::string t_CCNC; //charged current/neutral current
 
-/*
-      bool t_IsLambda;
-      bool t_IsHyperon;
-      bool t_IsSigmaZero; 		
-      bool t_IsLambdaCharged;
-      bool t_IsAssociatedHyperon;
-      bool t_HasNeutronScatter;
-      bool t_IsSignal;	
-      bool t_GoodReco;
-*/
+      /*
+         bool t_IsLambda;
+         bool t_IsHyperon;
+         bool t_IsSigmaZero; 		
+         bool t_IsLambdaCharged;
+         bool t_IsAssociatedHyperon;
+         bool t_HasNeutronScatter;
+         bool t_IsSignal;	
+         bool t_GoodReco;
+         */
 
       std::vector<bool> t_InActiveTPC;
       std::vector<bool> t_IsHyperon;
@@ -178,7 +178,10 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<std::vector<int>> t_Conn_SeedTicks_Plane2;
 
       std::vector<std::string> t_SysDials;
-      std::vector<std::vector<double>> t_SysWeights;
+      //std::vector<std::vector<double>> t_SysWeights;
+      //std::vector<std::vector<std::string>> t_SysDials;
+      std::vector<std::vector<std::vector<double>>> t_SysWeights;
+
 
       /////////////////////////
       // Metadata for sample //
@@ -257,15 +260,15 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_CCNC.clear();
    t_NMCTruths = 0;
    t_NMCTruthsInTPC = 0;
-/*
-   t_IsHyperon = false;
-   t_IsSigmaZero = false;
-   t_IsLambda = false;
-   t_IsLambdaCharged = false;
-   t_IsAssociatedHyperon = false;
-   t_HasNeutronScatter = false;
-   t_IsSignal = false;	
-*/
+   /*
+      t_IsHyperon = false;
+      t_IsSigmaZero = false;
+      t_IsLambda = false;
+      t_IsLambdaCharged = false;
+      t_IsAssociatedHyperon = false;
+      t_HasNeutronScatter = false;
+      t_IsSignal = false;	
+      */
 
    t_InActiveTPC.clear();
    t_IsHyperon.clear();
@@ -298,7 +301,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_DecayVertex_X.clear();
    t_DecayVertex_Y.clear();
    t_DecayVertex_Z.clear();
- 
+
    t_NPrimaryDaughters = 0; //number of primary daughters
    t_NPrimaryTrackDaughters=0; //num of track like primary daughters
    t_NPrimaryShowerDaughters=0; //num of shower like primary daughters
@@ -325,7 +328,10 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_Conn_OutputSizes_Plane2.clear();
    t_Conn_SeedChannels_Plane2.clear();
    t_Conn_SeedTicks_Plane2.clear();
- 
+
+   t_SysDials.clear();
+   t_SysWeights.clear();
+
    // General Event Info
 
    t_EventID = e.id().event();
@@ -341,7 +347,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       SubModuleGeneratorTruth* Generator_SM = new SubModuleGeneratorTruth(e,f_Generator);
       GeneratorTruth GenT = Generator_SM->GetGeneratorTruth();
-      
+
       t_Weight *= GenT.Weight;
       t_CCNC = GenT.CCNC;
       t_Mode = GenT.Mode;
@@ -384,7 +390,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_KaonDecay = G4T.KaonDecay;
       t_SigmaZeroDecayPhoton = G4T.SigmaZeroDecayPhoton;
       t_SigmaZeroDecayLambda = G4T.SigmaZeroDecayLambda;
-     // t_DecayVertex = G4T.DecayVertex;
+      // t_DecayVertex = G4T.DecayVertex;
       t_DecayVertex_X = G4T.DecayVertex_X;
       t_DecayVertex_Y = G4T.DecayVertex_Y;
       t_DecayVertex_Z = G4T.DecayVertex_Z;
@@ -401,7 +407,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       }
 
       //t_IsSignal = t_Neutrino.size() == 1 && t_Mode.at(0) == "HYP" && t_Neutrino.at(0).PDG == -14 && t_IsLambdaCharged;
-        
+
       delete G4_SM;
    }
 
@@ -450,54 +456,59 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       delete Reco_SM;
    }
 
+
    // Systematics weights if requested
-/*
-   if(fWeightLabel != "None"){
 
-      // Try to get some systematics info
-      art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
-      std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
+   if(!f_IsData){
 
-      if(!e.getByLabel(fWeightLabel,Handle_EventWeight)) 
-         throw cet::exception("HyperonNtuples") << "No EventWeight Found!" << std::endl;
+      if(t_NMCTruths > 1) std::cout << "NMCTruths=" << t_NMCTruths << std::endl;
 
-      art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
 
-      if(!Vect_EventWeight.size())
-         throw cet::exception("HyperonNtuples") << "Weight vector empty!" << std::endl;
+      //t_SysDials.resize(t_NMCTruths);
+      t_SysWeights.resize(t_NMCTruths);
 
-      std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(0)->fWeight;
-      std::map<std::string,std::vector<double>>::iterator it;
+      for(size_t i_w=0;i_w<f_WeightLabels.size();i_w++){
 
-      for(it = theWeights.begin(); it != theWeights.end();it++){
-         t_SysDials.push_back(it->first);
-         t_SysWeights.push_back(it->second);
+         // Try to get some systematics info
+         art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
+         std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
+
+         if(!e.getByLabel(f_WeightLabels.at(i_w),Handle_EventWeight)) 
+            throw cet::exception("HyperonNtuples") << "No EventWeight Found!" << std::endl;
+
+         art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
+
+         if(!Vect_EventWeight.size())
+            throw cet::exception("HyperonNtuples") << "Weight vector empty!" << std::endl;
+
+         if(Vect_EventWeight.size() != (size_t)t_NMCTruths)
+            throw cet::exception("HyperonNtuples") << "Weight vector size != NMCTruths" << std::endl;
+
+
+         for(size_t i_tr=0;i_tr<Vect_EventWeight.size();i_tr++){       
+
+            std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(i_tr)->fWeight;
+            std::map<std::string,std::vector<double>>::iterator it;
+
+            int dial=0;
+
+            for(it = theWeights.begin(); it != theWeights.end();it++){
+
+               if(i_tr == 0){
+                  t_SysDials.push_back(it->first);
+               }
+               else {
+                  if(it->first != t_SysDials.at(dial))
+                     throw cet::exception("HyperonNtuples") << "Malformed systematics weight vectors" << std::endl;
+               }
+
+               dial++;
+               t_SysWeights.at(i_tr).push_back(it->second);
+            }
+         }
+
       }
 
-   }
-*/
-
-   for(size_t i_w=0;i_w<f_WeightLabels.size();i_w++){
-
-      // Try to get some systematics info
-      art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
-      std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
-
-      if(!e.getByLabel(f_WeightLabels.at(i_w),Handle_EventWeight)) 
-         throw cet::exception("HyperonNtuples") << "No EventWeight Found!" << std::endl;
-
-      art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
-
-      if(!Vect_EventWeight.size())
-         throw cet::exception("HyperonNtuples") << "Weight vector empty!" << std::endl;
-
-      std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(0)->fWeight;
-      std::map<std::string,std::vector<double>>::iterator it;
-
-      for(it = theWeights.begin(); it != theWeights.end();it++){
-         t_SysDials.push_back(it->first);
-         t_SysWeights.push_back(it->second);
-      }
    }
 
    FinishEvent();
@@ -550,15 +561,15 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("CCNC","vector<string>",&t_CCNC);
    OutputTree->Branch("NMCTruths",&t_NMCTruths);
    OutputTree->Branch("NMCTruthsInTPC",&t_NMCTruthsInTPC);
-/*
-   OutputTree->Branch("IsHyperon",&t_IsHyperon);
-   OutputTree->Branch("IsSigmaZero",&t_IsSigmaZero);
-   OutputTree->Branch("IsLambda",&t_IsLambda);
-   OutputTree->Branch("IsLambdaCharged",&t_IsLambdaCharged);
-   OutputTree->Branch("IsSignal",&t_IsSignal);
-   OutputTree->Branch("GoodReco",&t_GoodReco);
-   OutputTree->Branch("IsAssociatedHyperon",&t_IsAssociatedHyperon);
-*/
+   /*
+      OutputTree->Branch("IsHyperon",&t_IsHyperon);
+      OutputTree->Branch("IsSigmaZero",&t_IsSigmaZero);
+      OutputTree->Branch("IsLambda",&t_IsLambda);
+      OutputTree->Branch("IsLambdaCharged",&t_IsLambdaCharged);
+      OutputTree->Branch("IsSignal",&t_IsSignal);
+      OutputTree->Branch("GoodReco",&t_GoodReco);
+      OutputTree->Branch("IsAssociatedHyperon",&t_IsAssociatedHyperon);
+      */
 
    OutputTree->Branch("InActiveTPC","vector<bool>",&t_InActiveTPC);
    OutputTree->Branch("IsHyperon","vector<bool>",&t_IsHyperon);
@@ -597,7 +608,7 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("NPrimaryShowerDaughters",&t_NPrimaryShowerDaughters);
    OutputTree->Branch("TracklikePrimaryDaughters","vector<RecoParticle>",&t_TrackPrimaryDaughters);
    OutputTree->Branch("ShowerlikePrimaryDaughters","vector<RecoParticle>",&t_ShowerPrimaryDaughters);
-   
+
    OutputTree->Branch("ConnSeedIndexes_Plane0",&t_Conn_SeedIndexes_Plane0);
    OutputTree->Branch("ConnOutputIndexes_Plane0",&t_Conn_OutputIndexes_Plane0);
    OutputTree->Branch("ConnOutputSizes_Plane0",&t_Conn_OutputSizes_Plane0);
@@ -615,7 +626,9 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("ConnSeedTicks_Plane2",&t_Conn_SeedTicks_Plane2);
 
    OutputTree->Branch("SysDials",&t_SysDials);
-   OutputTree->Branch("SysWeights",&t_SysWeights);
+   //OutputTree->Branch("SysWeights",&t_SysWeights);
+   //OutputTree->Branch("SysDials","vector<vector<string>>",&t_SysDials);
+   OutputTree->Branch("SysWeights","vector<vector<vector<double>>>",&t_SysWeights);
 
    //////////////////////////////////////////
    //             Metadata Tree	           //
