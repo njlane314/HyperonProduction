@@ -61,11 +61,11 @@ bool hyperon::NeutronScatterFilter::filter(art::Event& e)
       SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4);
       G4Truth G4T = G4_SM->GetG4Info();
 
-      bool HasNeutronScatter = G4T.HasNeutronScatter;       
+      bool EventHasNeutronScatter = G4T.EventHasNeutronScatter;       
         
       delete G4_SM;
   
-      return HasNeutronScatter;
+      return EventHasNeutronScatter;
 }
 
 DEFINE_ART_MODULE(hyperon::NeutronScatterFilter)

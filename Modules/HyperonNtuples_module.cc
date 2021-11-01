@@ -114,6 +114,12 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
          bool t_GoodReco;
          */
 
+      // Flags applying to the entire event
+      bool t_EventHasNeutronScatter;
+      bool t_EventHasHyperon;
+      bool t_GoodReco;
+
+      // Flags applying to each MCTruth
       std::vector<bool> t_InActiveTPC;
       std::vector<bool> t_IsHyperon;
       std::vector<bool> t_IsLambda;
@@ -123,8 +129,6 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<bool> t_IsAssociatedHyperon;
       std::vector<bool> t_IsSignal;
       std::vector<bool> t_IsSignalSigmaZero;
-      bool t_GoodReco;
-      bool t_HasNeutronScatter;
 
       std::vector<SimParticle> t_Neutrino;
       std::vector<SimParticle> t_Lepton;
@@ -280,7 +284,8 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_IsSignal.clear();	
    t_IsSignalSigmaZero.clear();	
    t_GoodReco = false;
-   t_HasNeutronScatter = false;
+   t_EventHasNeutronScatter = false;
+   t_EventHasHyperon = false;
 
    t_Neutrino.clear();
    t_Lepton.clear();
@@ -379,7 +384,8 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_IsSigmaZero = G4T.IsSigmaZero;
       t_IsSigmaZeroCharged = G4T.IsSigmaZeroCharged;
       t_IsAssociatedHyperon = G4T.IsAssociatedHyperon;
-      t_HasNeutronScatter = G4T.HasNeutronScatter;       
+      t_EventHasNeutronScatter = G4T.EventHasNeutronScatter;       
+      t_EventHasHyperon = G4T.EventHasHyperon;       
       t_Weight *= G4T.Weight;
       t_Lepton = G4T.Lepton;
       t_Hyperon = G4T.Hyperon;
@@ -581,7 +587,8 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("IsSignal","vector<bool>",&t_IsSignal);
    OutputTree->Branch("IsSignalSigmaZero","vector<bool>",&t_IsSignalSigmaZero);
    OutputTree->Branch("GoodReco",&t_GoodReco);
-   OutputTree->Branch("HasNeutronScatter",&t_HasNeutronScatter);
+   OutputTree->Branch("EventHasNeutronScatter",&t_EventHasNeutronScatter);
+   OutputTree->Branch("EventHasHyperon",&t_EventHasHyperon);
 
    OutputTree->Branch("Neutrino","vector<SimParticle>",&t_Neutrino);
    OutputTree->Branch("Lepton","vector<SimParticle>",&t_Lepton);

@@ -168,7 +168,6 @@ G4Truth SubModuleG4Truth::GetG4Info(){
          }
          */
 
-   theTruth.HasNeutronScatter = FindNeutronScatter();   
 
    return theTruth;
 
@@ -498,6 +497,10 @@ void SubModuleG4Truth::SetFlags(){
       if(nHyperons > 1 || (nHyperons >= 1 && nKaons >= 1)) theTruth.IsAssociatedHyperon[i_t] = true;
 
    }
+
+   theTruth.EventHasNeutronScatter = FindNeutronScatter();   
+   theTruth.EventHasHyperon = std::find(theTruth.IsHyperon.begin(), theTruth.IsHyperon.end(), true) != theTruth.IsHyperon.end();
+
 
 }
 

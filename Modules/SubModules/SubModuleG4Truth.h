@@ -34,6 +34,12 @@ struct G4Truth {
 //   bool IsLambdaCharged = false; 
 //   bool IsAssociatedHyperon = false;
 
+   // Flags applying to the entire event 
+   // Use for sample orthogonality
+   bool EventHasHyperon = false;
+   bool EventHasNeutronScatter = false;
+
+   // Flags for each MCTruth
    std::vector<bool> InActiveTPC;
    std::vector<bool> IsHyperon;
    std::vector<bool> IsLambda;
@@ -42,7 +48,6 @@ struct G4Truth {
    std::vector<bool> IsSigmaZeroCharged;
    std::vector<bool> IsAssociatedHyperon;
 
-   bool HasNeutronScatter = false;
    double Weight = 1.0;
 
    std::vector<SimParticle> Lepton;
@@ -80,6 +85,7 @@ class SubModuleG4Truth {
       void GetSigmaZeroDecay();
       bool FindNeutronScatter();
       int GetOrigin(int trackid);
+      void MCTruthMatch(SimParticle &P);
       void SetFlags();
       
       void SetNeutronScatterThresholds(double neutronscatterprotonthresh,double neutronscatterpionthresh);
@@ -100,7 +106,6 @@ class SubModuleG4Truth {
       std::vector<int> Kaon_Daughter_IDs;   // IDs of Kaon decay products
 
       std::vector<TVector3> PrimaryVertices;
-      void MCTruthMatch(SimParticle &P);
       bool PosMatch(TVector3 Pos1,TVector3 Pos2);
 
       std::map<int,art::Ptr<simb::MCParticle>> partByID;

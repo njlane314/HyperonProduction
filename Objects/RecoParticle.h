@@ -44,6 +44,7 @@ double ProtonMomentum,MuonMomentum; // Track kinematics
 
 // Truth info
 bool HasTruth; // False if reco particle has no corresponding MC particle
+int MCTruthIndex=-1;
 int TrackTruePDG;
 double TrackTrueE,TrackTruePx,TrackTruePy,TrackTruePz;
 double TrackTrueModMomentum;

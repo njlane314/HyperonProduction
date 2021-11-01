@@ -245,8 +245,10 @@ void SubModuleReco::TruthMatch(art::Ptr<recob::Track> trk,RecoParticle &P){
 
       SimParticle SP = MakeSimParticle(*matchedParticle);
       SP.Origin = G4T->GetOrigin(matchedParticle->TrackId());
-
+      G4T->MCTruthMatch(SP);
+      
       P.HasTruth = true;
+      P.MCTruthIndex = SP.MCTruthIndex;
       P.TrackTruePDG = SP.PDG;
       P.TrackTrueE = SP.E;
       P.TrackTruePx = SP.Px;
