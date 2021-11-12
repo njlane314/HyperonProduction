@@ -58,19 +58,15 @@ void SubModuleG4Truth::GetParticleLists(){
 
       if(isHyperon(g4p->PdgCode())){
 
-         if(g4p->PdgCode() == 3212 && g4p->EndProcess() == "Decay"){
-            SigmaZero_Daughter_IDs.insert(SigmaZero_Daughter_IDs.begin(),IDs.begin(),IDs.end());                         
-
-         }
-
+         if(g4p->PdgCode() == 3212 && g4p->EndProcess() == "Decay")
+            SigmaZero_Daughter_IDs.insert(SigmaZero_Daughter_IDs.begin(),IDs.begin(),IDs.end()); 
+         
          else if(g4p->EndProcess() == "Decay")
             Daughter_IDs.insert(Daughter_IDs.begin(),IDs.begin(),IDs.end());                
-
       }		
 
       else if(isKaon(g4p->PdgCode()) && g4p->EndProcess() == "Decay")
          Kaon_Daughter_IDs.insert(Kaon_Daughter_IDs.begin(),IDs.begin(),IDs.end());                     
-
    }
 
 
@@ -89,13 +85,12 @@ void SubModuleG4Truth::GetParticleLists(){
    } 
 
    // Set list of Primary vertices for matching to multiple MCTruths
-
-   for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){        
+   for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){         
       for(int k_particles=0;k_particles<theMCTruth->NParticles();k_particles++){
          simb::MCParticle Part = theMCTruth->GetParticle(k_particles);
-         if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) 
+         if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){ 
             PrimaryVertices.push_back(TVector3(Part.Vx(),Part.Vy(),Part.Vz()));
-
+         }
       }       
    }
 
