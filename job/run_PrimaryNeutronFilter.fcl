@@ -1,7 +1,7 @@
 #include "services_microboone.fcl"
 #include "neutronFilterConfig.fcl"
 
-process_name: NeutronScatterFilter
+process_name: PrimaryNeutronFilter
 
 source:
 {
@@ -32,3 +32,4 @@ outputs:
   }
 }
 
+physics.filters.NeutronScatterFilter.GetG4Info: false

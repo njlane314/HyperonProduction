@@ -374,14 +374,12 @@ bool SubModuleG4Truth::FindNeutronScatter(){
 
          // Look for protons and charged pions
          art::Ptr<simb::MCParticle> part2 = partByID[NeutronDaughter_IDs[i_d]];
-
-
          double P = sqrt(part2->Px()*part2->Px() + part2->Py()*part2->Py() + part2->Pz()*part2->Pz());
-
          if(part2->PdgCode() == 2212 && P > NeutronScatterProtonThresh) nProtons++; 
          if(abs(part2->PdgCode()) == 211 && P > NeutronScatterPionThresh) nPions++; 
-
       }
+
+        
 
       // Flag event as containing neutron scatter if there are either 2+ protons, 2+ charged pions or 1+ of each
       if(nProtons >= 2 || nPions >= 2 || (nProtons >= 1 && nPions >= 1)) return true;

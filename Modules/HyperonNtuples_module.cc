@@ -130,6 +130,8 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<bool> t_IsSignal;
       std::vector<bool> t_IsSignalSigmaZero;
 
+      bool t_EventHasFinalStateNeutron;
+
       std::vector<SimParticle> t_Neutrino;
       std::vector<SimParticle> t_Lepton;
       std::vector<SimParticle> t_Hyperon;
@@ -264,6 +266,8 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_CCNC.clear();
    t_NMCTruths = 0;
    t_NMCTruthsInTPC = 0;
+   t_EventHasFinalStateNeutron = false;
+
    /*
       t_IsHyperon = false;
       t_IsSigmaZero = false;
@@ -363,6 +367,8 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_TruePrimaryVertex_X = GenT.TruePrimaryVertex_X;
       t_TruePrimaryVertex_Y = GenT.TruePrimaryVertex_Y;
       t_TruePrimaryVertex_Z = GenT.TruePrimaryVertex_Z;
+
+      t_EventHasFinalStateNeutron = GenT.EventHasFinalStateNeutron;
 
       delete Generator_SM;
    }
@@ -596,6 +602,8 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("GoodReco",&t_GoodReco);
    OutputTree->Branch("EventHasNeutronScatter",&t_EventHasNeutronScatter);
    OutputTree->Branch("EventHasHyperon",&t_EventHasHyperon);
+   OutputTree->Branch("EventHasFinalStateNeutron",&t_EventHasFinalStateNeutron);
+
 
    OutputTree->Branch("Neutrino","vector<SimParticle>",&t_Neutrino);
    OutputTree->Branch("Lepton","vector<SimParticle>",&t_Lepton);

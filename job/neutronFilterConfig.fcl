@@ -5,11 +5,19 @@ filterEvents:
 {
 module_type: NeutronScatterFilter
 Debug: false
+GetGeneratorInfo: true
+GetG4Info: true
+
+# GeneratorTruth submodule config
+Generator: {
+GeneratorModuleLabel: "generator"
+}
 
 Geant4: {
+GeneratorModuleLabel: "generator"
 G4ModuleLabel: "largeant"
-NeutronScatterProtonThresh: 0.15
-NeutronScatterPionThresh: 0.05
+NeutronScatterProtonThresh: 0.400
+NeutronScatterPionThresh: 0.100
 DecayProtonThresh: 0.0
 DecayPionThresh: 0.0
 }

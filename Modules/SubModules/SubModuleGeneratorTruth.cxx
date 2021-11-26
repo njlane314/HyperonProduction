@@ -85,8 +85,11 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
             theTruth.Neutrino.push_back(P);
          }
 
-         // If there is a hyperon i the final state in a QEL event, change mode to HYP
+         // If there is a hyperon in the final state in a QEL event, change mode to HYP
          if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode.back() = "HYP";
+          
+         if(Part.StatusCode() == 1 && Part.PdgCode() == 2112) theTruth.EventHasFinalStateNeutron = true;
+
       }
 
       i_truth++;
