@@ -137,6 +137,8 @@ class ConnectednessHelper {
       Connectedness::ClusterBuilder C_Plane2;
 
       bool Draw=false;
+      std::string rse;
+
 
       Wiremap WM_Plane0;
       Wiremap WM_Plane1;

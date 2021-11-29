@@ -6,9 +6,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ConnectednessHelper::ConnectednessHelper(bool draw) :
-   C_Plane0(draw),
-   C_Plane1(draw),
-   C_Plane2(draw)
+   C_Plane0(draw,"Plane0"),
+   C_Plane1(draw,"Plane1"),
+   C_Plane2(draw,"Plane2")
 {
    Draw = draw;
 }
@@ -93,43 +93,65 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunClustering(std::vector<int>
 
    // Plane0 //
 
+   std::string label_Plane0 = rse + "_Plane0_";
+
    for(size_t i=0;i<indexes.size();i++){
       int index = indexes.at(i);
 
       std::pair<int,int> id_and_size =  C_Plane0.MakeCluster(Positions_Plane0.at(index).first,Positions_Plane0.at(index).second,index);
+
+      if(i < indexes.size()-1) label_Plane0 += std::to_string(indexes.at(i)) + "_";
+      else label_Plane0 += std::to_string(indexes.at(i));
 
       Outcome_Plane0.OutputIndexes.push_back(id_and_size.first);
       Outcome_Plane0.OutputSizes.push_back(id_and_size.second);
 
    }
 
+
+   if(Draw) C_Plane0.DrawClustered(label_Plane0,0,-1);
+
    C_Plane0.ClearClusters();
 
    // Plane1 //
+
+   std::string label_Plane1 = rse + "_Plane1_";
 
    for(size_t i=0;i<indexes.size();i++){
       int index = indexes.at(i);
 
       std::pair<int,int> id_and_size =  C_Plane1.MakeCluster(Positions_Plane1.at(index).first,Positions_Plane1.at(index).second,index);
 
+      if(i < indexes.size()-1) label_Plane1 += std::to_string(indexes.at(i)) + "_";
+      else label_Plane1 += std::to_string(indexes.at(i));
+
       Outcome_Plane1.OutputIndexes.push_back(id_and_size.first);
       Outcome_Plane1.OutputSizes.push_back(id_and_size.second);
 
    }
 
+   if(Draw) C_Plane1.DrawClustered(label_Plane1,1,-1);
+
    C_Plane1.ClearClusters();
 
    // Plane2 //
+
+   std::string label_Plane2 = rse + "_Plane2_";
 
    for(size_t i=0;i<indexes.size();i++){
       int index = indexes.at(i);
 
       std::pair<int,int> id_and_size =  C_Plane2.MakeCluster(Positions_Plane2.at(index).first,Positions_Plane2.at(index).second,index);
 
+      if(i < indexes.size()-1) label_Plane2 += std::to_string(indexes.at(i)) + "_";
+      else label_Plane2 += std::to_string(indexes.at(i));
+
       Outcome_Plane2.OutputIndexes.push_back(id_and_size.first);
       Outcome_Plane2.OutputSizes.push_back(id_and_size.second);
 
    }
+
+   if(Draw) C_Plane2.DrawClustered(label_Plane2,2,-1);
 
    C_Plane2.ClearClusters();
 
@@ -172,6 +194,8 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunTest(){
 CTOutcome ConnectednessHelper::PrepareAndTestEvent(art::Event const& e,std::string wirelabel,std::vector<TVector3> trackstarts){
 
    CTOutcome theOutcome;
+   
+   rse = std::to_string(e.run()) + "_" + std::to_string(e.subRun()) + "_" + std::to_string(e.event());
 
    if(trackstarts.size() < 3) return theOutcome;
 

@@ -22,7 +22,9 @@ ClusterBuilder::ClusterBuilder(bool draw,std::string displaydir){
 
    if(DrawEverything){
 
-      c = new TCanvas("c","c");
+      std::cout << "Will draw clusters" << std::endl;
+
+      c = new TCanvas(("c" + displaydir).c_str(),("c" + displaydir).c_str());
 
       if(displaydir != "") DisplayDir = displaydir;
 
@@ -35,17 +37,17 @@ ClusterBuilder::ClusterBuilder(bool draw,std::string displaydir){
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
 ClusterBuilder::~ClusterBuilder(){
 
 //   delete h_Raw;
 //   delete h_Binary;
 //   delete h_Clustered;
 
-   if(DrawEverything) delete c;
+   //if(DrawEverything) delete c;
 
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -110,8 +112,8 @@ void ClusterBuilder::Reset(){
 
    Clusters.clear();
 
-   if(h_Raw != nullptr)   delete h_Raw;
-   if(h_Binary != nullptr)   delete h_Binary;
+   //if(h_Raw != nullptr)   delete h_Raw;
+   //if(h_Binary != nullptr)   delete h_Binary;
 
 }
 
@@ -474,14 +476,11 @@ void ClusterBuilder::DrawClustered(std::string rse,int plane,int pass){
 
    if(!DrawEverything) return;
 
-   std::cout << "pass=" << pass << std::endl;
-   
-
    if(pass == -1) system(("mkdir -p Displays/" + DisplayDir + "/" + rse + "/").c_str());
    else if(pass == 0) system(("mkdir -p Displays/" + DisplayDir + "/Fail/" + rse + "/").c_str());
    else if(pass == 1) system(("mkdir -p Displays/" + DisplayDir + "/Pass/" + rse + "/").c_str());
 
-   h_Clustered = (TH2D*)h_Binary->Clone();
+   h_Clustered = (TH2D*)h_Binary->Clone("h_Clustered");
 
    // Draw on dead wires - makes pdfs much bigger so use only if needed
    //if(plane != -1) DeadWireFill(plane);

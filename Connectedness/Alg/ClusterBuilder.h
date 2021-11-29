@@ -29,7 +29,7 @@ class ClusterBuilder {
 
       ClusterBuilder();
       ClusterBuilder(bool draw,std::string displaydir="");
-      ~ClusterBuilder();
+      //~ClusterBuilder();
 
       // Setup functions
 
@@ -79,7 +79,7 @@ class ClusterBuilder {
       TH2D *h_Binary = nullptr;
       TH2D *h_Clustered = nullptr;
 
-      TCanvas *c;
+      TCanvas *c = nullptr;
 
       std::vector<Cluster> Clusters;
 
