@@ -21,7 +21,7 @@
 
 #include <memory>
 
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleG4Truth.h"
+#include "ubana/HyperonProduction/Modules/SubModules/SubModuleGeneratorTruth.h"
 
 namespace hyperon {
    class HyperonFilter;
@@ -45,25 +45,25 @@ class hyperon::HyperonFilter : public art::EDFilter {
 
    private:
 
-      fhicl::ParameterSet f_G4;
+      fhicl::ParameterSet f_Generator;
 };
 
 
 hyperon::HyperonFilter::HyperonFilter(fhicl::ParameterSet const& p)
    : EDFilter{p},
-   f_G4(p.get<fhicl::ParameterSet>("Geant4"))
+   f_Generator(p.get<fhicl::ParameterSet>("Generator"))
 {
 }
 
 bool hyperon::HyperonFilter::filter(art::Event& e)
 {
-
-      SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4);
-      G4Truth G4T = G4_SM->GetG4Info();
-
-      bool EventHasHyperon = G4T.EventHasHyperon;       
       
-      delete G4_SM;
+      SubModuleGeneratorTruth* Generator_SM = new SubModuleGeneratorTruth(e,f_Generator);
+      GeneratorTruth GenT = Generator_SM->GetGeneratorTruth();
+
+      bool EventHasHyperon = GenT.EventHasHyperon;       
+      
+      delete Generator_SM;
   
       return EventHasHyperon;
 }

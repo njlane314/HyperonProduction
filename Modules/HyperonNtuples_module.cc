@@ -373,7 +373,6 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       delete Generator_SM;
    }
 
-
    // G4 Info
 
    if(!f_IsData && f_GetG4Info){
@@ -550,6 +549,8 @@ void hyperon::HyperonNtuples::FinishEvent(){
    if(std::find(t_IsSignal.begin(), t_IsSignal.end(), true) != t_IsSignal.end()) m_NSignal++;
    if(std::find(t_IsSignalSigmaZero.begin(), t_IsSignalSigmaZero.end(), true) != t_IsSignalSigmaZero.end()) m_NSignalSigmaZero++;
    if(t_GoodReco) m_NGoodReco++;
+
+   if(f_Debug) std::cout << "Finished event" << std::endl;
 
 }
 

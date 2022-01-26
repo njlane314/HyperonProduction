@@ -428,24 +428,6 @@ void SubModuleG4Truth::MCTruthMatch(SimParticle &P){
 
 void SubModuleG4Truth::SetFlags(){
 
-   /*
-      if(theTruth.Hyperon.size()) theTruth.IsHyperon = true;
-      if(theTruth.Hyperon.size() == 1 && theTruth.Hyperon.at(0).PDG == 3122) theTruth.IsLambda = true;
-      if(theTruth.Hyperon.size() == 1 && theTruth.Hyperon.at(0).PDG == 3212) theTruth.IsSigmaZero = true;
-
-      if(theTruth.Decay.size() == 2){
-      if(theTruth.IsLambda && theTruth.Decay.at(0).PDG == 2212 && theTruth.Decay.at(1).PDG == -211) theTruth.IsLambdaCharged = true;
-      if(theTruth.IsLambda && theTruth.Decay.at(1).PDG == 2212 && theTruth.Decay.at(0).PDG == -211) theTruth.IsLambdaCharged = true; 
-      }
-
-
-   // Set Assoc hyperon to true if there is a hyperon and kaon from the same PV
-   for(size_t i_h=0;i_h<theTruth.Hyperon.size();i_h++)
-   for(size_t i_k=0;i_k<theTruth.PrimaryKaon.size();i_k++)
-   if(theTruth.Hyperon.at(i_h).MCTruthIndex == theTruth.PrimaryKaon.at(i_k).MCTruthIndex)
-   theTruth.IsAssociatedHyperon = true;
-   */
-
    // Iterate over the different MCTruths in the event, set their flags
    for(int i_t=0;i_t<NMCTruths;i_t++){
 
@@ -493,7 +475,6 @@ void SubModuleG4Truth::SetFlags(){
 
    theTruth.EventHasNeutronScatter = FindNeutronScatter();   
    theTruth.EventHasHyperon = std::find(theTruth.IsHyperon.begin(), theTruth.IsHyperon.end(), true) != theTruth.IsHyperon.end();
-
 
 }
 

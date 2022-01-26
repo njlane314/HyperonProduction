@@ -29,7 +29,7 @@ class ClusterBuilder {
 
       ClusterBuilder();
       ClusterBuilder(bool draw,std::string displaydir="");
-      //~ClusterBuilder();
+      ~ClusterBuilder();
 
       // Setup functions
 

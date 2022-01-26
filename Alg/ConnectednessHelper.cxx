@@ -175,7 +175,7 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunTest(){
    for(int i=0;i<nseeds;i++){
       for(int j=i+1;j<nseeds;j++){
          for(int k=j+1;k<nseeds;k++){
-
+            //std::cout << "Running clustering on combination " << i << j << k << std::endl;
             std::vector<CTSingleOutcome> Outcomes = RunClustering({i,j,k});
 
             AllOutcomes.push_back(Outcomes.at(0));
@@ -193,11 +193,15 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunTest(){
 
 CTOutcome ConnectednessHelper::PrepareAndTestEvent(art::Event const& e,std::string wirelabel,std::vector<TVector3> trackstarts){
 
+   
+ 
    CTOutcome theOutcome;
    
    rse = std::to_string(e.run()) + "_" + std::to_string(e.subRun()) + "_" + std::to_string(e.event());
 
    if(trackstarts.size() < 3) return theOutcome;
+
+   //std::cout << "Running CT Test on event with " << trackstarts.size() << " tracks" << std::endl;
 
    art::Handle<std::vector<recob::Wire>> Handle_Wire;
    std::vector<art::Ptr<recob::Wire>> Vect_Wire;
@@ -207,10 +211,13 @@ CTOutcome ConnectednessHelper::PrepareAndTestEvent(art::Event const& e,std::stri
 
    art::fill_ptr_vector(Vect_Wire,Handle_Wire);
 
+   //std::cout << "Loading wire activity" << std::endl;
    LoadWireActivity(Vect_Wire);
+   //std::cout << "Adding track start positions" << std::endl;
    AddStartPositions(trackstarts);
 
    // Vector containing the result for each combintation of three tracks
+   //std::cout << "Running test" << std::endl;
    std::vector<CTSingleOutcome> Outcomes = RunTest(); 
 
 

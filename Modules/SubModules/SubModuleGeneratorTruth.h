@@ -39,6 +39,8 @@ struct GeneratorTruth {
    std::vector<std::string> CCNC;
    bool EventHasFinalStateNeutron=false;
 
+   bool EventHasHyperon=false; 
+
 };
 
 class SubModuleGeneratorTruth {

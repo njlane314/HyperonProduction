@@ -37,17 +37,17 @@ ClusterBuilder::ClusterBuilder(bool draw,std::string displaydir){
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
+
 ClusterBuilder::~ClusterBuilder(){
 
 //   delete h_Raw;
 //   delete h_Binary;
 //   delete h_Clustered;
 
-   //if(DrawEverything) delete c;
+//   if(DrawEverything) delete c;
 
 }
-*/
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -112,8 +112,9 @@ void ClusterBuilder::Reset(){
 
    Clusters.clear();
 
-   //if(h_Raw != nullptr)   delete h_Raw;
-   //if(h_Binary != nullptr)   delete h_Binary;
+   if(h_Raw != nullptr)   delete h_Raw;
+   if(h_Binary != nullptr)   delete h_Binary;
+   if(h_Clustered != nullptr)   delete h_Clustered;
 
 }
 
@@ -141,8 +142,8 @@ void ClusterBuilder::ReadData(std::vector<int> channel,std::vector<int> tick,std
    int nticks = max_t - min_t;
 
    // Setup the histograms
-   h_Raw = new TH2D(("h_Channel_vs_Tick_Raw_"+rse).c_str(),"Raw Activity;Channel;Tick",nchannels,min_ch,max_ch,nticks,min_t,max_t);
-   h_Binary = new TH2D(("h_Channel_vs_Tick_Binary_"+rse).c_str(),"Binary Activity;Channel;Tick",nchannels,min_ch,max_ch,nticks,min_t,max_t);
+   h_Raw = new TH2D(("h_Channel_vs_Tick_Raw_"+rse+DisplayDir).c_str(),"Raw Activity;Channel;Tick",nchannels,min_ch,max_ch,nticks,min_t,max_t);
+   h_Binary = new TH2D(("h_Channel_vs_Tick_Binary_"+rse+DisplayDir).c_str(),"Binary Activity;Channel;Tick",nchannels,min_ch,max_ch,nticks,min_t,max_t);
 
    // Fill the histograms
    for(size_t i=0;i<channel.size();i++){

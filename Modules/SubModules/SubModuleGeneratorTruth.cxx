@@ -69,7 +69,6 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
          //if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) 
          // theTruth.TruePrimaryVertex.SetXYZ(Part.Vx(),Part.Vy(),Part.Vz());
 
-
          if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) {
             theTruth.TruePrimaryVertex_X.push_back(Part.Vx());
             theTruth.TruePrimaryVertex_Y.push_back(Part.Vy());
@@ -89,7 +88,9 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
          if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode.back() = "HYP";
           
          if(Part.StatusCode() == 1 && Part.PdgCode() == 2112) theTruth.EventHasFinalStateNeutron = true;
-
+         if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode())){
+            theTruth.EventHasHyperon = true;
+         }
       }
 
       i_truth++;
@@ -97,7 +98,7 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
 
       if(theTruth.Neutrino.size() != Vect_MCTruth.size())         
          throw cet::exception("SubModuleGeneratorTruth") << "Sim Neutrino/MCTruth vector size mismatch" << std::endl;
-
+    
    return theTruth;
 }
 
