@@ -28,12 +28,6 @@ const double _EPSILON_ = 0.0001;
 
 struct G4Truth {
 
-//   bool IsHyperon = false;
-//   bool IsSigmaZero = false;
-//   bool IsLambda = false;
-//   bool IsLambdaCharged = false; 
-//   bool IsAssociatedHyperon = false;
-
    // Flags applying to the entire event 
    // Use for sample orthogonality
    bool EventHasHyperon = false;
@@ -91,7 +85,6 @@ class SubModuleG4Truth {
       void SetNeutronScatterThresholds(double neutronscatterprotonthresh,double neutronscatterpionthresh);
       void SetDecayThresholds(double decayprotonthresh,double decaypionthresh);
 
-
    private:
       
       art::Handle<std::vector<simb::MCTruth>> Handle_MCTruth;
@@ -121,7 +114,6 @@ class SubModuleG4Truth {
       G4Truth theTruth;
 
       int NMCTruths;
-
 };
 
 }

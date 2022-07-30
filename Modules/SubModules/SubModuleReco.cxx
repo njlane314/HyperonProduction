@@ -90,11 +90,10 @@ void SubModuleReco::PrepareInfo(){
    theData.RecoPrimaryVertex = GetPrimaryVertex();
 
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
-      if(pfp->Parent() == neutrinoID){
-         RecoParticle P = MakeRecoParticle(pfp);
-         if(P.PDG == 13) theData.TrackPrimaryDaughters.push_back(P);
-         else if(P.PDG == 11) theData.ShowerPrimaryDaughters.push_back(P);
-      }
+      if(pfp->Parent() != neutrinoID) continue;
+      RecoParticle P = MakeRecoParticle(pfp);
+      if(P.PDG == 13) theData.TrackPrimaryDaughters.push_back(P);
+      else if(P.PDG == 11) theData.ShowerPrimaryDaughters.push_back(P);      
    }
 
 //   for(size_t i_tr=0;i_tr<theData.TrackPrimaryDaughters.size();i_tr++) theData.TrackPrimaryDaughters[i_tr].Index = i_tr; 
@@ -244,9 +243,10 @@ void SubModuleReco::TruthMatch(art::Ptr<recob::Track> trk,RecoParticle &P){
    if(matchedParticle != NULL){ 
 
       SimParticle SP = MakeSimParticle(*matchedParticle);
+            
       SP.Origin = G4T->GetOrigin(matchedParticle->TrackId());
       G4T->MCTruthMatch(SP);
-      
+ 
       P.HasTruth = true;
       P.MCTruthIndex = SP.MCTruthIndex;
       P.TrackTruePDG = SP.PDG;

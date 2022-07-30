@@ -208,6 +208,7 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       bool f_GetGeneratorInfo;
       bool f_GetG4Info;
       bool f_GetRecoInfo;
+      bool f_GetConnInfo;
 
       fhicl::ParameterSet f_Generator;
       fhicl::ParameterSet f_G4;
@@ -237,6 +238,7 @@ hyperon::HyperonNtuples::HyperonNtuples(fhicl::ParameterSet const& p)
    f_GetGeneratorInfo(p.get<bool>("GetGeneratorInfo",true)),   
    f_GetG4Info(p.get<bool>("GetG4Info",true)),   
    f_GetRecoInfo(p.get<bool>("GetRecoInfo",true)),   
+   f_GetConnInfo(p.get<bool>("GetConnInfo",true)),   
    f_Generator(p.get<fhicl::ParameterSet>("Generator")),
    f_G4(p.get<fhicl::ParameterSet>("Geant4")),
    f_Reco(p.get<fhicl::ParameterSet>("Reco")),
@@ -446,23 +448,26 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       if(f_Debug) std::cout << "Performing Connectedness Tests" << std::endl;
 
-      CTOutcome ConnData = Conn_Helper.PrepareAndTestEvent(e,f_WireLabel,RecoD.TrackStarts);   
+      if(f_GetConnInfo){
 
-      t_Conn_SeedIndexes_Plane0 = ConnData.SeedIndexes_Plane0;
-      t_Conn_OutputIndexes_Plane0 = ConnData.OutputIndexes_Plane0;
-      t_Conn_OutputSizes_Plane0 = ConnData.OutputSizes_Plane0;
-      t_Conn_SeedChannels_Plane0 = ConnData.SeedChannels_Plane0;
-      t_Conn_SeedTicks_Plane0 = ConnData.SeedTicks_Plane0;
-      t_Conn_SeedIndexes_Plane1 = ConnData.SeedIndexes_Plane1;
-      t_Conn_OutputIndexes_Plane1 = ConnData.OutputIndexes_Plane1;
-      t_Conn_OutputSizes_Plane1 = ConnData.OutputSizes_Plane1;
-      t_Conn_SeedChannels_Plane1 = ConnData.SeedChannels_Plane1;
-      t_Conn_SeedTicks_Plane1 = ConnData.SeedTicks_Plane1;
-      t_Conn_SeedIndexes_Plane2 = ConnData.SeedIndexes_Plane2;
-      t_Conn_OutputIndexes_Plane2 = ConnData.OutputIndexes_Plane2;
-      t_Conn_OutputSizes_Plane2 = ConnData.OutputSizes_Plane2;
-      t_Conn_SeedChannels_Plane2 = ConnData.SeedChannels_Plane2;
-      t_Conn_SeedTicks_Plane2 = ConnData.SeedTicks_Plane2;
+         CTOutcome ConnData = Conn_Helper.PrepareAndTestEvent(e,f_WireLabel,RecoD.TrackStarts);   
+
+         t_Conn_SeedIndexes_Plane0 = ConnData.SeedIndexes_Plane0;
+         t_Conn_OutputIndexes_Plane0 = ConnData.OutputIndexes_Plane0;
+         t_Conn_OutputSizes_Plane0 = ConnData.OutputSizes_Plane0;
+         t_Conn_SeedChannels_Plane0 = ConnData.SeedChannels_Plane0;
+         t_Conn_SeedTicks_Plane0 = ConnData.SeedTicks_Plane0;
+         t_Conn_SeedIndexes_Plane1 = ConnData.SeedIndexes_Plane1;
+         t_Conn_OutputIndexes_Plane1 = ConnData.OutputIndexes_Plane1;
+         t_Conn_OutputSizes_Plane1 = ConnData.OutputSizes_Plane1;
+         t_Conn_SeedChannels_Plane1 = ConnData.SeedChannels_Plane1;
+         t_Conn_SeedTicks_Plane1 = ConnData.SeedTicks_Plane1;
+         t_Conn_SeedIndexes_Plane2 = ConnData.SeedIndexes_Plane2;
+         t_Conn_OutputIndexes_Plane2 = ConnData.OutputIndexes_Plane2;
+         t_Conn_OutputSizes_Plane2 = ConnData.OutputSizes_Plane2;
+         t_Conn_SeedChannels_Plane2 = ConnData.SeedChannels_Plane2;
+         t_Conn_SeedTicks_Plane2 = ConnData.SeedTicks_Plane2;
+      }
 
       delete Reco_SM;
    }

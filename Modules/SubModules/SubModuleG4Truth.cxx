@@ -57,18 +57,15 @@ void SubModuleG4Truth::GetParticleLists(){
       std::vector<int> IDs = GetChildIDs(g4p);
 
       if(isHyperon(g4p->PdgCode())){
-
          if(g4p->PdgCode() == 3212 && g4p->EndProcess() == "Decay")
-            SigmaZero_Daughter_IDs.insert(SigmaZero_Daughter_IDs.begin(),IDs.begin(),IDs.end()); 
-         
+            SigmaZero_Daughter_IDs.insert(SigmaZero_Daughter_IDs.begin(),IDs.begin(),IDs.end());          
          else if(g4p->EndProcess() == "Decay")
             Daughter_IDs.insert(Daughter_IDs.begin(),IDs.begin(),IDs.end());                
       }		
 
-      else if(isKaon(g4p->PdgCode()) && g4p->EndProcess() == "Decay")
+      else if(isKaon(g4p->PdgCode()) && (g4p->EndProcess() == "Decay" || g4p->EndProcess() == "FastScintillation"))
          Kaon_Daughter_IDs.insert(Kaon_Daughter_IDs.begin(),IDs.begin(),IDs.end());                     
    }
-
 
    // Get the SigmaZero daughters  
    for(size_t i_d=0;i_d<SigmaZero_Daughter_IDs.size();i_d++){
@@ -98,7 +95,6 @@ void SubModuleG4Truth::GetParticleLists(){
 
    if(PrimaryVertices.size() != Vect_MCTruth.size())         
       throw cet::exception("SubModuleG4Truth") << "Vertex/MCTruth vector size mismatch" << std::endl;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,11 +104,6 @@ G4Truth SubModuleG4Truth::GetG4Info(){
    GetParticleLists();
 
    // Clear everything
-   /*
-      theTruth.IsHyperon = false;
-      theTruth.IsLambda = false;
-      theTruth.IsLambdaCharged = false;
-      */
 
    theTruth.InActiveTPC.resize(NMCTruths);
    theTruth.IsHyperon.resize(NMCTruths);
@@ -150,22 +141,7 @@ G4Truth SubModuleG4Truth::GetG4Info(){
 
    SetFlags(); 
 
-   /*    
-         if(theTruth.Hyperon.size()) theTruth.IsHyperon = true;
-         if(theTruth.Hyperon.size() == 1 && theTruth.Hyperon.at(0).PDG == 3122) theTruth.IsLambda = true;
-         if(theTruth.Hyperon.size() == 1 && theTruth.Hyperon.at(0).PDG == 3212) theTruth.IsSigmaZero = true;
-         if(theTruth.Hyperon.size() && theTruth.PrimaryKaon.size()) theTruth.IsAssociatedHyperon = true;
-
-
-         if(theTruth.Decay.size() == 2){
-         if(theTruth.IsLambda && theTruth.Decay.at(0).PDG == 2212 && theTruth.Decay.at(1).PDG == -211) theTruth.IsLambdaCharged = true;
-         if(theTruth.IsLambda && theTruth.Decay.at(1).PDG == 2212 && theTruth.Decay.at(0).PDG == -211) theTruth.IsLambdaCharged = true; 
-         }
-         */
-
-
    return theTruth;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,18 +163,14 @@ void SubModuleG4Truth::GetPrimaryParticles(){
       MCTruthMatch(P);
 
       //hyperon produced at primary vertex
-      if(isHyperon(part->PdgCode())){
+      if(isHyperon(part->PdgCode()))
          theTruth.Hyperon.push_back(P);
-         //theTruth.IsHyperon = true;	
-      }
-
+      
       if(isLepton(part->PdgCode()) || isNeutrino(part->PdgCode())) theTruth.Lepton.push_back(P);
       if(isNucleon(part->PdgCode())) theTruth.PrimaryNucleon.push_back(P);
       if(isPion(part->PdgCode())) theTruth.PrimaryPion.push_back(P);
       if(isKaon(part->PdgCode())) theTruth.PrimaryKaon.push_back(P);
-
    }
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,13 +205,8 @@ void SubModuleG4Truth::GetHyperonDecay(){
          if(PosMatch(TVector3(P.StartX,P.StartY,P.StartZ),TVector3(H.EndX,H.EndY,H.EndZ))) P.MCTruthIndex = H.MCTruthIndex;            
       } 
 
-
       theTruth.Decay.push_back(P);     
    }
-
-
-   //theTruth.DecayVertex = TVector3(theTruth.Decay.at(0).StartX,theTruth.Decay.at(0).StartY,theTruth.Decay.at(0).StartZ);
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,7 +219,7 @@ void SubModuleG4Truth::GetKaonDecay(){
       if(partByID.find(Kaon_Daughter_IDs[i_d]) == partByID.end()) continue;
 
       art::Ptr<simb::MCParticle> part = partByID[Kaon_Daughter_IDs[i_d]];
-
+       
       SimParticle P = MakeSimParticle(*part);
       P.Origin = 4;
 
@@ -261,10 +228,8 @@ void SubModuleG4Truth::GetKaonDecay(){
          SimParticle K = theTruth.PrimaryKaon.at(i_k);
          if(PosMatch(TVector3(P.StartX,P.StartY,P.StartZ),TVector3(K.EndX,K.EndY,K.EndZ))) P.MCTruthIndex = K.MCTruthIndex;
       } 
-
-      theTruth.Decay.push_back(P);     
+      theTruth.KaonDecay.push_back(P);     
    }
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,9 +258,6 @@ void SubModuleG4Truth::GetSigmaZeroDecay(){
          theTruth.SigmaZeroDecayPhoton.push_back(P);     
 
    }
-
-
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,7 +266,7 @@ std::vector<int> SubModuleG4Truth::GetChildIDs(art::Ptr<simb::MCParticle> g4p,bo
 
    std::vector<int> DecayProduct_IDs;
 
-   if(g4p->EndProcess() != "Decay" && !IsNeutron) return DecayProduct_IDs;
+   if(g4p->EndProcess() != "Decay" && !IsNeutron && !isKaon(g4p->PdgCode())) return DecayProduct_IDs;
 
    for(int i_d=0;i_d<g4p->NumberDaughters();i_d++){
 
@@ -322,15 +284,12 @@ std::vector<int> SubModuleG4Truth::GetChildIDs(art::Ptr<simb::MCParticle> g4p,bo
       double EndY = g4p->EndPosition().Y();
       double EndZ = g4p->EndPosition().Z();
 
-      //if(X != EndX || Y != EndY || Z != EndZ) continue;
-
       if(!PosMatch(TVector3(X,Y,Z),TVector3(EndX,EndY,EndZ))) continue;
 
       DecayProduct_IDs.push_back(g4p->Daughter(i_d));
    }
 
    return DecayProduct_IDs;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -342,7 +301,6 @@ int SubModuleG4Truth::GetOrigin(int trackid){
    else if(std::find(Kaon_Daughter_IDs.begin(),Kaon_Daughter_IDs.end(),trackid) != Kaon_Daughter_IDs.end()) return 4;
    else if(std::find(SigmaZero_Daughter_IDs.begin(),SigmaZero_Daughter_IDs.end(),trackid) != SigmaZero_Daughter_IDs.end()) return 5;
    else return 3;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -378,16 +336,12 @@ bool SubModuleG4Truth::FindNeutronScatter(){
          if(part2->PdgCode() == 2212 && P > NeutronScatterProtonThresh) nProtons++; 
          if(abs(part2->PdgCode()) == 211 && P > NeutronScatterPionThresh) nPions++; 
       }
-
-        
-
+       
       // Flag event as containing neutron scatter if there are either 2+ protons, 2+ charged pions or 1+ of each
       if(nProtons >= 2 || nPions >= 2 || (nProtons >= 1 && nPions >= 1)) return true;
-
    }
 
    return false;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -412,7 +366,6 @@ void SubModuleG4Truth::SetDecayThresholds(double decayprotonthresh,double decayp
 bool SubModuleG4Truth::PosMatch(TVector3 Pos1,TVector3 Pos2){
 
    return (Pos1-Pos2).Mag() < _EPSILON_;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
