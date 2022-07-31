@@ -26,11 +26,12 @@
 #include "ubana/HyperonProduction/Headers/ParticleTypes.h"
 #include "ubana/HyperonProduction/Headers/LLR_PID.h"
 #include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
+#include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
+#include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
 #include "ubana/HyperonProduction/Objects/RecoParticle.h"
 #include "ubana/HyperonProduction/Objects/Helpers.h"
 #include "ubana/HyperonProduction/Alg/MeandEdXCalculator.h"
 #include "ubana/HyperonProduction/Modules/SubModules/SubModuleG4Truth.h"
-
 
 #include "TVector3.h"
 
@@ -105,6 +106,10 @@ class SubModuleReco {
 
       searchingfornues::LLRPID llr_pid_calculator;
       searchingfornues::ProtonMuonLookUpParameters protonmuon_parameters;
+
+      searchingfornuesk::LLRPIDK llr_pid_calculator_kaon;
+      searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
+
       SubModuleG4Truth* G4T = nullptr;
 
       MeandEdXCalculator dEdXCalc;

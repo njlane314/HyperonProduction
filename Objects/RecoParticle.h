@@ -40,6 +40,7 @@ double TrackEndX=0,TrackEndY=0,TrackEndZ=0;
 double TrackPID; // 3 plane PID score
 double MeandEdX_Plane0,MeandEdX_Plane1,MeandEdX_Plane2,MeandEdX_ThreePlane; // Mean dE/dX scores
 double Track_LLR_PID; // LLR PID
+double Track_LLR_PID_Kaon; // LLR PID with Kaon hypothesis
 double ProtonMomentum,MuonMomentum; // Track kinematics
 
 // Truth info

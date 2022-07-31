@@ -76,6 +76,18 @@ dEdXCalc()
    llr_pid_calculator.set_par_binning(2, protonmuon_parameters.parameters_edges_pl_2);
    llr_pid_calculator.set_lookup_tables(2, protonmuon_parameters.dedx_pdf_pl_2);
 
+   llr_pid_calculator_kaon.set_dedx_binning(0, kaonproton_parameters.dedx_edges_pl_0);
+   llr_pid_calculator_kaon.set_par_binning(0, kaonproton_parameters.parameters_edges_pl_0);
+   llr_pid_calculator_kaon.set_lookup_tables(0, kaonproton_parameters.dedx_pdf_pl_0);
+
+   llr_pid_calculator_kaon.set_dedx_binning(1, kaonproton_parameters.dedx_edges_pl_1);
+   llr_pid_calculator_kaon.set_par_binning(1, kaonproton_parameters.parameters_edges_pl_1);
+   llr_pid_calculator_kaon.set_lookup_tables(1, kaonproton_parameters.dedx_pdf_pl_1);
+
+   llr_pid_calculator_kaon.set_dedx_binning(2, kaonproton_parameters.dedx_edges_pl_2);
+   llr_pid_calculator_kaon.set_par_binning(2, kaonproton_parameters.parameters_edges_pl_2);
+   llr_pid_calculator_kaon.set_lookup_tables(2, kaonproton_parameters.dedx_pdf_pl_2);
+
    if(!IsData){
       G4T = new SubModuleG4Truth(e,genlabel,g4label);
       G4T->GetParticleLists();
@@ -274,6 +286,8 @@ void SubModuleReco::GetPIDs(art::Ptr<recob::Track> trk,RecoParticle &P){
 
    double this_llr_pid=0;
    double this_llr_pid_score=0;
+   double this_llr_pid_kaon=0;
+   double this_llr_pid_score_kaon=0;
    for(auto const &calo : caloFromTrack){
 
       auto const &plane = calo->PlaneID().Plane;
@@ -291,13 +305,17 @@ void SubModuleReco::GetPIDs(art::Ptr<recob::Track> trk,RecoParticle &P){
          calo_energy += dedx_values[i] * pitch[i];
 
       float llr_pid = llr_pid_calculator.LLR_many_hits_one_plane(dedx_values,par_values,plane);
+      float llr_pid_kaon = llr_pid_calculator_kaon.LLR_many_hits_one_plane(dedx_values,par_values,plane);
       this_llr_pid += llr_pid;
+      this_llr_pid_kaon += llr_pid_kaon;
 
    }
 
    this_llr_pid_score = atan(this_llr_pid/100.)*2/3.14159266;
+   this_llr_pid_score_kaon = atan(this_llr_pid_kaon/100.)*2/3.14159266;
 
    P.Track_LLR_PID = this_llr_pid_score;
+   P.Track_LLR_PID_Kaon = this_llr_pid_score_kaon;
 
    // Mean dE/dX Calculation
    dEdXStore dEdXs = dEdXCalc.ThreePlaneMeandEdX(trk,caloFromTrack);
