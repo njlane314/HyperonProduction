@@ -14,6 +14,7 @@ SubModuleGeneratorTruth::SubModuleGeneratorTruth(art::Event const& e,fhicl::Para
 
    art::fill_ptr_vector(Vect_MCTruth,Handle_MCTruth);  
 
+   HyperonPDGs = pset.get<std::vector<int>>("HyperonPDGs",{3122,3212,3112,3222});
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,19 +40,6 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
       if(ccnc == 0) theTruth.CCNC.push_back("CC");
       else theTruth.CCNC.push_back("NC");
 
-      /*
-      // NOTE: Hyperon events produced in GENIE use 0, NuWro uses 1095
-      if(mode == 0) theTruth.Mode = "QEL";
-      else if(mode == 1) theTruth.Mode = "RES";
-      else if(mode == 2) theTruth.Mode = "DIS";
-      else if(mode == 3) theTruth.Mode = "COH";
-      else if(mode == 5) theTruth.Mode = "ElectronScattering";
-      else if(mode == 10) theTruth.Mode = "MEC";
-      else if(mode == 11) theTruth.Mode = "Diffractive";
-      else if(mode == 1095) theTruth.Mode = "HYP";
-      else theTruth.Mode = "Other";	
-      */
-
       if(mode == 0) theTruth.Mode.push_back("QEL");
       else if(mode == 1) theTruth.Mode.push_back("RES");
       else if(mode == 2) theTruth.Mode.push_back("DIS");
@@ -76,7 +64,6 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
             if(inActiveTPC(TVector3(Part.Vx(),Part.Vy(),Part.Vz()))) theTruth.NMCTruthsInTPC++;
          }
 
-
          if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){
             SimParticle P = MakeSimParticle(Part);
             P.Origin = 0;
@@ -88,7 +75,7 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
          if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode.back() = "HYP";
           
          if(Part.StatusCode() == 1 && Part.PdgCode() == 2112) theTruth.EventHasFinalStateNeutron = true;
-         if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode())){
+         if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode()) && std::find(HyperonPDGs.begin(),HyperonPDGs.end(),abs(Part.PdgCode())) != HyperonPDGs.end()){
             theTruth.EventHasHyperon = true;
          }
       }

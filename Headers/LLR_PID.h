@@ -2,10 +2,12 @@
 #define LLRPID_H
 
 // #include "LLRPID_proton_muon_lookup.h"
-// #include "LLRPID_correction_lookup.h"
+//#include "LLRPID_correction_lookup.h"
 
 //#include "BacktrackingFuncs.h"
 #include "Geometry.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+
 
 namespace searchingfornues
 {
@@ -105,6 +107,7 @@ namespace searchingfornues
 	  size_t aux_index = digitize(corr_parameter_value[i], corr_parameters_bin_edges[plane][i]);
 	  this_corr_parameters_bins.push_back(aux_index);
 	}
+      
 
       //findLookUpRow
       size_t lookup_index=0, accumulator_par_bins=1;
@@ -113,7 +116,6 @@ namespace searchingfornues
 	  lookup_index += (accumulator_par_bins * this_corr_parameters_bins[i]);
 	  accumulator_par_bins *= corr_parameters_num_bins[plane][i];
 	}
-
       return lookup_index;
     }
 
@@ -159,16 +161,15 @@ namespace searchingfornues
 	return dedx_values_corrected;
       }
 
-    /*
+    
     std::vector<float> correct_many_hits_one_plane(const art::Ptr<anab::Calorimetry> tkcalo,
 						   const recob::Track trk,
-						   const std::unique_ptr<art::FindManyP<simb::MCParticle, anab::BackTrackerHitMatchingData>> &assocMCPart,
+						   //const std::unique_ptr<art::FindManyP<simb::MCParticle, anab::BackTrackerHitMatchingData>> &assocMCPart,
 						   const bool fRecalibrateHits,
-						   const float fEnergyThresholdForMCHits,
+						   //const float fEnergyThresholdForMCHits,
 						   const bool fLocaldEdx)
       {
 	int plane = tkcalo->PlaneID().Plane;
-
 	std::vector<float> dqdx_values, dqdx_values_corrected;
 	if (!fLocaldEdx)
 	  dqdx_values = tkcalo->dQdx();
@@ -180,6 +181,7 @@ namespace searchingfornues
 	  {
 	    auto const &pitch = tkcalo->TrkPitchVec();
 	    auto const& xyz_v = tkcalo->XYZ();
+
 
 	    std::vector<std::vector<float>> corr_par_values;
 	    for (size_t i = 0; i < xyz_v.size(); i++)
@@ -193,19 +195,21 @@ namespace searchingfornues
 	      }
 
 	    // fill vector of boolean to determine if hit has to be corrected or not
+            
 	    std::vector<bool> is_hit_montecarlo;
 	    const std::vector< size_t > &tp_indices = tkcalo->TpIndices();
 	    for (size_t i = 0; i < tp_indices.size(); i++)
 	      {
-		size_t tp_index = tp_indices[i];
-		is_hit_montecarlo.push_back(searchingfornues::isHitBtMonteCarlo(tp_index, assocMCPart, fEnergyThresholdForMCHits));
+		//size_t tp_index = tp_indices[i];
+		//is_hit_montecarlo.push_back(searchingfornues::isHitBtMonteCarlo(tp_index, assocMCPart, fEnergyThresholdForMCHits));
+               is_hit_montecarlo.push_back(true);
 	      }
 	    // correct hits
 	    dqdx_values_corrected = correct_many_hits_one_plane(dqdx_values, corr_par_values, is_hit_montecarlo, plane);
 	  }
 	return dqdx_values_corrected;
       }// end of function
-    */
+    
   private:
     size_t dedx_num_bins[3];
     std::vector<float> dedx_bin_edges[3];

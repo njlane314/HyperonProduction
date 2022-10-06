@@ -1,0 +1,156 @@
+#include "reco_uboone_mcc9_8_driver_overlay_stage2.fcl"
+
+process_name: OverlayRecoStage2Reprocess
+
+# We use the beam off pandora slice vetos for overlay since everything is in EXT time
+physics.producers.pandora.SliceIdTool.BeamWindowStartTime: 6.00
+physics.producers.pandora.SliceIdTool.BeamWindowEndTime:   15.80
+
+# flash-matching score preservation module
+physics.producers.flashmatch.BeamWindowStart: 6.00
+physics.producers.flashmatch.BeamWindowEnd:   15.80
+
+# NuMI CRT Veto
+physics.filters.crtveto: @local::UBCRTCosmicFilterNuMIOFF
+
+# Overwite PID file location to uboonedata for running on Argonne Machines
+physics.producers.pandoracalipidSCE.BraggAlgo.LikelihoodMapsFile:          '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pandoracalipid.BraggAlgo.LikelihoodMapsFile:             '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pandorapidSCE.BraggAlgo.LikelihoodMapsFile:              '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pandorapid.BraggAlgo.LikelihoodMapsFile:                 '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pmtrackpid.BraggAlgo.LikelihoodMapsFile:                 '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pmtrackcalipid.BraggAlgo.LikelihoodMapsFile:             '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pandoraKalmanTrackpid.BraggAlgo.LikelihoodMapsFile:      '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pandoraKalmanTrackcalipid.BraggAlgo.LikelihoodMapsFile:  '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pandoraKalmanShowerpid.BraggAlgo.LikelihoodMapsFile:     '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+physics.producers.pandoraKalmanShowercalipid.BraggAlgo.LikelihoodMapsFile: '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
+
+physics.producers.pandoraReprocessSlices:           @local::microboone_pandoraReprocessSlices
+physics.producers.pandoraReprocessSlicesTrack:      @local::microboone_pandoraTrackCreation
+physics.producers.pandoraReprocessSlicesShower:     @local::microboone_pandoraShowerCreation
+
+physics.producers.pandoraReprocessSlices.SliceModuleLabel: "pandora"
+physics.producers.pandoraReprocessSlices.ReprocessForExternalVertex: true
+physics.producers.pandoraReprocessSlices.ExternalVertexModuleLabel: "SecondaryVertexProducer"
+physics.producers.pandoraReprocessSlices.ShouldProduceSlices: true
+
+physics.producers.pandoraReprocessSlicesTrack.PFParticleLabel: "pandoraReprocessSlices"
+physics.producers.pandoraReprocessSlicesShower.PFParticleLabel: "pandoraReprocessSlices"
+
+physics.producers.SecondaryVertexProducer: { module_type: "SecondaryVertexProducer" }
+physics.producers.SecondaryVertexProducer.KaonCheat: true
+physics.producers.SecondaryVertexProducer.TrackLabel: "pandora"
+physics.producers.SecondaryVertexProducer.PFParticleLabel: "pandora"
+physics.producers.SecondaryVertexProducer.Reco: {
+GeneratorModuleLabel: "generator"
+G4ModuleLabel: "largeant"
+PFParticleModuleLabel: "pandora"
+TrackModuleLabel: "pandora"
+VertexModuleLabel: "pandora"
+ShowerModuleLabel: "pandora"
+MetadataModuleLabel: "pandora" 
+PIDModuleLabel: "pandorapid"
+CaloModuleLabel: "pandoracali"
+HitModuleLabel: "gaushit"
+TrackHitAssnLabel: "pandora" 
+ShowerHitAssnLabel: "pandora"
+HitTruthAssnLabel: "gaushitTruthMatch"
+}
+
+physics.producers.pandoracaloReprocessSlices: {
+         CaloAlg: {
+            CalAmpConstants: [
+               5.82554e-4,
+               1.16594e-3
+            ]
+            CalAreaConstants: [
+               4.31e-3,
+               4.02e-3,
+               4.1e-3
+            ]
+            CaloDoLifeTimeCorrection: true
+            CaloLifeTimeForm: 0
+            CaloUseModBox: true
+         }
+         CorrectSCE: false
+         Flip_dQdx: false
+         SpacePointModuleLabel: "pandoraReprocessSlices"
+         T0ModuleLabel: "mctrutht0"
+         TrackModuleLabel: "pandoraReprocessSlicesTrack"
+         UseArea: true
+         module_type: "Calorimetry"
+      }
+
+physics.producers.pandoracaliReprocessSlices: {
+         CalibrationFileName: "calibration_mcc8.4_v1.root"
+         CaloAlg: {
+            CalAmpConstants: [
+               5.82554e-4,
+               1.16594e-3
+            ]
+            CalAreaConstants: [
+               4.31e-3,
+               4.02e-3,
+               4.1e-3
+            ]
+            CaloDoLifeTimeCorrection: false
+            CaloLifeTimeForm: 0
+            CaloUseModBox: true
+         }
+         CalorimetryModuleLabel: "pandoracaloReprocessSlices"
+         Corr_X: [
+            "correction_x_plane0",
+            "correction_x_plane1",
+            "correction_x_plane2"
+         ]
+         Corr_YZ: [
+            "correction_yz_plane0",
+            "correction_yz_plane1",
+            "correction_yz_plane2"
+         ]
+         CorrectSCE: false
+         ELifetimeCorrection: true
+         ForceUnity: true
+         ModBoxA: 9.3e-1
+         ModBoxB: 2.12e-1
+         TrackModuleLabel: "pandoraReprocessSlicesTrack"
+         UseRecoTrackDir: true
+         module_type: "CalibrationdEdX"
+        }
+
+    physics.producers.pandorapidReprocessSlices: {
+         BraggAlgo: {
+            EndPointFloatLong: 2
+            EndPointFloatShort: -2
+            EndPointFloatStepSize: 5e-2
+            LikelihoodMapsFile: "${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root"
+            NHitsToDrop: 1
+         }
+         Chi2PIDAlg: {
+            TemplateFile: "dEdxrestemplates.root"
+            UseMedian: true
+         }
+         DaughterFinderCutDistance: 5
+         DaughterFinderCutFraction: 5e-1
+         FiducialVolume: {
+            X_HIGH: 10
+            X_LOW: 10
+            Y_HIGH: 10
+            Y_LOW: 10
+            Z_HIGH: 10
+            Z_LOW: 10
+         }
+         ProducerLabels: {
+            CaloTrackAssn: "pandoracaloReprocessSlices"
+            CalorimetryLabel: "pandoracaloReprocessSlices"
+            HitLabel: "gaushit"
+            HitTrackAssn: "pandoraReprocessSlicesTrack"
+            HitTruthAssn: "gaushitTruthMatch"
+            ParticleIdLabel: "pid::particleid"
+            TrackLabel: "pandoraReprocessSlicesTrack"
+         }
+         module_type: "ParticleId"
+      }
+
+
+physics.reco: [ SecondaryVertexProducer , pandoraReprocessSlices, pandoraReprocessSlicesTrack, pandoraReprocessSlicesShower , pandoracaloReprocessSlices , pandoracaliReprocessSlices , pandorapidReprocessSlices ]

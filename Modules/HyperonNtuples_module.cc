@@ -99,20 +99,7 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       int t_NMCTruthsInTPC=0;	
 
       std::vector<std::string> t_Mode;
-      //std::string t_Mode; //interaction mode
       std::vector<std::string> t_CCNC;
-      //std::string t_CCNC; //charged current/neutral current
-
-      /*
-         bool t_IsLambda;
-         bool t_IsHyperon;
-         bool t_IsSigmaZero; 		
-         bool t_IsLambdaCharged;
-         bool t_IsAssociatedHyperon;
-         bool t_HasNeutronScatter;
-         bool t_IsSignal;	
-         bool t_GoodReco;
-         */
 
       // Flags applying to the entire event
       bool t_EventHasNeutronScatter;
@@ -160,6 +147,9 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<RecoParticle> t_ShowerPrimaryDaughters;   
 
       TVector3 t_RecoPrimaryVertex;
+
+      std::vector<RecoParticle> t_RepassTrackPrimaryDaughters;
+      std::vector<RecoParticle> t_RepassShowerPrimaryDaughters;   
 
       ////////////////////////////
       //   Connectedness test   //
@@ -213,8 +203,8 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       fhicl::ParameterSet f_Generator;
       fhicl::ParameterSet f_G4;
       fhicl::ParameterSet f_Reco;
+      std::vector<fhicl::ParameterSet> f_RecoRepass;
       std::string f_WireLabel;
-      //std::string fWeightLabel;
       std::vector<art::InputTag> f_WeightLabels;
       std::string f_POTSummaryLabel;
 
@@ -226,7 +216,6 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       ///////////////////////
 
       ConnectednessHelper Conn_Helper;
-
 };
 
 ////////////////////////////////////////////////////
@@ -242,8 +231,8 @@ hyperon::HyperonNtuples::HyperonNtuples(fhicl::ParameterSet const& p)
    f_Generator(p.get<fhicl::ParameterSet>("Generator")),
    f_G4(p.get<fhicl::ParameterSet>("Geant4")),
    f_Reco(p.get<fhicl::ParameterSet>("Reco")),
+   f_RecoRepass(p.get<std::vector<fhicl::ParameterSet>>("RecoRepass",{})),
    f_WireLabel(p.get<std::string>("WireLabel")),
-   //fWeightLabel(p.get<std::string>("WeightLabel","None")),
    f_WeightLabels(p.get<std::vector<art::InputTag>>("WeightCalculators",{})),
    f_POTSummaryLabel(p.get<std::string>("POTSummaryLabel")),
    f_IsData(p.get<bool>("IsData")),
@@ -269,16 +258,6 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_NMCTruths = 0;
    t_NMCTruthsInTPC = 0;
    t_EventHasFinalStateNeutron = false;
-
-   /*
-      t_IsHyperon = false;
-      t_IsSigmaZero = false;
-      t_IsLambda = false;
-      t_IsLambdaCharged = false;
-      t_IsAssociatedHyperon = false;
-      t_HasNeutronScatter = false;
-      t_IsSignal = false;	
-      */
 
    t_InActiveTPC.clear();
    t_IsHyperon.clear();
@@ -307,8 +286,6 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_TruePrimaryVertex_X.clear();
    t_TruePrimaryVertex_Y.clear();
    t_TruePrimaryVertex_Z.clear();
-   //t_TruePrimaryVertex.SetXYZ(-1000,-1000,-1000);
-   //t_DecayVertex.SetXYZ(-1000,-1000,-1000);
    t_DecayVertex_X.clear();
    t_DecayVertex_Y.clear();
    t_DecayVertex_Z.clear();
@@ -321,6 +298,9 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_ShowerPrimaryDaughters.clear();
 
    t_RecoPrimaryVertex.SetXYZ(-1000,-1000,-1000); //position of reco'd primary vertex
+
+   t_RepassTrackPrimaryDaughters.clear();
+   t_RepassShowerPrimaryDaughters.clear();
 
    t_Conn_SeedIndexes_Plane0.clear();
    t_Conn_OutputIndexes_Plane0.clear();
@@ -470,6 +450,20 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       }
 
       delete Reco_SM;
+
+      // If configured to get repass of reconstruction
+      if(f_RecoRepass.size()){
+        std::cout << "Getting repassed information" << std::endl;
+         for(size_t i_r=0;i_r<f_RecoRepass.size();i_r++){
+            SubModuleReco* Reco_SM_Repass = new SubModuleReco(e,f_IsData,f_RecoRepass.at(i_r));
+            Reco_SM_Repass->PrepareInfo();
+            //Reco_SM->SetIndices(t_IsSignal,t_IsSignalSigmaZero);
+            RecoData RecoD_Repass =  Reco_SM_Repass->GetInfo();   
+            t_RepassTrackPrimaryDaughters.insert(t_RepassTrackPrimaryDaughters.end(),RecoD_Repass.TrackPrimaryDaughters.begin(),RecoD_Repass.TrackPrimaryDaughters.end());
+            t_RepassShowerPrimaryDaughters.insert(t_RepassShowerPrimaryDaughters.end(),RecoD_Repass.ShowerPrimaryDaughters.begin(),RecoD_Repass.ShowerPrimaryDaughters.end());
+            delete Reco_SM_Repass;
+         }
+      }
    }
 
 
@@ -586,16 +580,6 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("CCNC","vector<string>",&t_CCNC);
    OutputTree->Branch("NMCTruths",&t_NMCTruths);
    OutputTree->Branch("NMCTruthsInTPC",&t_NMCTruthsInTPC);
-   /*
-      OutputTree->Branch("IsHyperon",&t_IsHyperon);
-      OutputTree->Branch("IsSigmaZero",&t_IsSigmaZero);
-      OutputTree->Branch("IsLambda",&t_IsLambda);
-      OutputTree->Branch("IsLambdaCharged",&t_IsLambdaCharged);
-      OutputTree->Branch("IsSignal",&t_IsSignal);
-      OutputTree->Branch("GoodReco",&t_GoodReco);
-      OutputTree->Branch("IsAssociatedHyperon",&t_IsAssociatedHyperon);
-      */
-
    OutputTree->Branch("InActiveTPC","vector<bool>",&t_InActiveTPC);
    OutputTree->Branch("IsHyperon","vector<bool>",&t_IsHyperon);
    OutputTree->Branch("IsLambda","vector<bool>",&t_IsLambda);
@@ -610,7 +594,6 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("EventHasHyperon",&t_EventHasHyperon);
    OutputTree->Branch("EventHasFinalStateNeutron",&t_EventHasFinalStateNeutron);
 
-
    OutputTree->Branch("Neutrino","vector<SimParticle>",&t_Neutrino);
    OutputTree->Branch("Lepton","vector<SimParticle>",&t_Lepton);
    OutputTree->Branch("Hyperon","vector<SimParticle>",&t_Hyperon);
@@ -621,12 +604,10 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("SigmaZeroDecayPhoton","vector<SimParticle>",&t_SigmaZeroDecayPhoton);
    OutputTree->Branch("SigmaZeroDecayLambda","vector<SimParticle>",&t_SigmaZeroDecayLambda);
    OutputTree->Branch("KaonDecay","vector<SimParticle>",&t_KaonDecay);
-   //OutputTree->Branch("TruePrimaryVertex","TVector3",&t_TruePrimaryVertex);
    OutputTree->Branch("TruePrimaryVertex_X",&t_TruePrimaryVertex_X);
    OutputTree->Branch("TruePrimaryVertex_Y",&t_TruePrimaryVertex_Y);
    OutputTree->Branch("TruePrimaryVertex_Z",&t_TruePrimaryVertex_Z);
 
-   //OutputTree->Branch("DecayVertex","TVector3",&t_DecayVertex); 
    OutputTree->Branch("DecayVertex_X",&t_DecayVertex_X);
    OutputTree->Branch("DecayVertex_Y",&t_DecayVertex_Y);
    OutputTree->Branch("DecayVertex_Z",&t_DecayVertex_Z);
@@ -636,6 +617,8 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("NPrimaryShowerDaughters",&t_NPrimaryShowerDaughters);
    OutputTree->Branch("TracklikePrimaryDaughters","vector<RecoParticle>",&t_TrackPrimaryDaughters);
    OutputTree->Branch("ShowerlikePrimaryDaughters","vector<RecoParticle>",&t_ShowerPrimaryDaughters);
+   OutputTree->Branch("RepassTracklikePrimaryDaughters","vector<RecoParticle>",&t_RepassTrackPrimaryDaughters);
+   OutputTree->Branch("RepassShowerlikePrimaryDaughters","vector<RecoParticle>",&t_RepassShowerPrimaryDaughters);
 
    OutputTree->Branch("ConnSeedIndexes_Plane0",&t_Conn_SeedIndexes_Plane0);
    OutputTree->Branch("ConnOutputIndexes_Plane0",&t_Conn_OutputIndexes_Plane0);
@@ -654,8 +637,6 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("ConnSeedTicks_Plane2",&t_Conn_SeedTicks_Plane2);
 
    OutputTree->Branch("SysDials",&t_SysDials);
-   //OutputTree->Branch("SysWeights",&t_SysWeights);
-   //OutputTree->Branch("SysDials","vector<vector<string>>",&t_SysDials);
    OutputTree->Branch("SysWeights","vector<vector<vector<double>>>",&t_SysWeights);
 
    //////////////////////////////////////////
@@ -681,7 +662,6 @@ void hyperon::HyperonNtuples::beginJob(){
    MetaTree->Branch("POT",&m_POT);
 
    if(f_Debug) std::cout << "Finished begin job" << std::endl;
-
 }
 
 

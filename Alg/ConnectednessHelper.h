@@ -1,7 +1,6 @@
 #ifndef _ConnectednessHelper_h_
 #define _ConnectednessHelper_h_
 
-
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "canvas/Persistency/Common/FindManyP.h"

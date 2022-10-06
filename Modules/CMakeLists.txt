@@ -45,6 +45,7 @@ art_make(
 		${ROOT_XMLIO}
 		${ROOT_GDML}
 		${ROOT_BASIC_LIB_LIST}
+                ${ROOT_GENVECTOR}
                 uboonecode_uboone_EventConnectedness
                 uboonecode_uboone_HyperonProduction_Algorithms
                 uboonecode_uboone_HyperonProduction_SubModules

@@ -30,8 +30,12 @@
 #include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
 #include "ubana/HyperonProduction/Objects/RecoParticle.h"
 #include "ubana/HyperonProduction/Objects/Helpers.h"
-#include "ubana/HyperonProduction/Alg/MeandEdXCalculator.h"
+//#include "ubana/HyperonProduction/Alg/LLRPIDHelper.h"
+//#include "ubana/HyperonProduction/Alg/MeandEdXCalculator.h"
+#include "ubana/HyperonProduction/Alg/PIDManager.h"
 #include "ubana/HyperonProduction/Modules/SubModules/SubModuleG4Truth.h"
+
+
 
 #include "TVector3.h"
 
@@ -57,9 +61,7 @@ struct RecoData {
    size_t TrueDecayPionIndex = -1;
 
    bool GoodReco = false;
-
 };
-
 
 class SubModuleReco {
 
@@ -68,7 +70,7 @@ class SubModuleReco {
       SubModuleReco();
       SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                         string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                        string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,string g4label);
+                        string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,string g4label,bool dogetpids);
 
       SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset);
 
@@ -77,6 +79,7 @@ class SubModuleReco {
       void SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero);
 
       RecoData GetInfo();
+      void SetResRangeCutoff(double cutoff){ ResRangeCutoff = cutoff; }
 
    private:
 
@@ -111,11 +114,14 @@ class SubModuleReco {
       searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
 
       SubModuleG4Truth* G4T = nullptr;
-
-      MeandEdXCalculator dEdXCalc;
+      //LLRPIDHelper LLRPIDCalc;
+      //MeandEdXCalculator dEdXCalc;
+      PIDManager PIDCalc;      
 
       RecoData theData;
       size_t neutrinoID = 99999;
+      //std::vector<size_t> PFP_IDs;
+      std::map<size_t,int> m_PFPID_TrackIndex;
 
       void GetPFPMetadata(art::Ptr<recob::PFParticle> pfp,RecoParticle &P);
       void GetTrackData(art::Ptr<recob::PFParticle> pfp,RecoParticle &P);
@@ -124,7 +130,8 @@ class SubModuleReco {
       void GetVertexData(art::Ptr<recob::PFParticle> pfp,RecoParticle &P);
 
       bool IsData;
-
+      bool DoGetPIDs=true;
+      double ResRangeCutoff=5; 
 };
 
 }

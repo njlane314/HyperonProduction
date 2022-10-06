@@ -9,10 +9,9 @@ MeandEdXCalculator::MeandEdXCalculator(){}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MeandEdXCalculator::SetTophatThresh(double thresh){
-
+void MeandEdXCalculator::SetTophatThresh(double thresh)
+{
    TophatThresh = thresh;
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,17 +36,43 @@ double MeandEdXCalculator::GetMeandEdX(art::Ptr<anab::Calorimetry> calo){
 
       totalX += D.Mag();
       totalE += calo->dEdx().at(i_point)*D.Mag();
-
    }
 
    return totalE/totalX;
+}
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+double MeandEdXCalculator::PlaneWeight(TVector3 dir,int i_pl){
+
+   TVector3 trackvec(0, dir.Y(), dir.Z());
+   trackvec = trackvec.Unit();
+   TVector3 zaxis(0, 0, 1);
+   double costhetayz = trackvec.Dot(zaxis);
+   double thetayz = TMath::ACos(costhetayz);
+   if ((dir.Y() < 0) && (thetayz > 0)) thetayz *= -1;
+
+   double theta_towires = 0;
+   if (i_pl == 0) theta_towires = std::min(std::abs(plane0_wireangle - thetayz), std::abs((-1*(6.28-plane0_wireangle) - thetayz)));
+   if (i_pl == 1) theta_towires = std::min(std::abs(plane1_wireangle - thetayz), std::abs((-1*(6.28-plane1_wireangle) - thetayz)));
+   if (i_pl == 2) theta_towires = std::min(std::abs(plane2_wireangle - thetayz), std::abs((-1*(6.28-plane2_wireangle) - thetayz)));
+
+   double angle_planeweight = sin(theta_towires)*sin(theta_towires);
+   if (angle_planeweight < TophatThresh) angle_planeweight = 0;
+   if (angle_planeweight != 0) angle_planeweight = 1;
+
+   return angle_planeweight;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 double MeandEdXCalculator::PlaneWeight(art::Ptr<recob::Track> track,int i_pl){
 
+   TVector3 trackdir(track->End().x()-track->Start().x(),track->End().y()-track->Start().y(),track->End().z()-track->Start().z());
+   return PlaneWeight(trackdir,i_pl);
+
+   //return PlaneWeight(TVector3(track->StartDirection().X(),track->StartDirection().Y(),track->StartDirection().Z()),i_pl);
+/*   
    // Find track angle in plane of the wires
    double y = track->End().y() - track->Start().y();
    double z = track->End().z() - track->Start().z();
@@ -67,8 +92,13 @@ double MeandEdXCalculator::PlaneWeight(art::Ptr<recob::Track> track,int i_pl){
    double angle_planeweight = sin(theta_towires)*sin(theta_towires);
    if (angle_planeweight < TophatThresh) angle_planeweight = 0;
    if (angle_planeweight != 0) angle_planeweight = 1;
+       
+   TVector3 trackdir(track->End().x()-track->Start().x(),track->End().y()-track->Start().y(),track->End().z()-track->Start().z());
+   std::cout << angle_planeweight << "  " << PlaneWeight(trackdir,i_pl) << std::endl;
+   assert(angle_planeweight == PlaneWeight(trackdir,i_pl));
 
    return angle_planeweight;
+*/
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +113,7 @@ dEdXStore MeandEdXCalculator::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,st
    for(size_t i_pl=0;i_pl<calo_v.size();i_pl++){
 
       int plane = calo_v.at(i_pl)->PlaneID().Plane;
-        
+
       if(plane != 0 && plane != 1 && plane != 2) continue;        
 
       double dEdX = GetMeandEdX(calo_v.at(i_pl));
@@ -96,14 +126,23 @@ dEdXStore MeandEdXCalculator::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,st
       if(plane == 0){
          theStore.Weight_Plane0 = thisPlaneWeight;       
          theStore.Plane0 = dEdX;
+         theStore.dEdX_Plane0 = calo_v.at(i_pl)->dEdx();
+         theStore.ResidualRange_Plane0 = calo_v.at(i_pl)->ResidualRange();
+         theStore.Pitch_Plane0 = calo_v.at(i_pl)->TrkPitchVec();
       }
       if(plane == 1){
          theStore.Weight_Plane1 = thisPlaneWeight;       
          theStore.Plane1 = dEdX;
+         theStore.dEdX_Plane1 = calo_v.at(i_pl)->dEdx();
+         theStore.ResidualRange_Plane1 = calo_v.at(i_pl)->ResidualRange();
+         theStore.Pitch_Plane1 = calo_v.at(i_pl)->TrkPitchVec();
       }
       if(plane == 2){
          theStore.Weight_Plane2 = thisPlaneWeight;       
          theStore.Plane2 = dEdX;
+         theStore.dEdX_Plane2 = calo_v.at(i_pl)->dEdx();
+         theStore.ResidualRange_Plane2 = calo_v.at(i_pl)->ResidualRange();
+         theStore.Pitch_Plane2 = calo_v.at(i_pl)->TrkPitchVec();
       }
 
       TotaldEdX += dEdX*thisPlaneWeight;
@@ -112,9 +151,9 @@ dEdXStore MeandEdXCalculator::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,st
 
    if(TotalWeight > 0) theStore.ThreePlaneAverage = TotaldEdX/TotalWeight;
 
-return theStore;
-
+   return theStore;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif

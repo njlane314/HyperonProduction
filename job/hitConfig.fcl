@@ -1,0 +1,21 @@
+BEGIN_PROLOG
+
+getHits:
+
+{
+module_type: WireTreeMaker
+
+PFParticleLabel: "pandora"
+TrackLabel: "pandora"
+CaloLabel: "pandoracali"
+SliceLabel: "pandora"
+ShowerLabel: "pandora"
+ClusterLabel: "pandora"
+ClusterHitAssocLabel: "pandora"
+HitLabel: "gaushit"
+SliceHitAssocLabel: "pandora"
+PFParticleSliceAssoc: "pandora"
+Debug: false
+}
+
+END_PROLOG

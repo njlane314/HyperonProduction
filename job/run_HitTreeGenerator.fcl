@@ -1,4 +1,4 @@
-#include "wireConfig.fcl"
+#include "hitConfig.fcl"
 #include "hyperonConfig.fcl"
 #include "services_microboone.fcl"
 
@@ -12,7 +12,7 @@ fileNames:[ "/pnfs/uboone/persistent/users/cthorpe/hyperons/v08_00_00_13d/all/ma
 
 services:
 {
-TFileService: { fileName: "WireTrees.root" }
+TFileService: { fileName: "HitTrees.root" }
 @table::microboone_services
 FileCatalogMetadata: @local::art_file_catalog_mc
 }
@@ -21,10 +21,10 @@ FileCatalogMetadata: @local::art_file_catalog_mc
 physics:
 {
 analyzers: { 
-wire: @local::getWires
+hit: @local::getHits
 ana: @local::analyseEvents
 }
-path0 : [ wire , ana ] 
+path0 : [ ana , hit ] 
 end_paths : [ path0 ] 
 }
 
@@ -39,3 +39,7 @@ services.SpaceCharge.EnableSimSpatialSCE: true # disable fwd (true -> reco)
 services.SpaceCharge.EnableSimEfieldSCE: true
 services.SpaceCharge.RepresentationType: "Voxelized_TH3"
 services.SpaceCharge.CalibrationInputFilename: "SpaceCharge/SCEoffsets_dataDriven_combined_bkwd_Jan18.root"
+
+physics.analyzers.hit.module_type: "HitTreeMaker"
+
+

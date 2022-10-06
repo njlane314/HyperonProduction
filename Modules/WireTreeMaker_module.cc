@@ -54,7 +54,9 @@ namespace hyperon {
 
 
 class hyperon::WireTreeMaker : public art::EDAnalyzer {
+
    public:
+
       explicit WireTreeMaker(fhicl::ParameterSet const& p);
 
       // The compiler-generated destructor is fine for non-base
@@ -69,8 +71,6 @@ class hyperon::WireTreeMaker : public art::EDAnalyzer {
       // Required functions.
       void analyze(art::Event const& e) override;
 
-
-
       // Selected optional functions.
       void beginJob() override;
       void endJob() override;
@@ -78,7 +78,6 @@ class hyperon::WireTreeMaker : public art::EDAnalyzer {
 
       void beginSubRun(const art::SubRun& sr);
       void endSubRun(const art::SubRun& sr);
-
 
    private:
 
@@ -95,21 +94,32 @@ class hyperon::WireTreeMaker : public art::EDAnalyzer {
       // Track Start (in xyz and tick/channel space)
       std::vector<int> t_TrackStart_Channel_Plane0;
       std::vector<int> t_TrackStart_Time_Plane0;
+      std::vector<int> t_TrackEnd_Channel_Plane0;
+      std::vector<int> t_TrackEnd_Time_Plane0;
 
       std::vector<int> t_TrackStart_Channel_Plane1;
       std::vector<int> t_TrackStart_Time_Plane1;
+      std::vector<int> t_TrackEnd_Channel_Plane1;
+      std::vector<int> t_TrackEnd_Time_Plane1;
 
       std::vector<int> t_TrackStart_Channel_Plane2;
       std::vector<int> t_TrackStart_Time_Plane2;
+      std::vector<int> t_TrackEnd_Channel_Plane2;
+      std::vector<int> t_TrackEnd_Time_Plane2;
 
       std::vector<double> t_TrackStart_X;
       std::vector<double> t_TrackStart_Y;
       std::vector<double> t_TrackStart_Z;
+      std::vector<double> t_TrackEnd_X;
+      std::vector<double> t_TrackEnd_Y;
+      std::vector<double> t_TrackEnd_Z;
 
       std::vector<double> t_TrackDir_X;
       std::vector<double> t_TrackDir_Y;
       std::vector<double> t_TrackDir_Z;
-
+      std::vector<double> t_TrackEndDir_X;
+      std::vector<double> t_TrackEndDir_Y;
+      std::vector<double> t_TrackEndDir_Z;
 
       // Calo Start (in xyz and tick/channel space)
       std::vector<int> t_CaloStart_Channel_Plane0;
@@ -130,7 +140,6 @@ class hyperon::WireTreeMaker : public art::EDAnalyzer {
       std::vector<double> t_CaloStart_Y_Plane2;
       std::vector<double> t_CaloStart_Z_Plane2;
 
-
       // Wire Signals
       std::vector<int> t_Wire_Channel_Plane0;
       std::vector<int> t_Wire_Tick_Plane0;
@@ -144,7 +153,6 @@ class hyperon::WireTreeMaker : public art::EDAnalyzer {
       std::vector<int> t_Wire_Tick_Plane2;
       std::vector<double> t_Wire_Signal_Plane2;
 
-
       //////////////////////////
       //   FHICL PARAMETERS   //
       //////////////////////////
@@ -156,23 +164,16 @@ class hyperon::WireTreeMaker : public art::EDAnalyzer {
       std::string fPFParticleLabel;
       std::string fCaloLabel;
       std::string fWireLabel;
-
-
 };
-
-
 
 ////////////////////////////////////////////////////
 // Setup module labels/read in fhicl settings     //
 ////////////////////////////////////////////////////
 
-
-
 hyperon::WireTreeMaker::WireTreeMaker(fhicl::ParameterSet const& p)
    : EDAnalyzer{p}   // ,
    // More initializers here.
 {
-
    fDebug = p.get<bool>("Debug","false");
 
    // Module labels
@@ -180,7 +181,6 @@ hyperon::WireTreeMaker::WireTreeMaker(fhicl::ParameterSet const& p)
    fTrackLabel = p.get<std::string>("TrackLabel");
    fCaloLabel = p.get<std::string>("CaloLabel");
    fWireLabel = p.get<std::string>("WireLabel");
-
 }
 
 void hyperon::WireTreeMaker::analyze(art::Event const& e)
@@ -194,20 +194,32 @@ void hyperon::WireTreeMaker::analyze(art::Event const& e)
 
    t_TrackStart_Channel_Plane0.clear();
    t_TrackStart_Time_Plane0.clear();
+   t_TrackEnd_Channel_Plane0.clear();
+   t_TrackEnd_Time_Plane0.clear();
 
    t_TrackStart_Channel_Plane1.clear();
    t_TrackStart_Time_Plane1.clear();
+   t_TrackEnd_Channel_Plane1.clear();
+   t_TrackEnd_Time_Plane1.clear();
 
    t_TrackStart_Channel_Plane2.clear();
    t_TrackStart_Time_Plane2.clear();
+   t_TrackEnd_Channel_Plane2.clear();
+   t_TrackEnd_Time_Plane2.clear();
 
    t_TrackStart_X.clear();
    t_TrackStart_Y.clear();
    t_TrackStart_Z.clear();
+   t_TrackEnd_X.clear();
+   t_TrackEnd_Y.clear();
+   t_TrackEnd_Z.clear();
 
    t_TrackDir_X.clear();
    t_TrackDir_Y.clear();
    t_TrackDir_Z.clear();
+   t_TrackEndDir_X.clear();
+   t_TrackEndDir_Y.clear();
+   t_TrackEndDir_Z.clear();
 
    t_CaloStart_Channel_Plane0.clear();
    t_CaloStart_Time_Plane0.clear();
@@ -226,7 +238,6 @@ void hyperon::WireTreeMaker::analyze(art::Event const& e)
    t_CaloStart_X_Plane2.clear();
    t_CaloStart_Y_Plane2.clear();
    t_CaloStart_Z_Plane2.clear();
-
 
    t_Wire_Channel_Plane0.clear();
    t_Wire_Tick_Plane0.clear();
@@ -281,7 +292,6 @@ void hyperon::WireTreeMaker::analyze(art::Event const& e)
    else
       std::cout << "Track handle not setup" << std::endl;
 
-
    // Setup Assns
 
    // Tracks Assoc with PFPs
@@ -290,14 +300,12 @@ void hyperon::WireTreeMaker::analyze(art::Event const& e)
    // Calo Assoc to Tracks
    art::FindManyP<anab::Calorimetry> caloTrackAssoc(trackVect,e,fCaloLabel);
 
-
    // Go through the list of pandora PFP's, find the reconstructed neutrino
    size_t neutrinoID = 99999;
 
    for(const art::Ptr<recob::PFParticle> &pfp : pfparticleVect)
       if((pfp->IsPrimary() && (std::abs(pfp->PdgCode()) == 14 || std::abs(pfp->PdgCode()) == 12 )))
          neutrinoID = pfp->Self();
-
 
    // Collect start points of tracks
    for(const art::Ptr<recob::PFParticle> &pfp : pfparticleVect){
@@ -314,29 +322,40 @@ void hyperon::WireTreeMaker::analyze(art::Event const& e)
          // Setup Calo Assn for next couple of steps	
          std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = caloTrackAssoc.at(trk.key());
 
-
          // Get Track Start point
          TVector3 TrackStart(trk->Start().X(),trk->Start().Y(),trk->Start().Z());
+         TVector3 TrackEnd(trk->End().X(),trk->End().Y(),trk->End().Z());
          TVector3 TrackDir(trk->StartDirection().X(),trk->StartDirection().Y(),trk->StartDirection().Z());
-
+         TVector3 TrackEndDir(trk->EndDirection().X(),trk->EndDirection().Y(),trk->EndDirection().Z());
 
          t_TrackStart_Channel_Plane0.push_back(U_wire(TrackStart)); 
          t_TrackStart_Time_Plane0.push_back(tick(TrackStart)); 
+         t_TrackEnd_Channel_Plane0.push_back(U_wire(TrackEnd)); 
+         t_TrackEnd_Time_Plane0.push_back(tick(TrackEnd)); 
 
          t_TrackStart_Channel_Plane1.push_back(V_wire(TrackStart)); 
          t_TrackStart_Time_Plane1.push_back(tick(TrackStart)); 
+         t_TrackEnd_Channel_Plane1.push_back(V_wire(TrackEnd)); 
+         t_TrackEnd_Time_Plane1.push_back(tick(TrackEnd)); 
 
          t_TrackStart_Channel_Plane2.push_back(Y_wire(TrackStart)); 
          t_TrackStart_Time_Plane2.push_back(tick(TrackStart)); 
+         t_TrackEnd_Channel_Plane2.push_back(Y_wire(TrackEnd)); 
+         t_TrackEnd_Time_Plane2.push_back(tick(TrackEnd)); 
 
          t_TrackStart_X.push_back(TrackStart.X());
          t_TrackStart_Y.push_back(TrackStart.Y());
          t_TrackStart_Z.push_back(TrackStart.Z());
+         t_TrackEnd_X.push_back(TrackEnd.X());
+         t_TrackEnd_Y.push_back(TrackEnd.Y());
+         t_TrackEnd_Z.push_back(TrackEnd.Z());
 
          t_TrackDir_X.push_back(TrackDir.X());
          t_TrackDir_Y.push_back(TrackDir.Y());
          t_TrackDir_Z.push_back(TrackDir.Z());
-
+         t_TrackEndDir_X.push_back(TrackEndDir.X());
+         t_TrackEndDir_Y.push_back(TrackEndDir.Y());
+         t_TrackEndDir_Z.push_back(TrackEndDir.Z());
 
          // Get Calo Start Point
 
@@ -403,11 +422,9 @@ void hyperon::WireTreeMaker::analyze(art::Event const& e)
 
    } //end of PFP loop
 
-
    /////////////////////////////
    //   Obtain Wire Signals   //
    /////////////////////////////
-
 
    // Setup handles
    art::Handle<std::vector<recob::Wire>> wireHandle;
@@ -459,19 +476,13 @@ void hyperon::WireTreeMaker::analyze(art::Event const& e)
 
    } // loop over wires
 
-
    // Fill tree! 
    t_WireTree->Fill();
-
 }
-
-
 
 //////////////////////////////////////////////////////////////////
 
-
 void hyperon::WireTreeMaker::beginJob(){
-
 
    if(fDebug) std::cout << "Begin job" << std::endl;
 
@@ -480,7 +491,6 @@ void hyperon::WireTreeMaker::beginJob(){
    //////////////////////////////////////////
    //              Wire Tree		   //
    //////////////////////////////////////////
-
 
    t_WireTree=tfs->make<TTree>("WireTree","Wire Tree");
 
@@ -503,21 +513,32 @@ void hyperon::WireTreeMaker::beginJob(){
 
    t_WireTree->Branch("TrackStart_Channel_Plane0",&t_TrackStart_Channel_Plane0);
    t_WireTree->Branch("TrackStart_Time_Plane0",&t_TrackStart_Time_Plane0);
+   t_WireTree->Branch("TrackEnd_Channel_Plane0",&t_TrackEnd_Channel_Plane0);
+   t_WireTree->Branch("TrackEnd_Time_Plane0",&t_TrackEnd_Time_Plane0);
 
    t_WireTree->Branch("TrackStart_Channel_Plane1",&t_TrackStart_Channel_Plane1);
    t_WireTree->Branch("TrackStart_Time_Plane1",&t_TrackStart_Time_Plane1);
+   t_WireTree->Branch("TrackEnd_Channel_Plane1",&t_TrackEnd_Channel_Plane1);
+   t_WireTree->Branch("TrackEnd_Time_Plane1",&t_TrackEnd_Time_Plane1);
 
    t_WireTree->Branch("TrackStart_Channel_Plane2",&t_TrackStart_Channel_Plane2);
    t_WireTree->Branch("TrackStart_Time_Plane2",&t_TrackStart_Time_Plane2);
+   t_WireTree->Branch("TrackEnd_Channel_Plane2",&t_TrackEnd_Channel_Plane2);
+   t_WireTree->Branch("TrackEnd_Time_Plane2",&t_TrackEnd_Time_Plane2);
 
    t_WireTree->Branch("TrackStart_X",&t_TrackStart_X);
    t_WireTree->Branch("TrackStart_Y",&t_TrackStart_Y);
    t_WireTree->Branch("TrackStart_Z",&t_TrackStart_Z);
+   t_WireTree->Branch("TrackEnd_X",&t_TrackEnd_X);
+   t_WireTree->Branch("TrackEnd_Y",&t_TrackEnd_Y);
+   t_WireTree->Branch("TrackEnd_Z",&t_TrackEnd_Z);
 
    t_WireTree->Branch("TrackDir_X",&t_TrackDir_X);
    t_WireTree->Branch("TrackDir_Y",&t_TrackDir_Y);
    t_WireTree->Branch("TrackDir_Z",&t_TrackDir_Z);
-
+   t_WireTree->Branch("TrackEndDir_X",&t_TrackEndDir_X);
+   t_WireTree->Branch("TrackEndDir_Y",&t_TrackEndDir_Y);
+   t_WireTree->Branch("TrackEndDir_Z",&t_TrackEndDir_Z);
 
    t_WireTree->Branch("CaloStart_Channel_Plane0",&t_CaloStart_Channel_Plane0);
    t_WireTree->Branch("CaloStart_Time_Plane0",&t_CaloStart_Time_Plane0);        
@@ -537,29 +558,22 @@ void hyperon::WireTreeMaker::beginJob(){
    t_WireTree->Branch("CaloStart_Y_Plane2",&t_CaloStart_Y_Plane2);
    t_WireTree->Branch("CaloStart_Z_Plane2",&t_CaloStart_Z_Plane2);
 
-
    if(fDebug) std::cout << "Finished begin job" << std::endl;
-
-
 }
-
-
 
 void hyperon::WireTreeMaker::endJob()
 {
 
 }
 
-
-
 void hyperon::WireTreeMaker::beginSubRun(const art::SubRun& sr)
 {
 
-
 }
 
+void hyperon::WireTreeMaker::endSubRun(const art::SubRun& sr)
+{
 
-void hyperon::WireTreeMaker::endSubRun(const art::SubRun& sr){}
-
+}
 
 DEFINE_ART_MODULE(hyperon::WireTreeMaker)

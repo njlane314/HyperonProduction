@@ -62,7 +62,7 @@ bool hyperon::HyperonFilter::filter(art::Event& e)
       GeneratorTruth GenT = Generator_SM->GetGeneratorTruth();
 
       bool EventHasHyperon = GenT.EventHasHyperon;       
-      
+
       delete Generator_SM;
   
       return EventHasHyperon;

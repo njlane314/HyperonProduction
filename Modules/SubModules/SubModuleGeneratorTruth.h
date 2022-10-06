@@ -28,19 +28,14 @@ struct GeneratorTruth {
    double Weight = 1.0;
    int NMCTruths = 0;
    int NMCTruthsInTPC = 0;
-   //std::string Mode;
    std::vector<std::string> Mode;
    std::vector<SimParticle> Neutrino;
-   //TVector3 TruePrimaryVertex;
    std::vector<double> TruePrimaryVertex_X;
    std::vector<double> TruePrimaryVertex_Y;
    std::vector<double> TruePrimaryVertex_Z;
-   //std::string CCNC;
    std::vector<std::string> CCNC;
    bool EventHasFinalStateNeutron=false;
-
    bool EventHasHyperon=false; 
-
 };
 
 class SubModuleGeneratorTruth {
@@ -48,16 +43,15 @@ class SubModuleGeneratorTruth {
 public:
 
    SubModuleGeneratorTruth(art::Event const& e,fhicl::ParameterSet pset);
-
    GeneratorTruth GetGeneratorTruth();
 
 private:
 
    art::Handle<std::vector<simb::MCTruth>> Handle_MCTruth;
    std::vector<art::Ptr<simb::MCTruth>> Vect_MCTruth;
-
    GeneratorTruth theTruth;
 
+   std::vector<int> HyperonPDGs = {3122,3212,3112,3222};
 };
 
 }

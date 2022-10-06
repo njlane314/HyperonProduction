@@ -29,6 +29,19 @@ struct dEdXStore {
    double Plane2 = -1;
 
    double ThreePlaneAverage = -1;
+    
+   std::vector<double> ThreePlanedEdX;
+   std::vector<double> ResidualRange;
+   
+   std::vector<float> dEdX_Plane0;
+   std::vector<float> ResidualRange_Plane0;
+   std::vector<float> Pitch_Plane0;
+   std::vector<float> dEdX_Plane1;
+   std::vector<float> ResidualRange_Plane1;
+   std::vector<float> Pitch_Plane1;
+   std::vector<float> dEdX_Plane2;
+   std::vector<float> ResidualRange_Plane2;
+   std::vector<float> Pitch_Plane2;
 
 };
 
@@ -41,8 +54,8 @@ class MeandEdXCalculator {
       MeandEdXCalculator();
 
       void SetTophatThresh(double thresh);
-
       double GetMeandEdX(art::Ptr<anab::Calorimetry> calo);
+      double PlaneWeight(TVector3 dir,int i_pl);
       double PlaneWeight(art::Ptr<recob::Track> track,int i_pl);
       dEdXStore ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v);
 
