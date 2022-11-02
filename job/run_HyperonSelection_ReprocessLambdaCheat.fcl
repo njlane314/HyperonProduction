@@ -40,19 +40,19 @@ physics.analyzers.ana.Debug: true
 
 physics.analyzers.ana.RecoRepass: [
                     {
-                    CaloModuleLabel: "pandoracali"
+                    CaloModuleLabel: "pandoracaliLambdaCheat"
                     G4ModuleLabel: "largeant"
                     GeneratorModuleLabel: "generator"
                     HitModuleLabel: "gaushit"
                     HitTruthAssnLabel: "gaushitTruthMatch"
                     MetadataModuleLabel: "pandoraReprocessSlicesLambdaCheat"
                     PFParticleModuleLabel: "pandoraReprocessSlicesLambdaCheat"
-                    PIDModuleLabel: "pandorapid"
+                    PIDModuleLabel: "pandorapidLambdaCheat"
                     ShowerHitAssnLabel: "pandoraReprocessSlicesLambdaCheatShower"
                     ShowerModuleLabel: "pandoraReprocessSlicesLambdaCheatShower"
                     TrackHitAssnLabel: "pandoraReprocessSlicesLambdaCheatTrack"
                     TrackModuleLabel: "pandoraReprocessSlicesLambdaCheatTrack"
                     VertexModuleLabel: "pandoraReprocessSlicesLambdaCheat"
-                    DoGetPIDs: false
+                    DoGetPIDs: true
                    }
 ]

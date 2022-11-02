@@ -1,6 +1,6 @@
 #include "reco_uboone_mcc9_8_driver_overlay_stage2.fcl"
 
-process_name: OverlayRecoStage2ReprocessLambdaCheat
+process_name: OverlayRecoStage2ReprocessPass4
 
 # We use the beam off pandora slice vetos for overlay since everything is in EXT time
 physics.producers.pandora.SliceIdTool.BeamWindowStartTime: 6.00
@@ -25,23 +25,24 @@ physics.producers.pandoraKalmanTrackcalipid.BraggAlgo.LikelihoodMapsFile:  '${UB
 physics.producers.pandoraKalmanShowerpid.BraggAlgo.LikelihoodMapsFile:     '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
 physics.producers.pandoraKalmanShowercalipid.BraggAlgo.LikelihoodMapsFile: '${UBOONEDATA_DIR}/ParticleID/BraggLikelihoodMaps_mcc8_20190215.root'
 
-physics.producers.pandoraReprocessSlicesLambdaCheat:           @local::microboone_pandoraReprocessSlices
-physics.producers.pandoraReprocessSlicesLambdaCheatTrack:      @local::microboone_pandoraTrackCreation
-physics.producers.pandoraReprocessSlicesLambdaCheatShower:     @local::microboone_pandoraShowerCreation
+physics.producers.pandoraReprocessSlicesKaonPass4:           @local::microboone_pandoraReprocessSlices
+physics.producers.pandoraReprocessSlicesKaonPass4Track:      @local::microboone_pandoraTrackCreation
+physics.producers.pandoraReprocessSlicesKaonPass4Shower:     @local::microboone_pandoraShowerCreation
 
-physics.producers.pandoraReprocessSlicesLambdaCheat.SliceModuleLabel: "pandora"
-physics.producers.pandoraReprocessSlicesLambdaCheat.ReprocessForExternalVertex: true
-physics.producers.pandoraReprocessSlicesLambdaCheat.ExternalVertexModuleLabel: "LambdaVertexProducer"
-physics.producers.pandoraReprocessSlicesLambdaCheat.ShouldProduceSlices: true
+physics.producers.pandoraReprocessSlicesKaonPass4.SliceModuleLabel: "pandora"
+physics.producers.pandoraReprocessSlicesKaonPass4.ReprocessForExternalVertex: true
+physics.producers.pandoraReprocessSlicesKaonPass4.ExternalVertexModuleLabel: "KaonVertexProducer"
+physics.producers.pandoraReprocessSlicesKaonPass4.ShouldProduceSlices: true
 
-physics.producers.pandoraReprocessSlicesLambdaCheatTrack.PFParticleLabel: "pandoraReprocessSlicesLambdaCheat"
-physics.producers.pandoraReprocessSlicesLambdaCheatShower.PFParticleLabel: "pandoraReprocessSlicesLambdaCheat"
+physics.producers.pandoraReprocessSlicesKaonPass4Track.PFParticleLabel: "pandoraReprocessSlicesKaonPass4"
+physics.producers.pandoraReprocessSlicesKaonPass4Shower.PFParticleLabel: "pandoraReprocessSlicesKaonPass4"
 
-physics.producers.LambdaVertexProducer: { module_type: "LambdaVertexProducer" }
-physics.producers.LambdaVertexProducer.LambdaCheat: true
-physics.producers.LambdaVertexProducer.TrackLabel: "pandora"
-physics.producers.LambdaVertexProducer.PFParticleLabel: "pandora"
-physics.producers.LambdaVertexProducer.Reco: {
+physics.producers.KaonVertexProducer: { module_type: "KaonVertexProducer" }
+physics.producers.KaonVertexProducer.KaonCheat: false
+physics.producers.KaonVertexProducer.TrackLabel: "pandora"
+physics.producers.KaonVertexProducer.PFParticleLabel: "pandora"
+physics.producers.KaonVertexProducer.PassNo: 0
+physics.producers.KaonVertexProducer.Reco: {
 GeneratorModuleLabel: "generator"
 G4ModuleLabel: "largeant"
 PFParticleModuleLabel: "pandora"
@@ -57,7 +58,7 @@ ShowerHitAssnLabel: "pandora"
 HitTruthAssnLabel: "gaushitTruthMatch"
 }
 
-physics.producers.pandoracaloLambdaCheat: {
+physics.producers.pandoracaloKaonPass4: {
          CaloAlg: {
             CalAmpConstants: [
                5.82554e-4,
@@ -74,14 +75,14 @@ physics.producers.pandoracaloLambdaCheat: {
          }
          CorrectSCE: false
          Flip_dQdx: false
-         SpacePointModuleLabel: "pandoraReprocessSlicesLambdaCheat"
+         SpacePointModuleLabel: "pandoraReprocessSlicesKaonPass4"
          T0ModuleLabel: "mctrutht0"
-         TrackModuleLabel: "pandoraReprocessSlicesLambdaCheatTrack"
+         TrackModuleLabel: "pandoraReprocessSlicesKaonPass4Track"
          UseArea: true
          module_type: "Calorimetry"
       }
 
-physics.producers.pandoracaliLambdaCheat: {
+physics.producers.pandoracaliKaonPass4: {
          CalibrationFileName: "calibration_mcc8.4_v1.root"
          CaloAlg: {
             CalAmpConstants: [
@@ -97,7 +98,7 @@ physics.producers.pandoracaliLambdaCheat: {
             CaloLifeTimeForm: 0
             CaloUseModBox: true
          }
-         CalorimetryModuleLabel: "pandoracaloLambdaCheat"
+         CalorimetryModuleLabel: "pandoracaloKaonPass4"
          Corr_X: [
             "correction_x_plane0",
             "correction_x_plane1",
@@ -113,12 +114,12 @@ physics.producers.pandoracaliLambdaCheat: {
          ForceUnity: true
          ModBoxA: 9.3e-1
          ModBoxB: 2.12e-1
-         TrackModuleLabel: "pandoraReprocessSlicesLambdaCheatTrack"
+         TrackModuleLabel: "pandoraReprocessSlicesKaonPass4Track"
          UseRecoTrackDir: true
          module_type: "CalibrationdEdX"
         }
 
-    physics.producers.pandorapidLambdaCheat: {
+    physics.producers.pandorapidKaonPass4: {
          BraggAlgo: {
             EndPointFloatLong: 2
             EndPointFloatShort: -2
@@ -141,15 +142,15 @@ physics.producers.pandoracaliLambdaCheat: {
             Z_LOW: 10
          }
          ProducerLabels: {
-            CaloTrackAssn: "pandoracaloLambdaCheat"
-            CalorimetryLabel: "pandoracaloLambdaCheat"
+            CaloTrackAssn: "pandoracaloKaonPass4"
+            CalorimetryLabel: "pandoracaloKaonPass4"
             HitLabel: "gaushit"
-            HitTrackAssn: "pandoraReprocessSlicesLambdaCheatTrack"
+            HitTrackAssn: "pandoraReprocessSlicesKaonPass4Track"
             HitTruthAssn: "gaushitTruthMatch"
             ParticleIdLabel: "pid::particleid"
-            TrackLabel: "pandoraReprocessSlicesLambdaCheatTrack"
+            TrackLabel: "pandoraReprocessSlicesKaonPass4Track"
          }
          module_type: "ParticleId"
       }
 
-physics.reco: [ LambdaVertexProducer , pandoraReprocessSlicesLambdaCheat, pandoraReprocessSlicesLambdaCheatTrack, pandoraReprocessSlicesLambdaCheatShower , pandoracaloLambdaCheat , pandoracaliLambdaCheat , pandorapidLambdaCheat ]
+physics.reco: [ KaonVertexProducer , pandoraReprocessSlicesKaonPass4, pandoraReprocessSlicesKaonPass4Track, pandoraReprocessSlicesKaonPass4Shower , pandoracaloKaonPass4 , pandoracaliKaonPass4 , pandorapidKaonPass4 ]

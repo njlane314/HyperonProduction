@@ -173,11 +173,11 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<std::vector<int>> t_Conn_SeedChannels_Plane2;
       std::vector<std::vector<int>> t_Conn_SeedTicks_Plane2;
 
-      std::vector<std::string> t_SysDials;
-      //std::vector<std::vector<double>> t_SysWeights;
-      //std::vector<std::vector<std::string>> t_SysDials;
-      std::vector<std::vector<std::vector<double>>> t_SysWeights;
+      //std::vector<std::string> t_SysDials;
+      //std::vector<std::vector<std::vector<double>>> t_SysWeights;
 
+      std::vector<std::string> t_SysDials;
+      std::vector<std::vector<double>> t_SysWeights;
 
       /////////////////////////
       // Metadata for sample //
@@ -468,7 +468,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
 
    // Systematics weights if requested
-
+/*
    if(!f_IsData){
 
       t_SysWeights.resize(t_NMCTruths);
@@ -527,9 +527,80 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       } // i_w
    } // if not data
+*/
+
+   if(!f_IsData){
+
+      std::vector<std::map<std::string,std::vector<double>>> theweightmap(t_NMCTruths); 
+
+      for(size_t i_w=0;i_w<f_WeightLabels.size();i_w++){
+
+         std::cout << "Getting new weight products with label " << f_WeightLabels.at(i_w) << std::endl;
+
+         art::Handle<std::vector<evwgh::MCEventWeight>> Handle_EventWeight;
+         std::vector<art::Ptr<evwgh::MCEventWeight>> Vect_EventWeight;
+
+         if(!e.getByLabel(f_WeightLabels.at(i_w),Handle_EventWeight)) 
+            throw cet::exception("HyperonNtuples") << "No EventWeight Found!" << std::endl;
+
+         art::fill_ptr_vector(Vect_EventWeight,Handle_EventWeight);
+
+         if(!Vect_EventWeight.size())
+            throw cet::exception("HyperonNtuples") << "Weight vector empty!" << std::endl;
+
+         if(Vect_EventWeight.size() != (size_t)t_NMCTruths)
+            throw cet::exception("HyperonNtuples") << "Weight vector size != NMCTruths" << std::endl;
+
+         for(size_t i_tr=0;i_tr<Vect_EventWeight.size();i_tr++){       
+
+            std::cout << "Getting weights for truth " << i_tr << std::endl;
+
+            std::map<std::string,std::vector<double>> theWeights = Vect_EventWeight.at(i_tr)->fWeight;
+            std::map<std::string,std::vector<double>>::iterator it;
+
+            for(it = theWeights.begin();it != theWeights.end();it++){
+
+               if(it->first ==  "empty") continue;
+
+               bool dial_found=false;
+
+               std::map<std::string,std::vector<double>>::iterator it2;
+               for(it2 = theweightmap.at(i_tr).begin();it2 != theweightmap.at(i_tr).end();it2++){
+                  if(it->first == it2->first){
+                     dial_found = true;
+                     theweightmap.at(i_tr)[it->first].insert(theweightmap.at(i_tr)[it->first].end(),it->second.begin(),it->second.end());
+                  }
+               }
+
+               if(!dial_found)
+                  theweightmap.at(i_tr)[it->first] = it->second;
+
+            }
+         } // i_tr
+      }
+
+      // Organise the weights
+      if(theweightmap.size()){
+         std::map<std::string,std::vector<double>>::iterator it;
+         for(it = theweightmap.at(0).begin();it != theweightmap.at(0).end();it++){
+            std::cout << "Organising weights for dial " << it->first << std::endl;
+
+            t_SysDials.push_back(it->first);
+            t_SysWeights.push_back(it->second);
+
+            for(size_t i_tr=1;i_tr<theweightmap.size();i_tr++){
+               if(theweightmap.at(i_tr).find(it->first) == theweightmap.at(i_tr).end()) 
+                  throw cet::exception("HyperonNtuples") << "Dial " << it->first << " not found in weights for MC truth " << i_tr << std::endl;
+               if(theweightmap.at(i_tr)[it->first].size() != t_SysWeights.back().size())
+                  throw cet::exception("HyperonNtuples") << "Dial " << it->first << " weight vector mismatch" << std::endl;                        
+               for(size_t i_w=0;i_w<t_SysWeights.back().size();i_w++)
+                  t_SysWeights.back().at(i_w) *= theweightmap.at(i_tr)[it->first].at(i_w);
+            }                  
+         }
+      }
+   }
 
    FinishEvent();
-
 }
 
 ///////////////////////////////////////////////////////////////	
@@ -636,8 +707,11 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("ConnSeedChannels_Plane2",&t_Conn_SeedChannels_Plane2);
    OutputTree->Branch("ConnSeedTicks_Plane2",&t_Conn_SeedTicks_Plane2);
 
+   //OutputTree->Branch("SysDials",&t_SysDials);
+   //OutputTree->Branch("SysWeights","vector<vector<vector<double>>>",&t_SysWeights);
+
    OutputTree->Branch("SysDials",&t_SysDials);
-   OutputTree->Branch("SysWeights","vector<vector<vector<double>>>",&t_SysWeights);
+   OutputTree->Branch("SysWeights","vector<vector<double>>",&t_SysWeights);
 
    //////////////////////////////////////////
    //             Metadata Tree	           //
