@@ -63,6 +63,8 @@ class hyperon::KaonVertexProducer : public art::EDProducer {
       bool f_KaonCheat = false;
       fhicl::ParameterSet f_Reco;
       size_t f_PassNo;
+
+      BDTHandle KaonBDT;
 };
 
 
@@ -72,7 +74,8 @@ hyperon::KaonVertexProducer::KaonVertexProducer(fhicl::ParameterSet const& p)
    f_PFParticleLabel(p.get<std::string>("PFParticleLabel","pandora")),
    f_KaonCheat(p.get<bool>("KaonCheat",false)),
    f_Reco(p.get<fhicl::ParameterSet>("Reco")),
-   f_PassNo(p.get<size_t>("PassNo",0))
+   f_PassNo(p.get<size_t>("PassNo",0)),
+   KaonBDT(p.get<std::string>("BDTWeightDir"))
    // More initializers here.
 {
    // Call appropriate produces<>() functions here.
@@ -103,8 +106,9 @@ void hyperon::KaonVertexProducer::produce(art::Event& e)
    else {
       std::sort(RecoD.TrackPrimaryDaughters.begin(),RecoD.TrackPrimaryDaughters.end(),
             [&](RecoParticle A,RecoParticle B) -> bool {
-            return A.Track_LLR_PID_Kaon > B.Track_LLR_PID_Kaon;
-            });
+            //return A.Track_LLR_PID_Kaon > B.Track_LLR_PID_Kaon;
+            return KaonBDT.GetScore(A.Track_LLR_PID_Kaon,A.Track_Bragg_PID_Kaon) > KaonBDT.GetScore(B.Track_LLR_PID_Kaon,B.Track_Bragg_PID_Kaon); 
+          });
 
       if(RecoD.TrackPrimaryDaughters.size() > f_PassNo) tracktouseindex = RecoD.TrackPrimaryDaughters.at(f_PassNo).Index; 
    }    

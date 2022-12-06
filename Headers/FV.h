@@ -3,6 +3,8 @@
 
 #include "TVector3.h"
 
+namespace hyperon {
+
 const std::vector<double> TPCCenter = { 126.625 , 0.97 , 518.5 }; //center of active TPC
 const std::vector<double> TPCSideLengths = { 236.35 , 233.0 , 1036.8 }; //side lengths of active TPC
 
@@ -19,6 +21,8 @@ inline bool inActiveTPC(TVector3 pos){
    if(pos.Y() > FVymax || pos.Y() < FVymin) return false;
    if(pos.Z() > FVzmax || pos.Z() < FVzmin) return false;
    return true;
+}
+
 }
 
 //DEPRECATED
@@ -64,11 +68,8 @@ if(pos.at(2) > FVzmax || pos.at(2) < FVzmin) return false;
 if(pos.at(2) < 	deadzmax && pos.at(2) > deadzmin) return false;
 
 	return true;
-
-
 }
 */
-
 
 #endif
 

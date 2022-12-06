@@ -243,6 +243,11 @@ hyperon::HyperonNtuples::HyperonNtuples(fhicl::ParameterSet const& p)
       std::cout << "Getting weights from data products with tags:" << std::endl;
       for(size_t i=0;i<f_WeightLabels.size();i++) std::cout << f_WeightLabels.at(i) << std::endl;
    }
+
+   if(f_Reco.get<bool>("IncludeCosmics",false) && f_GetConnInfo)
+      std::cout << std::endl << "HyperonNTuples WARNING: Requesting connectedness information with cosmics included. This will take a very long time." << std::endl
+                << "Set GetConnInfo fhicl parameter to false disable connectedness" << std::endl << std::endl;
+      
 }
 
 void hyperon::HyperonNtuples::analyze(art::Event const& e)
@@ -345,7 +350,6 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_NMCTruths = GenT.NMCTruths;
       t_NMCTruthsInTPC = GenT.NMCTruthsInTPC;
       t_Neutrino = GenT.Neutrino;
-      //t_TruePrimaryVertex = GenT.TruePrimaryVertex;
       t_TruePrimaryVertex_X = GenT.TruePrimaryVertex_X;
       t_TruePrimaryVertex_Y = GenT.TruePrimaryVertex_Y;
       t_TruePrimaryVertex_Z = GenT.TruePrimaryVertex_Z;
@@ -383,7 +387,6 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_KaonDecay = G4T.KaonDecay;
       t_SigmaZeroDecayPhoton = G4T.SigmaZeroDecayPhoton;
       t_SigmaZeroDecayLambda = G4T.SigmaZeroDecayLambda;
-      // t_DecayVertex = G4T.DecayVertex;
       t_DecayVertex_X = G4T.DecayVertex_X;
       t_DecayVertex_Y = G4T.DecayVertex_Y;
       t_DecayVertex_Z = G4T.DecayVertex_Z;
@@ -392,18 +395,12 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_IsSignalSigmaZero.resize(t_NMCTruths);
 
       for(int i_t=0;i_t<t_NMCTruths;i_t++){
-         if(t_Mode.at(i_t) == "HYP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == -14 && t_IsLambdaCharged.at(i_t) && !t_IsAssociatedHyperon.at(i_t)) t_IsSignal[i_t] = true;
-         else t_IsSignal[i_t] = false;
-
-         if(t_Mode.at(i_t) == "HYP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == -14 && t_IsSigmaZeroCharged.at(i_t) && !t_IsAssociatedHyperon.at(i_t)) t_IsSignalSigmaZero[i_t] = true;
-         else t_IsSignalSigmaZero[i_t] = false;
+         t_IsSignal[i_t] = t_Mode.at(i_t) == "HYP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == -14 && t_IsLambdaCharged.at(i_t) && !t_IsAssociatedHyperon.at(i_t);
+         t_IsSignalSigmaZero[i_t] = t_Mode.at(i_t) == "HYP" && t_InActiveTPC.at(i_t) && t_Neutrino.at(i_t).PDG == -14 && t_IsSigmaZeroCharged.at(i_t) && !t_IsAssociatedHyperon.at(i_t);
       }
-
-      //t_IsSignal = t_Neutrino.size() == 1 && t_Mode.at(0) == "HYP" && t_Neutrino.at(0).PDG == -14 && t_IsLambdaCharged;
 
       delete G4_SM;
    }
-
 
    // Reconstructed Info
 
@@ -645,9 +642,7 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("event",&t_event);
 
    OutputTree->Branch("Weight",&t_Weight);
-   //OutputTree->Branch("Mode",&t_Mode);
    OutputTree->Branch("Mode","vector<string>",&t_Mode);
-   //OutputTree->Branch("CCNC",&t_CCNC);
    OutputTree->Branch("CCNC","vector<string>",&t_CCNC);
    OutputTree->Branch("NMCTruths",&t_NMCTruths);
    OutputTree->Branch("NMCTruthsInTPC",&t_NMCTruthsInTPC);
@@ -722,7 +717,6 @@ void hyperon::HyperonNtuples::beginJob(){
    m_NSignal=0;
    m_NSignalSigmaZero=0;
    m_NGoodReco=0;
-
    m_POT=0;
 
    MetaTree=tfs->make<TTree>("MetaTree","Metadata Info Tree");
@@ -736,9 +730,8 @@ void hyperon::HyperonNtuples::beginJob(){
    MetaTree->Branch("POT",&m_POT);
 
    if(f_Debug) std::cout << "Finished begin job" << std::endl;
+
 }
-
-
 
 void hyperon::HyperonNtuples::endJob()
 {

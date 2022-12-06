@@ -8,7 +8,6 @@
 #include "Geometry.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 
-
 namespace searchingfornues
 {
 

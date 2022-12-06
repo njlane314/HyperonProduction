@@ -71,37 +71,5 @@ physics.analyzers.ana.RecoRepass: [
                     TrackModuleLabel: "pandoraReprocessSlicesKaonPass1Track"
                     VertexModuleLabel: "pandoraReprocessSlicesKaonPass1"
                     DoGetPIDs: true
-                   },
-                    {
-                    CaloModuleLabel: "pandoracali"
-                    G4ModuleLabel: "largeant"
-                    GeneratorModuleLabel: "generator"
-                    HitModuleLabel: "gaushit"
-                    HitTruthAssnLabel: "gaushitTruthMatch"
-                    MetadataModuleLabel: "pandoraReprocessSlicesKaonPass2"
-                    PFParticleModuleLabel: "pandoraReprocessSlicesKaonPass2"
-                    PIDModuleLabel: "pandorapidKaonPass2"
-                    ShowerHitAssnLabel: "pandoraReprocessSlicesKaonPass2Shower"
-                    ShowerModuleLabel: "pandoraReprocessSlicesKaonPass2Shower"
-                    TrackHitAssnLabel: "pandoraReprocessSlicesKaonPass2Track"
-                    TrackModuleLabel: "pandoraReprocessSlicesKaonPass2Track"
-                    VertexModuleLabel: "pandoraReprocessSlicesKaonPass2"
-                    DoGetPIDs: true
-                   },
-                    {
-                    CaloModuleLabel: "pandoracali"
-                    G4ModuleLabel: "largeant"
-                    GeneratorModuleLabel: "generator"
-                    HitModuleLabel: "gaushit"
-                    HitTruthAssnLabel: "gaushitTruthMatch"
-                    MetadataModuleLabel: "pandoraReprocessSlicesKaonPass3"
-                    PFParticleModuleLabel: "pandoraReprocessSlicesKaonPass3"
-                    PIDModuleLabel: "pandorapidKaonPass3"
-                    ShowerHitAssnLabel: "pandoraReprocessSlicesKaonPass3Shower"
-                    ShowerModuleLabel: "pandoraReprocessSlicesKaonPass3Shower"
-                    TrackHitAssnLabel: "pandoraReprocessSlicesKaonPass3Track"
-                    TrackModuleLabel: "pandoraReprocessSlicesKaonPass3Track"
-                    VertexModuleLabel: "pandoraReprocessSlicesKaonPass3"
-                    DoGetPIDs: true
                    }
 ]

@@ -66,7 +66,7 @@ class SubModuleG4Truth {
 
    public:
 
-      SubModuleG4Truth();
+      //SubModuleG4Truth();
       SubModuleG4Truth(art::Event const& e,std::string genlabel,std::string g4label);
       SubModuleG4Truth(art::Event const& e,fhicl::ParameterSet pset);
 

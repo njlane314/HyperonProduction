@@ -54,6 +54,7 @@ art_make(
       ${ROOT_GDML}
       ${ROOT_BASIC_LIB_LIST}
       uboonecode_uboone_EventConnectedness
+      ${ROOT_TMVA}
 
       DICT_LIBRARIES
       ${ROOT_BASIC_LIB_LIST}

@@ -7,7 +7,9 @@ using namespace hyperon;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SubModuleReco::SubModuleReco(){}
+//SubModuleReco::SubModuleReco(){}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset) :
 SubModuleReco(e,isdata,
@@ -23,7 +25,8 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("MetadataModuleLabel"),
                   pset.get<std::string>("GeneratorModuleLabel"),
                   pset.get<std::string>("G4ModuleLabel"),
-                  pset.get<bool>("DoGetPIDs",true))
+                  pset.get<bool>("DoGetPIDs",true),
+                  pset.get<bool>("IncludeCosmics",false))
 {
 
 }
@@ -32,11 +35,11 @@ SubModuleReco(e,isdata,
 
 SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                                      string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                                     string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,string g4label,bool dogetpids) :
+                                     string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
+                                     string g4label,bool dogetpids,bool includecosmics) :
 PIDCalc(),
-//LLRPIDCalc(),
-//dEdXCalc(),
-DoGetPIDs(dogetpids)
+DoGetPIDs(dogetpids),
+IncludeCosmics(includecosmics)
 {
 
    IsData = isdata;
@@ -99,7 +102,6 @@ DoGetPIDs(dogetpids)
       G4T->GetParticleLists();
    }
 
-   //PFP_IDs.clear();
    m_PFPID_TrackIndex.clear(); 
 }
 
@@ -110,23 +112,24 @@ void SubModuleReco::PrepareInfo(){
    theData.RecoPrimaryVertex = GetPrimaryVertex();
 
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
-      //if(pfp->Parent() != neutrinoID && std::find(PFP_IDs.begin(),PFP_IDs.end(),pfp->Parent()) == PFP_IDs.end()) continue;
-      if(pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
+      if(!IncludeCosmics && pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
       RecoParticle P = MakeRecoParticle(pfp);
-      if(pfp->Parent() == neutrinoID) P.Parentage = 1;
-      else {
+      
+      if(pfp->Parent() == neutrinoID){
+         P.Parentage = 1;
+         P.InNuSlice = true;         
+      }
+      else if(m_PFPID_TrackIndex.find(pfp->Parent()) != m_PFPID_TrackIndex.end()){         
          P.Parentage = 2; 
          P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
       }
+
       if(P.PDG == 13){
          theData.TrackPrimaryDaughters.push_back(P);
-         m_PFPID_TrackIndex[pfp->Self()] = P.Index;
+         if(P.InNuSlice) m_PFPID_TrackIndex[pfp->Self()] = P.Index;
       }
       else if(P.PDG == 11) theData.ShowerPrimaryDaughters.push_back(P);      
    }
-
-//   for(size_t i_tr=0;i_tr<theData.TrackPrimaryDaughters.size();i_tr++) theData.TrackPrimaryDaughters[i_tr].Index = i_tr; 
-//   for(size_t i_sh=0;i_sh<theData.ShowerPrimaryDaughters.size();i_sh++) theData.ShowerPrimaryDaughters[i_sh].Index = i_sh; 
 
    theData.NPrimaryDaughters = theData.TrackPrimaryDaughters.size() + theData.ShowerPrimaryDaughters.size();
    theData.NPrimaryTrackDaughters = theData.TrackPrimaryDaughters.size();
@@ -170,7 +173,7 @@ TVector3 SubModuleReco::GetPrimaryVertex(){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RecoParticle SubModuleReco::MakeRecoParticle(art::Ptr<recob::PFParticle> pfp){
+RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> pfp){
 
    RecoParticle P;
 
@@ -194,7 +197,7 @@ RecoParticle SubModuleReco::MakeRecoParticle(art::Ptr<recob::PFParticle> pfp){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetPFPMetadata(art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
+void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
 
    std::vector<art::Ptr<larpandoraobj::PFParticleMetadata>> pfpMeta = Assoc_PFParticleMetadata->at(pfp.key());
 
@@ -215,7 +218,7 @@ void SubModuleReco::GetPFPMetadata(art::Ptr<recob::PFParticle> pfp,RecoParticle 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetTrackData(art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
+void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
 
    std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
 
@@ -297,7 +300,7 @@ void SubModuleReco::TruthMatch(art::Ptr<recob::Track> trk,RecoParticle &P){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetPIDs(art::Ptr<recob::Track> trk,RecoParticle &P){
+void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> trk,RecoParticle &P){
 
    std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
    std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
@@ -415,7 +418,7 @@ void SubModuleReco::GetPIDs(art::Ptr<recob::Track> trk,RecoParticle &P){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetVertexData(art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
+void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
 
    std::vector<art::Ptr<recob::Vertex>> pfpVertex = Assoc_PFParticleVertex->at(pfp.key());
 

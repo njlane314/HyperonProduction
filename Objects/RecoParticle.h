@@ -22,6 +22,7 @@ RecoParticle(){}
 ~RecoParticle(){}
 
 int Index;
+bool InNuSlice = false;
 
 // General reco info
 int PDG; // Pandora PDG code (11 or 13)
@@ -43,6 +44,7 @@ double Track_LLR_PID_Kaon; // LLR PID with Kaon hypothesis
 double Track_LLR_PID_Kaon_Partial; // LLR PID with Kaon hypothesis using last 5cm of track
 double Track_Bragg_PID_Kaon;
 double ProtonMomentum,MuonMomentum,KaonMomentum; // Track kinematics
+double TrackWiggliness;
 
 // Truth info
 bool HasTruth; // False if reco particle has no corresponding MC particle

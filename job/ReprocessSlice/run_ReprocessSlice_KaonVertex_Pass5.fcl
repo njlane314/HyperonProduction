@@ -41,7 +41,8 @@ physics.producers.KaonVertexProducer: { module_type: "KaonVertexProducer" }
 physics.producers.KaonVertexProducer.KaonCheat: false
 physics.producers.KaonVertexProducer.TrackLabel: "pandora"
 physics.producers.KaonVertexProducer.PFParticleLabel: "pandora"
-physics.producers.KaonVertexProducer.PassNo: 0
+physics.producers.KaonVertexProducer.PassNo: 5
+physics.producers.KaonVertexProducer.BDTWeightDir: "HyperonProduction/KaonBDT"
 physics.producers.KaonVertexProducer.Reco: {
 GeneratorModuleLabel: "generator"
 G4ModuleLabel: "largeant"
