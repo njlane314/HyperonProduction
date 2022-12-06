@@ -262,7 +262,7 @@ void SubModuleG4Truth::GetSigmaZeroDecay(){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::vector<int> SubModuleG4Truth::GetChildIDs(art::Ptr<simb::MCParticle> g4p,bool IsNeutron){
+std::vector<int> SubModuleG4Truth::GetChildIDs(const art::Ptr<simb::MCParticle> &g4p,bool IsNeutron){
 
    std::vector<int> DecayProduct_IDs;
 

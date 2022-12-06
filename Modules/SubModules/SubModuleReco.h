@@ -95,7 +95,7 @@ class SubModuleReco {
       art::Handle<std::vector<recob::Hit>> Handle_Hit;
       std::vector<art::Ptr<recob::Hit>> Vect_Hit;
 
-      RecoParticle MakeRecoParticle(art::Ptr<recob::PFParticle> pfp);
+      RecoParticle MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp);
 
       art::FindManyP<recob::Vertex>* Assoc_PFParticleVertex;
       art::FindManyP<recob::Track>* Assoc_PFParticleTrack;
@@ -120,11 +120,11 @@ class SubModuleReco {
       size_t neutrinoID = 99999;
       std::map<size_t,int> m_PFPID_TrackIndex;
 
-      void GetPFPMetadata(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P);
-      void GetTrackData(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P);
-      void TruthMatch(const art::Ptr<recob::Track> trk,RecoParticle &P);
-      void GetPIDs(const art::Ptr<recob::Track> trk,RecoParticle &P);
-      void GetVertexData(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P);
+      void GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      void GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);
+      void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);
+      void GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
 
       bool IsData;
       bool DoGetPIDs=true;

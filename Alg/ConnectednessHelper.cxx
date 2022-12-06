@@ -3,6 +3,8 @@
 
 #include "ConnectednessHelper.h"
 
+using namespace hyperon;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ConnectednessHelper::ConnectednessHelper(bool draw) :
@@ -192,8 +194,6 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunTest(){
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CTOutcome ConnectednessHelper::PrepareAndTestEvent(art::Event const& e,std::string wirelabel,std::vector<TVector3> trackstarts){
-
-   
  
    CTOutcome theOutcome;
    
@@ -219,7 +219,6 @@ CTOutcome ConnectednessHelper::PrepareAndTestEvent(art::Event const& e,std::stri
    // Vector containing the result for each combintation of three tracks
    //std::cout << "Running test" << std::endl;
    std::vector<CTSingleOutcome> Outcomes = RunTest(); 
-
 
    // iterate over each combination of three tracks, store the result
    for(size_t i=0;i<Outcomes.size();i++){

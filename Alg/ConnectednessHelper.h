@@ -18,6 +18,8 @@
 
 #include "TVector3.h"
 
+namespace hyperon {
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Wiremap {
@@ -138,7 +140,6 @@ class ConnectednessHelper {
       bool Draw=false;
       std::string rse;
 
-
       Wiremap WM_Plane0;
       Wiremap WM_Plane1;
       Wiremap WM_Plane2;
@@ -154,5 +155,7 @@ class ConnectednessHelper {
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+}
 
 #endif

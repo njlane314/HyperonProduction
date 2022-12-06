@@ -103,7 +103,7 @@ class SubModuleG4Truth {
 
       std::map<int,art::Ptr<simb::MCParticle>> partByID;
 
-      std::vector<int> GetChildIDs(art::Ptr<simb::MCParticle> g4p,bool IsNeutron=false);
+      std::vector<int> GetChildIDs(const art::Ptr<simb::MCParticle> &g4p,bool IsNeutron=false);
 
       double NeutronScatterProtonThresh = 0.15;
       double NeutronScatterPionThresh = 0.05;

@@ -173,7 +173,7 @@ TVector3 SubModuleReco::GetPrimaryVertex(){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> pfp){
+RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp){
 
    RecoParticle P;
 
@@ -197,7 +197,7 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> p
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
+void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
 
    std::vector<art::Ptr<larpandoraobj::PFParticleMetadata>> pfpMeta = Assoc_PFParticleMetadata->at(pfp.key());
 
@@ -218,7 +218,7 @@ void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> pfp,RecoPar
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
+void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
 
    std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
 
@@ -239,7 +239,7 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> pfp,RecoParti
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::TruthMatch(art::Ptr<recob::Track> trk,RecoParticle &P){
+void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
    std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
 
@@ -300,7 +300,7 @@ void SubModuleReco::TruthMatch(art::Ptr<recob::Track> trk,RecoParticle &P){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> trk,RecoParticle &P){
+void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
 
    std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
    std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
@@ -418,7 +418,7 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> trk,RecoParticle &P){
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> pfp,RecoParticle &P){
+void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
 
    std::vector<art::Ptr<recob::Vertex>> pfpVertex = Assoc_PFParticleVertex->at(pfp.key());
 
