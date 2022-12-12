@@ -41,6 +41,7 @@
 //#include "ubana/HyperonProduction/Alg/LLRPIDHelper.h"
 //#include "ubana/HyperonProduction/Alg/MeandEdXCalculator.h"
 #include "ubana/ParticleID/Algorithms/uB_PlaneIDBitsetHelperFunctions.h"
+#include "ubana/HyperonProduction/Headers/TrackWiggliness.h"
 
 //root includes
 #include "TTree.h"
@@ -139,6 +140,7 @@ class hyperon::KaonDecay : public art::EDAnalyzer {
       std::vector<double> t_TrackLLRPID;
       std::vector<double> t_TrackLLRPID_Kaon;
       std::vector<double> t_TrackLLRPID_Kaon_Partial;
+      std::vector<double> t_TrackWiggliness;
  
       //////////////////////////
       //   FHICL PARAMETERS   //
@@ -241,6 +243,7 @@ void hyperon::KaonDecay::analyze(art::Event const& e)
    t_TrackLLRPID.clear();
    t_TrackLLRPID_Kaon.clear();
    t_TrackLLRPID_Kaon_Partial.clear();
+   t_TrackWiggliness.clear();
    
    // General Event Info
 
@@ -441,6 +444,7 @@ void hyperon::KaonDecay::analyze(art::Event const& e)
         t_TrackLLRPID.push_back(store.LLR);
         t_TrackLLRPID_Kaon.push_back(store.LLR_Kaon);
         t_TrackLLRPID_Kaon_Partial.push_back(store.LLR_Kaon_Partial);
+        t_TrackWiggliness.push_back(GetTrackWiggliness(trk));
    }  
  
    OutputTree->Fill();
@@ -521,6 +525,7 @@ void hyperon::KaonDecay::beginJob(){
    OutputTree->Branch("TrackLLRPID",&t_TrackLLRPID);
    OutputTree->Branch("TrackLLRPID_Kaon",&t_TrackLLRPID_Kaon);
    OutputTree->Branch("TrackLLRPID_Kaon_Partial",&t_TrackLLRPID_Kaon_Partial); 
+   OutputTree->Branch("TrackWiggliness",&t_TrackWiggliness);
 
    if(f_Debug) std::cout << "Finished begin job" << std::endl;
 }
