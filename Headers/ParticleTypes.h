@@ -13,7 +13,7 @@ inline bool isLepton(int pdg){ return abs(pdg) == 11 || abs(pdg) == 13 || abs(pd
 
 inline bool isNeutrino(int pdg){ return abs(pdg) == 12 || abs(pdg) == 14 || abs(pdg) == 16; }
 
-inline bool isKaon(int pdg){ return abs(pdg) == 321 || pdg == 311; }
+inline bool isKaon(int pdg){ return abs(pdg) == 321 || abs(pdg) == 311 || abs(pdg) == 130 || abs(pdg) == 310; }
 
 }
 

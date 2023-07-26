@@ -49,12 +49,17 @@ struct G4Truth {
    std::vector<SimParticle> PrimaryNucleon;
    std::vector<SimParticle> PrimaryPion;
    std::vector<SimParticle> PrimaryKaon;
+   std::vector<SimParticle> PrimaryNucleus;
    std::vector<SimParticle> Decay;
    std::vector<SimParticle> KaonDecay;
    std::vector<SimParticle> SigmaZeroDecayPhoton;
    std::vector<SimParticle> SigmaZeroDecayLambda;
 
    //TVector3 DecayVertex;
+
+   std::vector<double> TruePrimaryVertex_X;
+   std::vector<double> TruePrimaryVertex_Y;
+   std::vector<double> TruePrimaryVertex_Z;
    
    std::vector<double> DecayVertex_X;
    std::vector<double> DecayVertex_Y;
@@ -67,8 +72,8 @@ class SubModuleG4Truth {
    public:
 
       //SubModuleG4Truth();
-      SubModuleG4Truth(art::Event const& e,std::string genlabel,std::string g4label);
-      SubModuleG4Truth(art::Event const& e,fhicl::ParameterSet pset);
+      SubModuleG4Truth(art::Event const& e,std::string genlabel,std::string g4label,bool particlegunmode=false);
+      SubModuleG4Truth(art::Event const& e,fhicl::ParameterSet pset,bool particlegunmode=false);
 
       void GetParticleLists();
       G4Truth GetG4Info();
@@ -114,6 +119,9 @@ class SubModuleG4Truth {
       G4Truth theTruth;
 
       int NMCTruths;
+       
+      const bool ParticleGunMode;
+
 };
 
 }

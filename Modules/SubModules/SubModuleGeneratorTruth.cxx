@@ -7,7 +7,9 @@ using namespace hyperon;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SubModuleGeneratorTruth::SubModuleGeneratorTruth(art::Event const& e,fhicl::ParameterSet pset){
+SubModuleGeneratorTruth::SubModuleGeneratorTruth(art::Event const& e,fhicl::ParameterSet pset,bool particlegunmode) :
+ParticleGunMode(particlegunmode)
+{
 
    if(!e.getByLabel(pset.get<std::string>("GeneratorModuleLabel","generator"),Handle_MCTruth))  
       throw cet::exception("SubModuleGeneratorTruth") << "No MC Truth data product!" << std::endl;
@@ -15,6 +17,7 @@ SubModuleGeneratorTruth::SubModuleGeneratorTruth(art::Event const& e,fhicl::Para
    art::fill_ptr_vector(Vect_MCTruth,Handle_MCTruth);  
 
    HyperonPDGs = pset.get<std::vector<int>>("HyperonPDGs",{3122,3212,3112,3222});
+    
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,13 +60,6 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
          //if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) 
          // theTruth.TruePrimaryVertex.SetXYZ(Part.Vx(),Part.Vy(),Part.Vz());
 
-         if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) {
-            theTruth.TruePrimaryVertex_X.push_back(Part.Vx());
-            theTruth.TruePrimaryVertex_Y.push_back(Part.Vy());
-            theTruth.TruePrimaryVertex_Z.push_back(Part.Vz());
-            if(inActiveTPC(TVector3(Part.Vx(),Part.Vy(),Part.Vz()))) theTruth.NMCTruthsInTPC++;
-         }
-
          if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){
             SimParticle P = MakeSimParticle(Part);
             P.Origin = 0;
@@ -73,19 +69,27 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
 
          // If there is a hyperon in the final state in a QEL event, change mode to HYP
          if(isHyperon(Part.PdgCode()) && Part.StatusCode() == 1 && mode == 0) theTruth.Mode.back() = "HYP";
-          
+
          if(Part.StatusCode() == 1 && Part.PdgCode() == 2112) theTruth.EventHasFinalStateNeutron = true;
          if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode()) && std::find(HyperonPDGs.begin(),HyperonPDGs.end(),abs(Part.PdgCode())) != HyperonPDGs.end()){
             theTruth.EventHasHyperon = true;
          }
+         
+         if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) {
+            theTruth.TruePrimaryVertex_X.push_back(Part.Vx());
+            theTruth.TruePrimaryVertex_Y.push_back(Part.Vy());
+            theTruth.TruePrimaryVertex_Z.push_back(Part.Vz());
+            if(inActiveTPC(TVector3(Part.Vx(),Part.Vy(),Part.Vz()))) theTruth.NMCTruthsInTPC++;
+         }
+
       }
 
       i_truth++;
    }
 
-      if(theTruth.Neutrino.size() != Vect_MCTruth.size())         
-         throw cet::exception("SubModuleGeneratorTruth") << "Sim Neutrino/MCTruth vector size mismatch" << std::endl;
-    
+   if(!ParticleGunMode && theTruth.Neutrino.size() != Vect_MCTruth.size())         
+      throw cet::exception("SubModuleGeneratorTruth") << "Sim Neutrino/MCTruth vector size mismatch" << std::endl;
+
    return theTruth;
 }
 

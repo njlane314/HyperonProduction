@@ -11,7 +11,9 @@ using namespace hyperon;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SubModuleG4Truth::SubModuleG4Truth(art::Event const& e,std::string genlabel,std::string g4label){
+SubModuleG4Truth::SubModuleG4Truth(art::Event const& e,std::string genlabel,std::string g4label,bool particlegunmode) :
+ParticleGunMode(particlegunmode)
+{
 
    if(!e.getByLabel(genlabel,Handle_MCTruth))  
       throw cet::exception("SubModuleG4Truth") << "No MC Truth data product!" << std::endl;
@@ -29,10 +31,11 @@ SubModuleG4Truth::SubModuleG4Truth(art::Event const& e,std::string genlabel,std:
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SubModuleG4Truth::SubModuleG4Truth(art::Event const& e,fhicl::ParameterSet pset) :
+SubModuleG4Truth::SubModuleG4Truth(art::Event const& e,fhicl::ParameterSet pset,bool particlegunmode) :
    SubModuleG4Truth(e,
          pset.get<std::string>("GeneratorModuleLabel","generator"),
-         pset.get<std::string>("G4ModuleLabel","largeant"))
+         pset.get<std::string>("G4ModuleLabel","largeant"),
+         particlegunmode)
 {
    SetNeutronScatterThresholds(pset.get<double>("NeutronScatterProtonThresh",0.15),pset.get<double>("NeutronScatterPionThresh",0.05));
    SetDecayThresholds(pset.get<double>("DecayProtonThresh",0.0),pset.get<double>("DecayPionThresh",0.0));
@@ -83,18 +86,32 @@ void SubModuleG4Truth::GetParticleLists(){
 
    // Set list of Primary vertices for matching to multiple MCTruths
    for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){         
-      for(int k_particles=0;k_particles<theMCTruth->NParticles();k_particles++){
-         simb::MCParticle Part = theMCTruth->GetParticle(k_particles);
-         if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){ 
-            PrimaryVertices.push_back(TVector3(Part.Vx(),Part.Vy(),Part.Vz()));
+      if(!ParticleGunMode){
+         for(int k_particles=0;k_particles<theMCTruth->NParticles();k_particles++){
+            simb::MCParticle Part = theMCTruth->GetParticle(k_particles);
+            if(isNeutrino(Part.PdgCode()) && Part.StatusCode() == 0){ 
+               PrimaryVertices.push_back(TVector3(Part.Vx(),Part.Vy(),Part.Vz()));
+               theTruth.TruePrimaryVertex_X.push_back(Part.Vx());
+               theTruth.TruePrimaryVertex_Y.push_back(Part.Vy());
+               theTruth.TruePrimaryVertex_Z.push_back(Part.Vz());
+            }
          }
       }       
+      else if(theMCTruth->NParticles()){
+         PrimaryVertices.push_back(TVector3(theMCTruth->GetParticle(0).Vx(),theMCTruth->GetParticle(0).Vy(),theMCTruth->GetParticle(0).Vz()));
+         theTruth.TruePrimaryVertex_X.push_back(theMCTruth->GetParticle(0).Vx());
+         theTruth.TruePrimaryVertex_Y.push_back(theMCTruth->GetParticle(0).Vy());
+         theTruth.TruePrimaryVertex_Z.push_back(theMCTruth->GetParticle(0).Vz());
+      }
+      else if(theMCTruth->NParticles() == 0)
+         throw cet::exception("SubModuleG4Truth") << "MCTruth made with particle gun contains no particles!" << std::endl;
    }
 
    NMCTruths = Vect_MCTruth.size();
 
-   if(PrimaryVertices.size() != Vect_MCTruth.size())         
+   if(/*!ParticleGun &&*/ PrimaryVertices.size() != Vect_MCTruth.size())         
       throw cet::exception("SubModuleG4Truth") << "Vertex/MCTruth vector size mismatch" << std::endl;
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +173,7 @@ void SubModuleG4Truth::GetPrimaryParticles(){
       art::Ptr<simb::MCParticle> part = partByID[Primary_IDs.at(i_p)];
 
       // Anything with very large pdg code is a nucleus, skip these
-      if(part->PdgCode() > 10000) continue;
+      //if(part->PdgCode() > 10000) continue;
 
       SimParticle P = MakeSimParticle(*part);
       P.Origin = 1;
@@ -165,12 +182,21 @@ void SubModuleG4Truth::GetPrimaryParticles(){
       //hyperon produced at primary vertex
       if(isHyperon(part->PdgCode()))
          theTruth.Hyperon.push_back(P);
-      
+
+      if(part->PdgCode() == 311){
+        TLorentzVector diff = part->Position() - part->EndPosition();
+        double travel = TVector3(diff.X(),diff.Y(),diff.Z()).Mag();
+        std::cout << part->EndProcess() << "  " << part->NumberDaughters() << "  " << travel << std::endl;
+        
+      }      
+
       if(isLepton(part->PdgCode()) || isNeutrino(part->PdgCode())) theTruth.Lepton.push_back(P);
       if(isNucleon(part->PdgCode())) theTruth.PrimaryNucleon.push_back(P);
       if(isPion(part->PdgCode())) theTruth.PrimaryPion.push_back(P);
       if(isKaon(part->PdgCode())) theTruth.PrimaryKaon.push_back(P);
+      if(part->PdgCode() > 10000) theTruth.PrimaryNucleus.push_back(P);
    }
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

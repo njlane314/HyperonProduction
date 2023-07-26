@@ -11,7 +11,7 @@ using namespace hyperon;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset) :
+SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode) :
 SubModuleReco(e,isdata,
                   pset.get<std::string>("PFParticleModuleLabel"),
                   pset.get<std::string>("TrackModuleLabel"),
@@ -26,7 +26,8 @@ SubModuleReco(e,isdata,
                   pset.get<std::string>("GeneratorModuleLabel"),
                   pset.get<std::string>("G4ModuleLabel"),
                   pset.get<bool>("DoGetPIDs",true),
-                  pset.get<bool>("IncludeCosmics",false))
+                  pset.get<bool>("IncludeCosmics",false),
+                  particlegunmode)
 {
 
 }
@@ -36,10 +37,11 @@ SubModuleReco(e,isdata,
 SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                                      string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
                                      string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
-                                     string g4label,bool dogetpids,bool includecosmics) :
+                                     string g4label,bool dogetpids,bool includecosmics,bool particlegunmode) :
 PIDCalc(),
 DoGetPIDs(dogetpids),
-IncludeCosmics(includecosmics)
+IncludeCosmics(includecosmics),
+ParticleGunMode(particlegunmode)
 {
 
    IsData = isdata;
@@ -98,7 +100,7 @@ IncludeCosmics(includecosmics)
    llr_pid_calculator_kaon.set_lookup_tables(2, kaonproton_parameters.dedx_pdf_pl_2);
 
    if(!IsData){
-      G4T = new SubModuleG4Truth(e,genlabel,g4label);
+      G4T = new SubModuleG4Truth(e,genlabel,g4label,ParticleGunMode);
       G4T->GetParticleLists();
    }
 

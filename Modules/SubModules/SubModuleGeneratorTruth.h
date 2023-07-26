@@ -42,7 +42,7 @@ class SubModuleGeneratorTruth {
 
 public:
 
-   SubModuleGeneratorTruth(art::Event const& e,fhicl::ParameterSet pset);
+   SubModuleGeneratorTruth(art::Event const& e,fhicl::ParameterSet pset,bool particlegunmode=false);
    GeneratorTruth GetGeneratorTruth();
 
 private:
@@ -52,6 +52,7 @@ private:
    GeneratorTruth theTruth;
 
    std::vector<int> HyperonPDGs = {3122,3212,3112,3222};
+   const bool ParticleGunMode;
 };
 
 }

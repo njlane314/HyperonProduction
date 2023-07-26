@@ -125,6 +125,7 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<SimParticle> t_PrimaryNucleon;
       std::vector<SimParticle> t_PrimaryPion;
       std::vector<SimParticle> t_PrimaryKaon; 
+      std::vector<SimParticle> t_PrimaryNucleus; 
       std::vector<SimParticle> t_Decay; 
       std::vector<SimParticle> t_SigmaZeroDecayPhoton;
       std::vector<SimParticle> t_SigmaZeroDecayLambda;
@@ -208,6 +209,7 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<art::InputTag> f_WeightLabels;
       std::string f_POTSummaryLabel;
 
+      bool f_ParticleGun = false;
       bool f_IsData;
       bool f_Debug = false;
 
@@ -235,6 +237,7 @@ hyperon::HyperonNtuples::HyperonNtuples(fhicl::ParameterSet const& p)
    f_WireLabel(p.get<std::string>("WireLabel")),
    f_WeightLabels(p.get<std::vector<art::InputTag>>("WeightCalculators",{})),
    f_POTSummaryLabel(p.get<std::string>("POTSummaryLabel")),
+   f_ParticleGun(p.get<bool>("ParticleGun",false)),
    f_IsData(p.get<bool>("IsData")),
    f_Debug(p.get<bool>("Debug",false)),
    Conn_Helper(p.get<bool>("DrawConnectedness",false))   // ,
@@ -283,6 +286,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_PrimaryNucleon.clear();
    t_PrimaryPion.clear();
    t_PrimaryKaon.clear();
+   t_PrimaryNucleus.clear();
    t_Decay.clear();
    t_KaonDecay.clear();
    t_SigmaZeroDecayPhoton.clear();
@@ -341,7 +345,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       if(f_Debug) std::cout << "Getting EG Info" << std::endl;
 
-      SubModuleGeneratorTruth* Generator_SM = new SubModuleGeneratorTruth(e,f_Generator);
+      SubModuleGeneratorTruth* Generator_SM = new SubModuleGeneratorTruth(e,f_Generator,f_ParticleGun);
       GeneratorTruth GenT = Generator_SM->GetGeneratorTruth();
 
       t_Weight *= GenT.Weight;
@@ -350,9 +354,9 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_NMCTruths = GenT.NMCTruths;
       t_NMCTruthsInTPC = GenT.NMCTruthsInTPC;
       t_Neutrino = GenT.Neutrino;
-      t_TruePrimaryVertex_X = GenT.TruePrimaryVertex_X;
-      t_TruePrimaryVertex_Y = GenT.TruePrimaryVertex_Y;
-      t_TruePrimaryVertex_Z = GenT.TruePrimaryVertex_Z;
+      //t_TruePrimaryVertex_X = GenT.TruePrimaryVertex_X;
+      //t_TruePrimaryVertex_Y = GenT.TruePrimaryVertex_Y;
+      //t_TruePrimaryVertex_Z = GenT.TruePrimaryVertex_Z;
 
       t_EventHasFinalStateNeutron = GenT.EventHasFinalStateNeutron;
 
@@ -365,9 +369,11 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       if(f_Debug) std::cout << "Getting G4 Info" << std::endl;
 
-      SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4);
+      SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4,f_ParticleGun);
       G4Truth G4T = G4_SM->GetG4Info();
-
+      t_TruePrimaryVertex_X = G4T.TruePrimaryVertex_X;
+      t_TruePrimaryVertex_Y = G4T.TruePrimaryVertex_Y;
+      t_TruePrimaryVertex_Z = G4T.TruePrimaryVertex_Z;
       t_InActiveTPC = G4T.InActiveTPC;
       t_IsHyperon = G4T.IsHyperon;
       t_IsLambda = G4T.IsLambda;
@@ -383,6 +389,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_PrimaryNucleon = G4T.PrimaryNucleon;
       t_PrimaryPion = G4T.PrimaryPion;
       t_PrimaryKaon = G4T.PrimaryKaon;
+      t_PrimaryNucleus = G4T.PrimaryNucleus;
       t_Decay = G4T.Decay;
       t_KaonDecay = G4T.KaonDecay;
       t_SigmaZeroDecayPhoton = G4T.SigmaZeroDecayPhoton;
@@ -408,7 +415,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
 
       if(f_Debug) std::cout << "Getting Reconstructed Info" << std::endl;
 
-      SubModuleReco* Reco_SM = new SubModuleReco(e,f_IsData,f_Reco);
+      SubModuleReco* Reco_SM = new SubModuleReco(e,f_IsData,f_Reco,f_ParticleGun);
       Reco_SM->PrepareInfo();
       Reco_SM->SetIndices(t_IsSignal,t_IsSignalSigmaZero);
       RecoData RecoD =  Reco_SM->GetInfo();   
@@ -666,6 +673,7 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("PrimaryNucleon","vector<SimParticle>",&t_PrimaryNucleon);
    OutputTree->Branch("PrimaryPion","vector<SimParticle>",&t_PrimaryPion);
    OutputTree->Branch("PrimaryKaon","vector<SimParticle>",&t_PrimaryKaon);
+   OutputTree->Branch("PrimaryNucleus","vector<SimParticle>",&t_PrimaryNucleus);
    OutputTree->Branch("Decay","vector<SimParticle>",&t_Decay);
    OutputTree->Branch("SigmaZeroDecayPhoton","vector<SimParticle>",&t_SigmaZeroDecayPhoton);
    OutputTree->Branch("SigmaZeroDecayLambda","vector<SimParticle>",&t_SigmaZeroDecayLambda);

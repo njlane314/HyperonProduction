@@ -68,9 +68,9 @@ class SubModuleReco {
       SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                         string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
                         string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
-                        string g4label,bool dogetpids,bool includecosmics);
+                        string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false);
 
-      SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset);
+      SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false);
 
       void PrepareInfo(); 
       TVector3 GetPrimaryVertex();
@@ -130,6 +130,7 @@ class SubModuleReco {
       bool DoGetPIDs=true;
       double ResRangeCutoff=5; 
       const bool IncludeCosmics;
+      const bool ParticleGunMode;
 };
 
 }
