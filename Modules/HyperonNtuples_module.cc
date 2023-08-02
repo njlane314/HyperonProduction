@@ -104,6 +104,8 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       // Flags applying to the entire event
       bool t_EventHasNeutronScatter;
       bool t_EventHasHyperon;
+      bool t_EventHasKaon;
+      bool t_EventHasK0S;
       bool t_GoodReco;
 
       // Flags applying to each MCTruth
@@ -116,6 +118,9 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<bool> t_IsAssociatedHyperon;
       std::vector<bool> t_IsSignal;
       std::vector<bool> t_IsSignalSigmaZero;
+      std::vector<bool> t_IsKaon;
+      std::vector<bool> t_IsK0S;
+      std::vector<bool> t_IsK0SCharged;
 
       bool t_EventHasFinalStateNeutron;
 
@@ -130,6 +135,7 @@ class hyperon::HyperonNtuples : public art::EDAnalyzer {
       std::vector<SimParticle> t_SigmaZeroDecayPhoton;
       std::vector<SimParticle> t_SigmaZeroDecayLambda;
       std::vector<SimParticle> t_KaonDecay;
+      std::vector<SimParticle> t_NeutralKaonDecayK0SL;
 
       std::vector<double> t_TruePrimaryVertex_X;
       std::vector<double> t_TruePrimaryVertex_Y;
@@ -279,6 +285,8 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_GoodReco = false;
    t_EventHasNeutronScatter = false;
    t_EventHasHyperon = false;
+   t_EventHasKaon = false;
+   t_EventHasK0S = false;
 
    t_Neutrino.clear();
    t_Lepton.clear();
@@ -289,8 +297,12 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
    t_PrimaryNucleus.clear();
    t_Decay.clear();
    t_KaonDecay.clear();
+   t_NeutralKaonDecayK0SL.clear();
    t_SigmaZeroDecayPhoton.clear();
    t_SigmaZeroDecayLambda.clear();
+   t_IsKaon.clear();
+   t_IsK0S.clear();
+   t_IsK0SCharged.clear();
 
    t_TruePrimaryVertex_X.clear();
    t_TruePrimaryVertex_Y.clear();
@@ -381,8 +393,13 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_IsSigmaZero = G4T.IsSigmaZero;
       t_IsSigmaZeroCharged = G4T.IsSigmaZeroCharged;
       t_IsAssociatedHyperon = G4T.IsAssociatedHyperon;
+      t_IsKaon = G4T.IsKaon;
+      t_IsK0S = G4T.IsK0S;
+      t_IsK0SCharged = G4T.IsK0SCharged;
       t_EventHasNeutronScatter = G4T.EventHasNeutronScatter;       
       t_EventHasHyperon = G4T.EventHasHyperon;       
+      t_EventHasKaon = G4T.EventHasKaon;
+      t_EventHasK0S = G4T.EventHasK0S;
       t_Weight *= G4T.Weight;
       t_Lepton = G4T.Lepton;
       t_Hyperon = G4T.Hyperon;
@@ -392,6 +409,7 @@ void hyperon::HyperonNtuples::analyze(art::Event const& e)
       t_PrimaryNucleus = G4T.PrimaryNucleus;
       t_Decay = G4T.Decay;
       t_KaonDecay = G4T.KaonDecay;
+      t_NeutralKaonDecayK0SL = G4T.NeutralKaonDecayK0SL;
       t_SigmaZeroDecayPhoton = G4T.SigmaZeroDecayPhoton;
       t_SigmaZeroDecayLambda = G4T.SigmaZeroDecayLambda;
       t_DecayVertex_X = G4T.DecayVertex_X;
@@ -662,9 +680,14 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("IsAssociatedHyperon","vector<bool>",&t_IsAssociatedHyperon);
    OutputTree->Branch("IsSignal","vector<bool>",&t_IsSignal);
    OutputTree->Branch("IsSignalSigmaZero","vector<bool>",&t_IsSignalSigmaZero);
+   OutputTree->Branch("IsKaon","vector<bool>",&t_IsKaon);
+   OutputTree->Branch("IsK0S","vector<bool>",&t_IsK0S);
+   OutputTree->Branch("IsK0SCharged","vector<bool>",&t_IsK0SCharged);
    OutputTree->Branch("GoodReco",&t_GoodReco);
    OutputTree->Branch("EventHasNeutronScatter",&t_EventHasNeutronScatter);
    OutputTree->Branch("EventHasHyperon",&t_EventHasHyperon);
+   OutputTree->Branch("EventHasKaon",&t_EventHasKaon);
+   OutputTree->Branch("EventHasK0S",&t_EventHasK0S);
    OutputTree->Branch("EventHasFinalStateNeutron",&t_EventHasFinalStateNeutron);
 
    OutputTree->Branch("Neutrino","vector<SimParticle>",&t_Neutrino);
@@ -678,6 +701,7 @@ void hyperon::HyperonNtuples::beginJob(){
    OutputTree->Branch("SigmaZeroDecayPhoton","vector<SimParticle>",&t_SigmaZeroDecayPhoton);
    OutputTree->Branch("SigmaZeroDecayLambda","vector<SimParticle>",&t_SigmaZeroDecayLambda);
    OutputTree->Branch("KaonDecay","vector<SimParticle>",&t_KaonDecay);
+   OutputTree->Branch("NeutralKaonDecayK0SL","vector<SimParticle>",&t_NeutralKaonDecayK0SL);
    OutputTree->Branch("TruePrimaryVertex_X",&t_TruePrimaryVertex_X);
    OutputTree->Branch("TruePrimaryVertex_Y",&t_TruePrimaryVertex_Y);
    OutputTree->Branch("TruePrimaryVertex_Z",&t_TruePrimaryVertex_Z);

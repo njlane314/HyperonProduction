@@ -34,7 +34,7 @@ double EndX=0,EndY=0,EndZ=0;
 double Travel=0; // Distance travelled
 double Theta=0;
 double Phi=0;
-int Origin=0; //0 = neutrino , 1 = primary , 2 = hyperon decay, 3 = other, 4 = Kaon decay, 5 = Sigma0 decay
+int Origin=0; // 0 = neutrino , 1 = primary , 2 = hyperon decay, 3 = other, 4 = Kaon decay, 5 = Sigma0 decay, 6 = K0S/K0L, 7 = K0S/K0L decay
 
 inline void SetKinematics(TLorentzVector P,TLorentzVector EndP,double Mass);
 inline void SetPositions(TLorentzVector Start,TLorentzVector End);

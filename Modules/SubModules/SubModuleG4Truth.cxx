@@ -49,6 +49,8 @@ void SubModuleG4Truth::GetParticleLists(){
    Daughter_IDs.clear();
    SigmaZero_Daughter_IDs.clear();
    Kaon_Daughter_IDs.clear();
+   PrimaryK0SL_IDs.clear();
+   NeutralKaon_Daughter_IDs.clear();  
 
    for(const art::Ptr<simb::MCParticle> &g4p : Vect_G4){
 
@@ -66,23 +68,36 @@ void SubModuleG4Truth::GetParticleLists(){
             Daughter_IDs.insert(Daughter_IDs.begin(),IDs.begin(),IDs.end());                
       }		
 
-      else if(isKaon(g4p->PdgCode()) && (g4p->EndProcess() == "Decay" || g4p->EndProcess() == "FastScintillation"))
-         Kaon_Daughter_IDs.insert(Kaon_Daughter_IDs.begin(),IDs.begin(),IDs.end());                     
+      if(isKaon(g4p->PdgCode())){
+        if(g4p->PdgCode() == 311 && g4p->EndProcess() == "Decay")
+          NeutralKaon_Daughter_IDs.insert(NeutralKaon_Daughter_IDs.begin(),IDs.begin(),IDs.end()); 
+        else if(g4p->EndProcess() == "Decay" || g4p->EndProcess() == "FastScintillation")
+          Kaon_Daughter_IDs.insert(Kaon_Daughter_IDs.begin(),IDs.begin(),IDs.end());                     
+      }
+   
    }
 
    // Get the SigmaZero daughters  
    for(size_t i_d=0;i_d<SigmaZero_Daughter_IDs.size();i_d++){
-
       if(partByID.find(SigmaZero_Daughter_IDs[i_d]) == partByID.end()) continue;
-
       art::Ptr<simb::MCParticle> part = partByID[SigmaZero_Daughter_IDs.at(i_d)];
-
       if(part->PdgCode() == 3122){
          std::vector<int> IDs = GetChildIDs(part);
          Daughter_IDs.insert(Daughter_IDs.begin(),IDs.begin(),IDs.end());                     
       }     
-
    } 
+
+   // Get the Neutral Kaon daughters
+   for(size_t i_d=0;i_d<NeutralKaon_Daughter_IDs.size();i_d++){
+     if(partByID.find(NeutralKaon_Daughter_IDs[i_d]) == partByID.end()) continue;
+     art::Ptr<simb::MCParticle> part = partByID[NeutralKaon_Daughter_IDs.at(i_d)];
+     if(part->PdgCode() != 130 && part->PdgCode() != 310)
+       throw std::invalid_argument("SubModuleG4Truth::GetParticleLists: Neutral kaon daughter with pdg code " + std::to_string(part->PdgCode()) + " expected 130 or 310");
+     if(part->EndProcess() == "Decay"){
+       std::vector<int> IDs = GetChildIDs(part);   
+       Kaon_Daughter_IDs.insert(Kaon_Daughter_IDs.begin(),IDs.begin(),IDs.end());  
+     }
+   }
 
    // Set list of Primary vertices for matching to multiple MCTruths
    for(const art::Ptr<simb::MCTruth> &theMCTruth : Vect_MCTruth){         
@@ -129,6 +144,9 @@ G4Truth SubModuleG4Truth::GetG4Info(){
    theTruth.IsSigmaZero.resize(NMCTruths);
    theTruth.IsSigmaZeroCharged.resize(NMCTruths);
    theTruth.IsAssociatedHyperon.resize(NMCTruths);
+   theTruth.IsKaon.resize(NMCTruths);
+   theTruth.IsK0S.resize(NMCTruths);
+   theTruth.IsK0SCharged.resize(NMCTruths);
 
    theTruth.DecayVertex_X.resize(NMCTruths);
    theTruth.DecayVertex_Y.resize(NMCTruths);
@@ -155,6 +173,7 @@ G4Truth SubModuleG4Truth::GetG4Info(){
    if(SigmaZero_Daughter_IDs.size()) GetSigmaZeroDecay(); 
    if(theTruth.Hyperon.size() || theTruth.SigmaZeroDecayLambda.size()) GetHyperonDecay();
    if(theTruth.PrimaryKaon.size()) GetKaonDecay();
+   if(NeutralKaon_Daughter_IDs.size()) GetNeutralKaonDecay(); 
 
    SetFlags(); 
 
@@ -182,13 +201,6 @@ void SubModuleG4Truth::GetPrimaryParticles(){
       //hyperon produced at primary vertex
       if(isHyperon(part->PdgCode()))
          theTruth.Hyperon.push_back(P);
-
-      if(part->PdgCode() == 311){
-        TLorentzVector diff = part->Position() - part->EndPosition();
-        double travel = TVector3(diff.X(),diff.Y(),diff.Z()).Mag();
-        std::cout << part->EndProcess() << "  " << part->NumberDaughters() << "  " << travel << std::endl;
-        
-      }      
 
       if(isLepton(part->PdgCode()) || isNeutrino(part->PdgCode())) theTruth.Lepton.push_back(P);
       if(isNucleon(part->PdgCode())) theTruth.PrimaryNucleon.push_back(P);
@@ -249,6 +261,12 @@ void SubModuleG4Truth::GetKaonDecay(){
       SimParticle P = MakeSimParticle(*part);
       P.Origin = 4;
 
+      // Check if the parent is a K0S/K0L
+      if(partByID.find(part->Mother()) != partByID.end()){
+        art::Ptr<simb::MCParticle> part2 = partByID[part->Mother()];
+        if(part2->PdgCode() == 130 || part2->PdgCode() == 310) P.Origin = 7;
+      }
+
       // Check which MCTruth this decay belongs to
       for(size_t i_k=0;i_k<theTruth.PrimaryKaon.size();i_k++){
          SimParticle K = theTruth.PrimaryKaon.at(i_k);
@@ -282,6 +300,31 @@ void SubModuleG4Truth::GetSigmaZeroDecay(){
          theTruth.SigmaZeroDecayLambda.push_back(P);     
       else if(part->PdgCode() == 22)
          theTruth.SigmaZeroDecayPhoton.push_back(P);     
+
+   }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SubModuleG4Truth::GetNeutralKaonDecay(){
+
+   for(size_t i_d=0;i_d<NeutralKaon_Daughter_IDs.size();i_d++){
+
+      // Geant does not always keep all particles it simulates, first check daughter is actually in list of IDs
+      if(partByID.find(NeutralKaon_Daughter_IDs[i_d]) == partByID.end()) continue;
+
+      art::Ptr<simb::MCParticle> part = partByID[NeutralKaon_Daughter_IDs[i_d]];
+
+      SimParticle P = MakeSimParticle(*part);
+      P.Origin = 6;
+
+      // Check which MCTruth this decay belongs to
+      for(size_t i_h=0;i_h<theTruth.PrimaryKaon.size();i_h++){
+         SimParticle H = theTruth.PrimaryKaon.at(i_h);
+         if(PosMatch(TVector3(P.StartX,P.StartY,P.StartZ),TVector3(H.EndX,H.EndY,H.EndZ))) P.MCTruthIndex = H.MCTruthIndex;
+      } 
+
+      theTruth.NeutralKaonDecayK0SL.push_back(P);
 
    }
 }
@@ -417,6 +460,9 @@ void SubModuleG4Truth::SetFlags(){
       theTruth.IsLambdaCharged[i_t] = false;
       theTruth.IsSigmaZero[i_t] = false;
       theTruth.IsAssociatedHyperon[i_t] = false;
+      theTruth.IsKaon[i_t] = false;
+      theTruth.IsK0S[i_t] = false;
+      theTruth.IsK0SCharged[i_t] = false; 
 
       int nHyperons=0,nKaons=0;
 
@@ -431,7 +477,6 @@ void SubModuleG4Truth::SetFlags(){
 
       int nProducts=0;
       bool hasProton=false,hasPion=false;
-
       for(size_t i_d=0;i_d<theTruth.Decay.size();i_d++){
          if(theTruth.Decay.at(i_d).MCTruthIndex == i_t){
             nProducts++;
@@ -444,8 +489,22 @@ void SubModuleG4Truth::SetFlags(){
       if(nHyperons == 1 && theTruth.IsSigmaZero.at(i_t) && nProducts == 2 && hasProton && hasPion) theTruth.IsSigmaZeroCharged[i_t] = true;
 
       for(size_t i_k=0;i_k<theTruth.PrimaryKaon.size();i_k++)
-         if(theTruth.PrimaryKaon.at(i_k).MCTruthIndex == i_t) nKaons++;
+        if(theTruth.PrimaryKaon.at(i_k).MCTruthIndex == i_t) theTruth.IsKaon[i_t] = true;
+     
+      for(SimParticle kaon : theTruth.NeutralKaonDecayK0SL)        
+        if(kaon.MCTruthIndex == i_t && kaon.PDG == 310) theTruth.IsK0S[i_t] = true;
 
+      if(theTruth.IsK0S[i_t]){
+        bool hasPiP=false,hasPiM=false;
+        for(SimParticle kaondecay : theTruth.KaonDecay){
+          if(kaondecay.MCTruthIndex == i_t && kaondecay.Origin == 7){
+            if(kaondecay.PDG == 211) hasPiP = true;  
+            if(kaondecay.PDG == -211) hasPiM = true;  
+          }
+        }
+        if(hasPiP && hasPiM) theTruth.IsK0SCharged[i_t] = true; 
+      }
+        
       // If there are multiple hyperons/antihyperons or hyperons and kaons present together
       // flag as associated hyperon
       if(nHyperons > 1 || (nHyperons >= 1 && nKaons >= 1)) theTruth.IsAssociatedHyperon[i_t] = true;
@@ -454,6 +513,8 @@ void SubModuleG4Truth::SetFlags(){
 
    theTruth.EventHasNeutronScatter = FindNeutronScatter();   
    theTruth.EventHasHyperon = std::find(theTruth.IsHyperon.begin(), theTruth.IsHyperon.end(), true) != theTruth.IsHyperon.end();
+   theTruth.EventHasKaon = std::find(theTruth.IsKaon.begin(), theTruth.IsKaon.end(), true) != theTruth.IsKaon.end();
+   theTruth.EventHasK0S = std::find(theTruth.IsK0S.begin(), theTruth.IsK0S.end(), true) != theTruth.IsK0S.end();
 
 }
 

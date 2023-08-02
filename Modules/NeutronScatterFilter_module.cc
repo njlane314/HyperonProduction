@@ -79,7 +79,6 @@ bool hyperon::NeutronScatterFilter::filter(art::Event& e)
       delete Generator_SM;
    }
 
-
    if(f_GetG4Info){
       if(f_Debug) std::cout << "Getting G4 Info" << std::endl;
       SubModuleG4Truth* G4_SM = new SubModuleG4Truth(e,f_G4);

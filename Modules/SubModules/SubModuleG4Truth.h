@@ -32,6 +32,8 @@ struct G4Truth {
    // Use for sample orthogonality
    bool EventHasHyperon = false;
    bool EventHasNeutronScatter = false;
+   bool EventHasKaon = false;
+   bool EventHasK0S = false;
 
    // Flags for each MCTruth
    std::vector<bool> InActiveTPC;
@@ -41,6 +43,9 @@ struct G4Truth {
    std::vector<bool> IsSigmaZero;
    std::vector<bool> IsSigmaZeroCharged;
    std::vector<bool> IsAssociatedHyperon;
+   std::vector<bool> IsKaon;
+   std::vector<bool> IsK0S;
+   std::vector<bool> IsK0SCharged;
 
    double Weight = 1.0;
 
@@ -54,6 +59,7 @@ struct G4Truth {
    std::vector<SimParticle> KaonDecay;
    std::vector<SimParticle> SigmaZeroDecayPhoton;
    std::vector<SimParticle> SigmaZeroDecayLambda;
+   std::vector<SimParticle> NeutralKaonDecayK0SL;
 
    //TVector3 DecayVertex;
 
@@ -82,6 +88,7 @@ class SubModuleG4Truth {
       void GetHyperonDecay();
       void GetKaonDecay();
       void GetSigmaZeroDecay();
+      void GetNeutralKaonDecay();
       bool FindNeutronScatter();
       int GetOrigin(int trackid);
       void MCTruthMatch(SimParticle &P);
@@ -102,6 +109,10 @@ class SubModuleG4Truth {
       std::vector<int> SigmaZero_Daughter_IDs; // IDs of SigmaZero decay products
       std::vector<int> Primary_IDs;         // IDs of particles produced at primary vertex
       std::vector<int> Kaon_Daughter_IDs;   // IDs of Kaon decay products
+      // NOTE: If GENIE produces a K0 (pdg 311), it will instantly decay it into a K0S (pdg 310)/K0L (pdg 130), then propagates
+      // those. PrimaryK0SL is to capture the ID of the K0S/K0L, in order to then identify their decay products 
+      std::vector<int> PrimaryK0SL_IDs;     // IDs of primary K0S/K0L
+      std::vector<int> NeutralKaon_Daughter_IDs;  
 
       std::vector<TVector3> PrimaryVertices;
       bool PosMatch(TVector3 Pos1,TVector3 Pos2);
