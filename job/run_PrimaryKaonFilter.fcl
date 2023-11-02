@@ -1,0 +1,36 @@
+#include "services_microboone.fcl"
+#include "hyperonConfig.fcl"
+
+process_name: PrimaryKaonFilter
+
+source:
+{
+  module_type: RootInput
+  maxEvents: -1
+}
+
+physics:
+{
+  analyzers: {}
+  filters: { PrimaryKaonFilter: @local::analyseEvents }
+        
+  filter: [ PrimaryKaonFilter ]
+  stream: [ out1 ]
+  trigger_paths: [ filter ]
+  end_paths: [ stream ]
+}
+
+outputs:
+{
+  out1:
+  {
+    module_type: RootOutput
+    fileName: "%ifb_%tc_cthorpe-primarykaonfilter.root"
+    dataTier:    "generated"
+    compressionLevel: 1
+    SelectEvents: [ filter ]
+  }
+}
+
+physics.filters.PrimaryKaonFilter.GetG4Info: false
+physics.filters.PrimaryKaonFilter.module_type: K0SFilter

@@ -74,7 +74,8 @@ GeneratorTruth SubModuleGeneratorTruth::GetGeneratorTruth(){
          if(Part.StatusCode() == 1 && isHyperon(Part.PdgCode()) && std::find(HyperonPDGs.begin(),HyperonPDGs.end(),abs(Part.PdgCode())) != HyperonPDGs.end()){
             theTruth.EventHasHyperon = true;
          }
-         
+         if(Part.StatusCode() == 1 && isKaon(Part.PdgCode())) theTruth.EventHasKaon = true;        
+ 
          if((isLepton(Part.PdgCode()) || isNeutrino(Part.PdgCode())) && Part.StatusCode() == 1) {
             theTruth.TruePrimaryVertex_X.push_back(Part.Vx());
             theTruth.TruePrimaryVertex_Y.push_back(Part.Vy());

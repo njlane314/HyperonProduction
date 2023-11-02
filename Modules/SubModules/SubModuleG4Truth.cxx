@@ -172,8 +172,8 @@ G4Truth SubModuleG4Truth::GetG4Info(){
 
    if(SigmaZero_Daughter_IDs.size()) GetSigmaZeroDecay(); 
    if(theTruth.Hyperon.size() || theTruth.SigmaZeroDecayLambda.size()) GetHyperonDecay();
-   if(theTruth.PrimaryKaon.size()) GetKaonDecay();
    if(NeutralKaon_Daughter_IDs.size()) GetNeutralKaonDecay(); 
+   if(theTruth.PrimaryKaon.size()) GetKaonDecay();
 
    SetFlags(); 
 
@@ -251,7 +251,11 @@ void SubModuleG4Truth::GetHyperonDecay(){
 
 void SubModuleG4Truth::GetKaonDecay(){
 
+   std::cout << "Starting GetKaonDecay" <<  std::endl;
+
    for(size_t i_d=0;i_d<Kaon_Daughter_IDs.size();i_d++){
+
+      std::cout << "i_d=" << i_d << std::endl;
 
       // Geant does not always keep all particles it simulates, first check daughter is actually in list of IDs
       if(partByID.find(Kaon_Daughter_IDs[i_d]) == partByID.end()) continue;
@@ -262,16 +266,29 @@ void SubModuleG4Truth::GetKaonDecay(){
       P.Origin = 4;
 
       // Check if the parent is a K0S/K0L
+      bool child_of_K0SL=false;
       if(partByID.find(part->Mother()) != partByID.end()){
         art::Ptr<simb::MCParticle> part2 = partByID[part->Mother()];
-        if(part2->PdgCode() == 130 || part2->PdgCode() == 310) P.Origin = 7;
+        if(part2->PdgCode() == 130 || part2->PdgCode() == 310){ 
+          P.Origin = 7;
+          child_of_K0SL=true;
+        }
       }
 
-      // Check which MCTruth this decay belongs to
+      // depending on whether this particle is the child of a K+/- or K0, parents will live in different vectors
+      std::vector<SimParticle>* decay_parents = child_of_K0SL ? &theTruth.NeutralKaonDecayK0SL : &theTruth.PrimaryKaon;
+
+      /*
       for(size_t i_k=0;i_k<theTruth.PrimaryKaon.size();i_k++){
          SimParticle K = theTruth.PrimaryKaon.at(i_k);
          if(PosMatch(TVector3(P.StartX,P.StartY,P.StartZ),TVector3(K.EndX,K.EndY,K.EndZ))) P.MCTruthIndex = K.MCTruthIndex;
       } 
+      */
+      for(size_t i_k=0;i_k<decay_parents->size();i_k++){
+         SimParticle K = decay_parents->at(i_k);
+         if(PosMatch(TVector3(P.StartX,P.StartY,P.StartZ),TVector3(K.EndX,K.EndY,K.EndZ))) P.MCTruthIndex = K.MCTruthIndex;
+      } 
+  
       theTruth.KaonDecay.push_back(P);     
    }
 }
