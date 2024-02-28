@@ -251,11 +251,7 @@ void SubModuleG4Truth::GetHyperonDecay(){
 
 void SubModuleG4Truth::GetKaonDecay(){
 
-   std::cout << "Starting GetKaonDecay" <<  std::endl;
-
    for(size_t i_d=0;i_d<Kaon_Daughter_IDs.size();i_d++){
-
-      std::cout << "i_d=" << i_d << std::endl;
 
       // Geant does not always keep all particles it simulates, first check daughter is actually in list of IDs
       if(partByID.find(Kaon_Daughter_IDs[i_d]) == partByID.end()) continue;
@@ -384,7 +380,11 @@ int SubModuleG4Truth::GetOrigin(int trackid){
 
    if(std::find(Primary_IDs.begin(),Primary_IDs.end(),trackid) != Primary_IDs.end()) return 1;
    else if(std::find(Daughter_IDs.begin(),Daughter_IDs.end(),trackid) != Daughter_IDs.end()) return 2;
-   else if(std::find(Kaon_Daughter_IDs.begin(),Kaon_Daughter_IDs.end(),trackid) != Kaon_Daughter_IDs.end()) return 4;
+   else if(std::find(Kaon_Daughter_IDs.begin(),Kaon_Daughter_IDs.end(),trackid) != Kaon_Daughter_IDs.end()){
+     // If the parent of this particle is in the neutral kaon vector, this trackid is the decay product of a neutral kaon
+     if(std::find(NeutralKaon_Daughter_IDs.begin(),NeutralKaon_Daughter_IDs.end(),partByID[trackid]->Mother()) != NeutralKaon_Daughter_IDs.end()) return 7;
+     else return 4;
+   }
    else if(std::find(SigmaZero_Daughter_IDs.begin(),SigmaZero_Daughter_IDs.end(),trackid) != SigmaZero_Daughter_IDs.end()) return 5;
    else return 3;
 }
@@ -457,10 +457,34 @@ bool SubModuleG4Truth::PosMatch(TVector3 Pos1,TVector3 Pos2){
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SubModuleG4Truth::MCTruthMatch(SimParticle &P){
+ 
+  for(size_t i_mct=0;i_mct<PrimaryVertices.size();i_mct++)
+    if(PosMatch(TVector3(P.StartX,P.StartY,P.StartZ),PrimaryVertices.at(i_mct)))
+      P.MCTruthIndex = i_mct;
+}
 
-   for(size_t i_mct=0;i_mct<PrimaryVertices.size();i_mct++)
-      if(PosMatch(TVector3(P.StartX,P.StartY,P.StartZ),PrimaryVertices.at(i_mct)))
-         P.MCTruthIndex = i_mct;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SubModuleG4Truth::MCTruthMatch(SimParticle &P,int trackid){
+
+  // Go up the hierarchy of particles until you reach a direct child of the neutrino
+
+  // If particle is missing from map
+  if(partByID.find(trackid) == partByID.end()) {
+    P.MCTruthIndex = -1;
+    return;
+  }
+  
+  art::Ptr<simb::MCParticle> mcp = partByID.at(trackid);
+  while(true){
+    if(partByID.find(mcp->Mother()) == partByID.end() || mcp->Mother() == 0) break;
+    mcp = partByID.at(mcp->Mother());
+  }
+
+  for(size_t i_mct=0;i_mct<PrimaryVertices.size();i_mct++)
+    if(PosMatch(TVector3(mcp->Position().X(),mcp->Position().Y(),mcp->Position().Z()),PrimaryVertices.at(i_mct)))
+      P.MCTruthIndex = i_mct;
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

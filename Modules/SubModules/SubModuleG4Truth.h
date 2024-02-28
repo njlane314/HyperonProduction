@@ -92,6 +92,7 @@ class SubModuleG4Truth {
       bool FindNeutronScatter();
       int GetOrigin(int trackid);
       void MCTruthMatch(SimParticle &P);
+      void MCTruthMatch(SimParticle &P,int trackid);
       void SetFlags();
       
       void SetNeutronScatterThresholds(double neutronscatterprotonthresh,double neutronscatterpionthresh);
