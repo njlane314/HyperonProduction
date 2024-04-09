@@ -42,7 +42,11 @@ double MeandEdX_Plane0,MeandEdX_Plane1,MeandEdX_Plane2,MeandEdX_ThreePlane; // M
 double Track_LLR_PID; // LLR PID
 double Track_LLR_PID_Kaon; // LLR PID with Kaon hypothesis
 double Track_LLR_PID_Kaon_Partial; // LLR PID with Kaon hypothesis using last 5cm of track
-double Track_Bragg_PID_Kaon;
+double Track_Bragg_Pion;
+double Track_Bragg_Muon;
+double Track_Bragg_Proton; 
+double Track_Bragg_Kaon;
+double Track_Bragg_Sigma;
 double ProtonMomentum,MuonMomentum,KaonMomentum; // Track kinematics
 double TrackWiggliness;
 int NDescendents;

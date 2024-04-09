@@ -414,7 +414,7 @@ void hyperon::KaonDecay::analyze(art::Event const& e)
            }
         }
 
-        PIDStore store = PIDCalc.GetPIDs(trk,caloFromTrack,AlgScoresVec);
+        PIDStore store = PIDCalc.GetPIDScores(trk,caloFromTrack,AlgScoresVec);
         t_TrackMeandEdX.push_back(store.MeandEdX_3Plane);
 
         t_TrackdEdX_Plane0_v.push_back(store.dEdX_Plane0);

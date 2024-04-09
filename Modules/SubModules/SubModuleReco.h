@@ -28,6 +28,8 @@
 #include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
 #include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
 #include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
+#include "ubana/HyperonProduction/Headers/Descendants.h"
+
 #include "ubana/HyperonProduction/Objects/RecoParticle.h"
 #include "ubana/HyperonProduction/Objects/Helpers.h"
 #include "ubana/HyperonProduction/Alg/PIDManager.h"

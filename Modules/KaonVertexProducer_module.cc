@@ -107,7 +107,7 @@ void hyperon::KaonVertexProducer::produce(art::Event& e)
       std::sort(RecoD.TrackPrimaryDaughters.begin(),RecoD.TrackPrimaryDaughters.end(),
             [&](RecoParticle A,RecoParticle B) -> bool {
             //return A.Track_LLR_PID_Kaon > B.Track_LLR_PID_Kaon;
-            return KaonBDT.GetScore(A.Track_LLR_PID_Kaon,A.Track_Bragg_PID_Kaon) > KaonBDT.GetScore(B.Track_LLR_PID_Kaon,B.Track_Bragg_PID_Kaon); 
+            return 0;//KaonBDT.GetScore(A.Track_LLR_PID_Kaon,A.Track_Bragg_PID_Kaon) > KaonBDT.GetScore(B.Track_LLR_PID_Kaon,B.Track_Bragg_PID_Kaon); 
           });
 
       if(RecoD.TrackPrimaryDaughters.size() > f_PassNo) tracktouseindex = RecoD.TrackPrimaryDaughters.at(f_PassNo).Index; 

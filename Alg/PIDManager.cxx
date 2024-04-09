@@ -185,40 +185,66 @@ void PIDManager::LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PIDManager::BraggPID(art::Ptr<recob::Track> track,std::vector<anab::sParticleIDAlgScores> algscores_v,PIDStore& store){
-
-   for(size_t i_algscore=0;i_algscore<algscores_v.size();i_algscore++){
+double PIDManager::GetBraggLikelihood(
+   art::Ptr<recob::Track> track, 
+   std::vector<anab::sParticleIDAlgScores> algscores_v, 
+   int pdg, 
+   anab::kTrackDir dir)
+{
+   double score_plane0 = 0.0, score_plane1 = 0.0, score_plane2 = 0.0, score_weighted = 0.0;
+   for(size_t i_algscore = 0; i_algscore < algscores_v.size(); i_algscore++){
       anab::sParticleIDAlgScores algscore = algscores_v.at(i_algscore);
-      if(algscore.fAssumedPdg == 321 && algscore.fAlgName=="BraggPeakLLH" && anab::kTrackDir(algscore.fTrackDir) == anab::kForward){
-         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 0) store.Bragg_Kaon_Plane0 = algscore.fValue;
-         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 1) store.Bragg_Kaon_Plane1 = algscore.fValue;
-         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 2) store.Bragg_Kaon_Plane2 = algscore.fValue;
+      if(algscore.fAssumedPdg == pdg && algscore.fAlgName == "BraggPeakLLH" && anab::kTrackDir(algscore.fTrackDir) == dir){
+         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 0) score_plane0 = algscore.fValue;
+         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 1) score_plane1 = algscore.fValue;
+         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 2) score_plane2 = algscore.fValue;
       }
    }
 
-   store.Bragg_Kaon_3Plane = store.Bragg_Kaon_Plane0*PlaneWeight(track,0) + store.Bragg_Kaon_Plane1*PlaneWeight(track,1) + store.Bragg_Kaon_Plane2*PlaneWeight(track,2);
-   store.Bragg_Kaon_3Plane /= (PlaneWeight(track,0) + PlaneWeight(track,1) + PlaneWeight(track,2));
+   score_weighted = score_plane0 * PlaneWeight(track, 0) + score_plane1 * PlaneWeight(track, 1) + score_plane2 * PlaneWeight(track, 2);
+   score_weighted /= (PlaneWeight(track, 0) + PlaneWeight(track, 1) + PlaneWeight(track, 2)); 
+
+   return score_weighted;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-PIDStore PIDManager::GetPIDs(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v){
-
-   PIDStore theStore;
-   ThreePlaneMeandEdX(track,calo_v,theStore);
-   LLRPID(calo_v,theStore);
-   BraggPID(track,algscores_v,theStore);
-
-   return theStore;
+void PIDManager::SetBraggScores(
+   art::Ptr<recob::Track> track,
+   std::vector<anab::sParticleIDAlgScores> algscores_v,
+   PIDStore& store)
+{
+   store.BraggWeighted_Pion = GetBraggLikelihood(track, algscores_v, 211, anab::kForward); 
+   store.BraggWeighted_Muon = GetBraggLikelihood(track, algscores_v, 13, anab::kForward);
+   store.BraggWeighted_Proton = GetBraggLikelihood(track, algscores_v, 2212, anab::kForward);
+   store.BraggWeighted_Kaon = GetBraggLikelihood(track, algscores_v, 321, anab::kForward);
+   store.BraggWeighted_Sigma = GetBraggLikelihood(track, algscores_v, 3222, anab::kForward);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+PIDStore PIDManager::GetPIDScores(
+   art::Ptr<recob::Track> track,
+   std::vector<art::Ptr<anab::Calorimetry>> calo_v,
+   std::vector<anab::sParticleIDAlgScores> algscores_v)
+{
+   PIDStore store;
+   ThreePlaneMeandEdX(track, calo_v, store);
+   LLRPID(calo_v, store);
+   SetBraggScores(track, algscores_v, store);
 
-double PIDManager::PlaneWeight(TVector3 dir,int i_pl){
+   return store;
+}
+
+double PIDManager::PlaneWeight(
+   art::Ptr<recob::Track> track,
+   int i_pl)
+{
+   // returns a weight based on the angle between the track direction and wire plane
+   // perpendicular tracks are more favourably weighted
+
+   TVector3 dir(track->End().x()-track->Start().x(),track->End().y()-track->Start().y(),track->End().z()-track->Start().z());
 
    TVector3 trackvec(0, dir.Y(), dir.Z());
    trackvec = trackvec.Unit();
    TVector3 zaxis(0, 0, 1);
+
    double costhetayz = trackvec.Dot(zaxis);
    double thetayz = TMath::ACos(costhetayz);
    if ((dir.Y() < 0) && (thetayz > 0)) thetayz *= -1;
@@ -228,21 +254,11 @@ double PIDManager::PlaneWeight(TVector3 dir,int i_pl){
    if (i_pl == 1) theta_towires = std::min(std::abs(plane1_wireangle - thetayz), std::abs((-1*(6.28-plane1_wireangle) - thetayz)));
    if (i_pl == 2) theta_towires = std::min(std::abs(plane2_wireangle - thetayz), std::abs((-1*(6.28-plane2_wireangle) - thetayz)));
 
-   double angle_planeweight = sin(theta_towires)*sin(theta_towires);
+   double angle_planeweight = sin(theta_towires) * sin(theta_towires);
    if (angle_planeweight < TophatThresh) angle_planeweight = 0;
    if (angle_planeweight != 0) angle_planeweight = 1;
 
    return angle_planeweight;
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-double PIDManager::PlaneWeight(art::Ptr<recob::Track> track,int i_pl){
-
-   TVector3 trackdir(track->End().x()-track->Start().x(),track->End().y()-track->Start().y(),track->End().z()-track->Start().z());
-   return PlaneWeight(trackdir,i_pl);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif
