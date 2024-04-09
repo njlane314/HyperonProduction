@@ -229,7 +229,8 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
    art::Ptr<recob::Track> trk = pfpTracks.at(0);
 
    // Sets track length/position related variables
-   SetTrackVariables(P,trk);
+   int ndesc = GetNDescendents(pfp,GetPFParticleMap(Vect_PFParticle)); 
+   SetTrackVariables(P,trk,ndesc);
 
    if(!IsData) TruthMatch(trk,P);
 

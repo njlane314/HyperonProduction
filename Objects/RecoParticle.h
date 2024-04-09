@@ -45,6 +45,7 @@ double Track_LLR_PID_Kaon_Partial; // LLR PID with Kaon hypothesis using last 5c
 double Track_Bragg_PID_Kaon;
 double ProtonMomentum,MuonMomentum,KaonMomentum; // Track kinematics
 double TrackWiggliness;
+int NDescendents;
 
 // Truth info
 bool HasTruth; // False if reco particle has no corresponding MC particle
@@ -69,7 +70,6 @@ ClassDef(RecoParticle,1);
 #endif
 
 };
-
 
 inline void RecoParticle::SetVertex(TVector3 V){
 

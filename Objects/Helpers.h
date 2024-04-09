@@ -33,7 +33,7 @@ inline SimParticle MakeSimParticle(simb::MCParticle Part){
 }
 
 // Helper function for setting track variables in Reco Particle
-inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk){
+inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk, int ndesc){
 
    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
 
@@ -58,6 +58,8 @@ inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk){
    P.SetTrackPositions(Start,End);
 
    P.TrackWiggliness = GetTrackWiggliness(trk);
+
+   P.NDescendents = ndesc;
 }
 
 }
