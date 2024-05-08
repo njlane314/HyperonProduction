@@ -1,5 +1,5 @@
-#ifndef _Helpers_h_
-#define _Helpers_h_
+#ifndef _RecoHelper_h_
+#define _RecoHelper_h_
 
 //local includes
 #include "ubana/HyperonProduction/Objects/SimParticle.h"
@@ -20,18 +20,6 @@
 #include "TVector3.h"
 
 namespace hyperon {
-
-inline SimParticle MakeSimParticle(simb::MCParticle Part)
-{
-   SimParticle S;
-   S.SetKinematics(Part.Momentum(), Part.EndMomentum(), Part.Mass());
-   S.PDG = Part.PdgCode();
-   S.SetPositions(Part.Position(), Part.EndPosition());
-
-   S.SetScatterings();
-
-   return S;
-}
 
 inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk)
 {

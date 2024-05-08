@@ -19,7 +19,8 @@
 #include "ubana/HyperonProduction/Headers/ParticleTypes.h"
 #include "ubana/HyperonProduction/Headers/FV.h"
 #include "ubana/HyperonProduction/Objects/SimParticle.h"
-#include "ubana/HyperonProduction/Objects/Helpers.h"
+#include "ubana/HyperonProduction/Objects/RecoHelper.h"
+#include "ubana/HyperonProduction/Objects/SimHelper.h"
 
 namespace hyperon {
 

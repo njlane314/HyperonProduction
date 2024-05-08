@@ -25,7 +25,8 @@
 
 #include "ubana/HyperonProduction/Objects/SimParticle.h"
 #include "ubana/HyperonProduction/Objects/RecoParticle.h"
-#include "ubana/HyperonProduction/Objects/Helpers.h"
+#include "ubana/HyperonProduction/Objects/SimHelper.h"
+#include "ubana/HyperonProduction/Objects/RecoHelper.h"
 
 #include "ubana/HyperonProduction/Alg/ConnectednessHelper.h"
 

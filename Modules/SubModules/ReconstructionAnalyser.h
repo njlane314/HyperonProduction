@@ -28,10 +28,10 @@
 #include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
 #include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
 #include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
-//#include "ubana/HyperonProduction/Headers/Descendants.h"
 
 #include "ubana/HyperonProduction/Objects/RecoParticle.h"
-#include "ubana/HyperonProduction/Objects/Helpers.h"
+#include "ubana/HyperonProduction/Objects/RecoHelper.h"
+#include "ubana/HyperonProduction/Objects/SimHelper.h"
 #include "ubana/HyperonProduction/Alg/PIDManager.h"
 #include "ubana/HyperonProduction/Modules/SubModules/ParticleTrackerAnalyser.h"
 #include "ubana/HyperonProduction/Alg/BDTHandle.h"
@@ -42,8 +42,8 @@ using std::string;
 
 namespace hyperon {
 
-struct RecoData {
-
+struct RecoData 
+{
    TVector3 RecoPrimaryVertex = TVector3(-1000, -1000, -1000);
 
    int NPrimaryDaughters; 
@@ -60,77 +60,85 @@ struct RecoData {
    size_t TrueDecayPionMinusIndex = -1;
 
    bool GoodReco = false;
-
 };
 
 class ReconstructionAnalyser {
 
    public:
 
-      ReconstructionAnalyser(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
-                        string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                        string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
-                        string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false);
+      ReconstructionAnalyser(art::Event const& E, 
+                        bool IsData, 
+                        string PFParticleLabel, 
+                        string TrackLabel, 
+                        string ShowerLabel, 
+                        string VertexLabel, 
+                        string PIDLabel, 
+                        string CaloLabel, 
+                        string HitLabel,
+                        string HitTruthAssnLabel, 
+                        string TrackHitAssnLabel, 
+                        string MetaDataLabel, 
+                        string GenLabel,
+                        string G4Label, 
+                        bool DoGetPIDs, 
+                        bool IncludeCosmics, 
+                        bool ParticleGunMode = false);
 
-      ReconstructionAnalyser(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false);
+      ReconstructionAnalyser(art::Event const& E, 
+                        bool IsData, 
+                        fhicl::ParameterSet ParamSet, 
+                        bool ParticleGunMode = false);
 
       void PrepareInfo(); 
       TVector3 GetPrimaryVertex();
       void SetIndices(std::vector<bool> IsSignal);
 
       RecoData GetInfo();
-      void SetResRangeCutoff(double cutoff){ ResRangeCutoff = cutoff; }
+      void SetResRangeCutoff(double cutoff){ resRangeCutoff = cutoff; }
 
    private:
 
-      art::Handle<std::vector<recob::PFParticle>> Handle_PFParticle;
-      std::vector<art::Ptr<recob::PFParticle>> Vect_PFParticle;
+      art::Handle<std::vector<recob::PFParticle>> handlePFParticle;
+      std::vector<art::Ptr<recob::PFParticle>> vectPFParticle;
 
-      art::Handle<std::vector<recob::Track>> Handle_Track;
-      std::vector<art::Ptr<recob::Track>> Vect_Track;
+      art::Handle<std::vector<recob::Track>> handleTrack;
+      std::vector<art::Ptr<recob::Track>> vectTrack;
 
-      art::Handle<std::vector<recob::Shower>> Handle_Shower;
-      std::vector<art::Ptr<recob::Shower>> Vect_Shower;
+      art::Handle<std::vector<recob::Shower>> handleShower;
+      std::vector<art::Ptr<recob::Shower>> vectShower;
 
-      art::Handle<std::vector<recob::Hit>> Handle_Hit;
-      std::vector<art::Ptr<recob::Hit>> Vect_Hit;
+      art::Handle<std::vector<recob::Hit>> handleHit;
+      std::vector<art::Ptr<recob::Hit>> vectHit;
 
-      RecoParticle MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp);
+      RecoParticle MakeRecoParticle(const art::Ptr<recob::PFParticle> &PFP);
 
-      art::FindManyP<recob::Vertex>* Assoc_PFParticleVertex;
-      art::FindManyP<recob::Track>* Assoc_PFParticleTrack;
-      art::FindManyP<recob::Shower>* Assoc_PFParticleShower;
-      art::FindManyP<larpandoraobj::PFParticleMetadata>* Assoc_PFParticleMetadata;
-      art::FindManyP<recob::Hit>* Assoc_TrackHit;
-      art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* Assoc_MCParticleBacktracker;
-      art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* ParticlesPerHit;
-      art::FindManyP<anab::Calorimetry>* Assoc_TrackCalo;
-      art::FindManyP<anab::ParticleID>* Assoc_TrackPID;
+      art::FindManyP<recob::Vertex>* assocPFParticleVertex;
+      art::FindManyP<recob::Track>* assocPFParticleTrack;
+      art::FindManyP<recob::Shower>* assocPFParticleShower;
+      art::FindManyP<larpandoraobj::PFParticleMetadata>* assocPFParticleMetadata;
+      art::FindManyP<recob::Hit>* assocTrackHit;
+      art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>* particlesPerHit;
+      art::FindManyP<anab::Calorimetry>* assocTrackCalo;
+      art::FindManyP<anab::ParticleID>* assocTrackPID;
 
-      searchingfornues::LLRPID llr_pid_calculator;
-      searchingfornues::ProtonMuonLookUpParameters protonmuon_parameters;
-
-      searchingfornuesk::LLRPIDK llr_pid_calculator_kaon;
-      searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
-
-      ParticleTrackerAnalyser* G4T = nullptr;
+      ParticleTrackerAnalyser* particleTrackerAnalyser = nullptr;
       PIDManager PIDCalc;      
 
       RecoData eventReco;
-      size_t neutrinoID = 99999;
-      std::map<size_t,int> m_PFPID_TrackIndex;
+      size_t neutrinoIndex = 99999;
+      std::map<size_t, int> particleMap;
 
-      void GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
-      void GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
-      void TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P);
-      void GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P);
-      void GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P);
+      void SetPFPMetaData(const art::Ptr<recob::PFParticle> &PFP, RecoParticle &Particle);
+      void GetTrackData(const art::Ptr<recob::PFParticle> &PFP, RecoParticle &Particle);
+      void TruthMatch(const art::Ptr<recob::Track> &Trk, RecoParticle &Particle);
+      void GetPIDs(const art::Ptr<recob::Track> &Trk, RecoParticle &Particle);
+      void GetVertexData(const art::Ptr<recob::PFParticle> &PFP, RecoParticle &Particle);
 
-      bool IsData;
-      bool DoGetPIDs=true;
-      double ResRangeCutoff=5; 
-      const bool IncludeCosmics;
-      const bool ParticleGunMode;
+      bool isData;
+      bool doGetPIDs = true;
+      double resRangeCutoff = 5; 
+      const bool includeCosmics;
+      const bool particleGunMode;
 };
 
 }

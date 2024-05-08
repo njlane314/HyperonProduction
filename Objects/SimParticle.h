@@ -20,7 +20,7 @@ public:
 SimParticle() {}
 ~SimParticle() {}
 
-int MCTruthIndex=-1; // which MCTruth this particle is the child of
+int MCTruthIndex = -1;
 
 int PDG = 0;
 double E = 0, Px = 0, Py = 0, Pz = 0;
@@ -31,7 +31,7 @@ double KE = 0;
 double EndKE = 0;
 double StartX = 0, StartY = 0, StartZ = 0;
 double EndX = 0, EndY = 0, EndZ = 0;
-double Travel = 0; // Distance travelled
+double Travel = 0; 
 double Theta = 0;
 double Phi = 0;
 int Origin = 0;
@@ -39,17 +39,6 @@ int Origin = 0;
 inline void SetKinematics(TLorentzVector P, TLorentzVector EndP, double Mass);
 inline void SetPositions(TLorentzVector Start, TLorentzVector End);
 inline void Print();
-
-int numSecondaries = 0;
-
-std::vector<int> SecondaryPDG;
-std::vector<double> SecondaryE;
-std::vector<double> SecondaryPx, SecondaryPy, SecondaryPz;
-std::vector<double> SecondaryModMomentum;
-std::vector<double> SecondaryEndE, SecondaryEndPx, SecondaryEndPy, SecondaryEndPz;
-std::vector<double> SecondaryEndModMomentum;
-std::vector<double> SecondaryKE, SecondaryEndKE;
-std::vector<double> SecondaryTheta, SecondaryPhi;
 
 #ifdef __MAKE_ROOT_DICT__
 ClassDef(SimParticle,1);
