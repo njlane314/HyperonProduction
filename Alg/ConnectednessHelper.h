@@ -95,23 +95,23 @@ struct CTSingleOutcome {
 
 struct CTOutcome {
 
-   std::vector<std::vector<int>> SeedIndexes_Plane0;
-   std::vector<std::vector<int>> OutputIndexes_Plane0;
-   std::vector<std::vector<int>> OutputSizes_Plane0;
-   std::vector<std::vector<int>> SeedChannels_Plane0;
-   std::vector<std::vector<int>> SeedTicks_Plane0;
+   std::vector<std::vector<int>> SeedIndexesPlane0;
+   std::vector<std::vector<int>> OutputIndexesPlane0;
+   std::vector<std::vector<int>> OutputSizesPlane0;
+   std::vector<std::vector<int>> SeedChannelsPlane0;
+   std::vector<std::vector<int>> SeedTicksPlane0;
 
-   std::vector<std::vector<int>> SeedIndexes_Plane1;
-   std::vector<std::vector<int>> OutputIndexes_Plane1;
-   std::vector<std::vector<int>> OutputSizes_Plane1;
-   std::vector<std::vector<int>> SeedChannels_Plane1;
-   std::vector<std::vector<int>> SeedTicks_Plane1;
+   std::vector<std::vector<int>> SeedIndexesPlane1;
+   std::vector<std::vector<int>> OutputIndexesPlane1;
+   std::vector<std::vector<int>> OutputSizesPlane1;
+   std::vector<std::vector<int>> SeedChannelsPlane1;
+   std::vector<std::vector<int>> SeedTicksPlane1;
 
-   std::vector<std::vector<int>> SeedIndexes_Plane2;
-   std::vector<std::vector<int>> OutputIndexes_Plane2;
-   std::vector<std::vector<int>> OutputSizes_Plane2;
-   std::vector<std::vector<int>> SeedChannels_Plane2;
-   std::vector<std::vector<int>> SeedTicks_Plane2;
+   std::vector<std::vector<int>> SeedIndexesPlane2;
+   std::vector<std::vector<int>> OutputIndexesPlane2;
+   std::vector<std::vector<int>> OutputSizesPlane2;
+   std::vector<std::vector<int>> SeedChannelsPlane2;
+   std::vector<std::vector<int>> SeedTicksPlane2;
 
 };
 
@@ -133,24 +133,24 @@ class ConnectednessHelper {
 
    private: 
      
-      Connectedness::ClusterBuilder C_Plane0;
-      Connectedness::ClusterBuilder C_Plane1;
-      Connectedness::ClusterBuilder C_Plane2;
+      Connectedness::ClusterBuilder CPlane0;
+      Connectedness::ClusterBuilder CPlane1;
+      Connectedness::ClusterBuilder CPlane2;
 
       bool Draw=false;
       std::string rse;
 
-      Wiremap WM_Plane0;
-      Wiremap WM_Plane1;
-      Wiremap WM_Plane2;
+      Wiremap WMPlane0;
+      Wiremap WMPlane1;
+      Wiremap WMPlane2;
 
       // Starting positions of tracks in 3D (do not correct for SC)
-      std::vector<TVector3> Positions_3D;   
+      std::vector<TVector3> Positions3D;   
    
       // Starting positions of tracks in channel/tick space  
-      std::vector<std::pair<int,int>> Positions_Plane0;
-      std::vector<std::pair<int,int>> Positions_Plane1;
-      std::vector<std::pair<int,int>> Positions_Plane2;
+      std::vector<std::pair<int,int>> PositionsPlane0;
+      std::vector<std::pair<int,int>> PositionsPlane1;
+      std::vector<std::pair<int,int>> PositionsPlane2;
 
 };
 

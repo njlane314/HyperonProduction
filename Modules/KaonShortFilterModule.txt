@@ -1,0 +1,82 @@
+ #include "art/Framework/Core/EDFilter.h"
+#include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Principal/Event.h"
+#include "art/Framework/Principal/Handle.h"
+#include "art/Framework/Principal/Run.h"
+#include "art/Framework/Principal/SubRun.h"
+#include "canvas/Utilities/InputTag.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
+
+#include <memory>
+
+#include "ubana/HyperonProduction/Modules/SubModules/ParticleTrackerAnalyser.h"
+#include "ubana/HyperonProduction/Modules/SubModules/GeneratorAnalyser.h"
+
+namespace hyperon 
+{
+   class KaonShortFilter;
+}
+
+class hyperon::KaonShortFilter : public art::EDFilter 
+{
+   public:
+      explicit KaonShortFilter(fhicl::ParameterSet const& p);
+
+      KaonShortFilter(KaonShortFilter const&) = delete;
+      KaonShortFilter(KaonShortFilter&&) = delete;
+      KaonShortFilter& operator=(KaonShortFilter const&) = delete;
+      KaonShortFilter& operator=(KaonShortFilter&&) = delete;
+
+      bool filter(art::Event& e) override;
+
+   private:
+
+      bool f_GetGeneratorInfo;
+      bool f_GetG4Info;
+
+      fhicl::ParameterSet f_Generator;
+      fhicl::ParameterSet f_G4;
+
+      bool f_Debug = false;
+};
+
+hyperon::KaonShortFilter::KaonShortFilter(fhicl::ParameterSet const& p)
+   : EDFilter{p},
+   f_GetGeneratorInfo(p.get<bool>("GetGeneratorInfo",true)),   
+   f_GetG4Info(p.get<bool>("GetG4Info",true)),   
+   f_Generator(p.get<fhicl::ParameterSet>("Generator")),
+   f_G4(p.get<fhicl::ParameterSet>("Geant4")),
+   f_Debug(p.get<bool>("Debug",false))
+{}
+
+bool hyperon::KaonShortFilter::filter(art::Event& e)
+{
+   bool pass = false;
+
+   if(f_GetGeneratorInfo){
+      if(f_Debug) std::cout << "Getting generator information..." << std::endl;
+      
+      GeneratorAnalyser* Generator_SM = new GeneratorAnalyser(e, f_Generator);
+      GeneratorTruth GenT = Generator_SM->GetGeneratorTruth();
+      
+      pass = GenT.eventHasNeutralKaon;
+
+      delete Generator_SM;
+   }
+
+   if(f_GetG4Info){
+      if(f_Debug) std::cout << "Getting particle tracker information..." << std::endl;
+      
+      ParticleTrackerAnalyser* G4_SM = new ParticleTrackerAnalyser(e, f_G4);
+      EventTruth G4T = G4_SM->GetEventTruth();
+      
+      pass = G4T.eventHasKaonShort;   
+      
+      delete G4_SM;
+   }
+
+   return pass;
+}
+
+DEFINE_ART_MODULE(hyperon::KaonShortFilter)

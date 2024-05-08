@@ -1,5 +1,5 @@
-#ifndef _SubModuleGeneratorTruth_h_
-#define _SubModuleGeneratorTruth_h_
+#ifndef _GeneratorAnalyser_h_
+#define _GeneratorAnalyser_h_
 
 #include <string>
 #include <vector>
@@ -23,38 +23,45 @@
 
 namespace hyperon {
 
-struct GeneratorTruth {
-
+struct GeneratorTruth 
+{
    double Weight = 1.0;
-   int NMCTruths = 0;
-   int NMCTruthsInTPC = 0;
-   std::vector<std::string> Mode;
-   std::vector<SimParticle> Neutrino;
-   std::vector<double> TruePrimaryVertex_X;
-   std::vector<double> TruePrimaryVertex_Y;
-   std::vector<double> TruePrimaryVertex_Z;
-   std::vector<std::string> CCNC;
-   bool EventHasFinalStateNeutron=false;
-   bool EventHasHyperon=false; 
-   bool EventHasKaon=false; 
 
+   int nMCTruths = 0;
+   int nMCTruthsInTPC = 0;
+
+   std::vector<SimParticle> Neutrinos;
+
+   std::vector<std::string> CCNC;
+   std::vector<std::string> Mode;
+
+   std::vector<double> W;
+   std::vector<double> X;
+   std::vector<double> Y;
+   std::vector<double> QSqr; 
+   std::vector<double> Pt;
+   std::vector<double> Theta;
+
+   bool eventHasNeutralKaon;
+   bool eventHasHyperon;
+   bool eventHasNeutron;
 };
 
-class SubModuleGeneratorTruth {
+class GeneratorAnalyser {
 
 public:
 
-   SubModuleGeneratorTruth(art::Event const& e,fhicl::ParameterSet pset,bool particlegunmode=false);
+   GeneratorAnalyser(art::Event const& e, fhicl::ParameterSet pset, bool particlegunmode = false);
    GeneratorTruth GetGeneratorTruth();
 
 private:
 
    art::Handle<std::vector<simb::MCTruth>> Handle_MCTruth;
    std::vector<art::Ptr<simb::MCTruth>> Vect_MCTruth;
-   GeneratorTruth theTruth;
 
-   std::vector<int> HyperonPDGs = {3122,3212,3112,3222};
-   const bool ParticleGunMode;
+   GeneratorTruth generatorTruth;
+
+   const bool particleGunMode;
 };
 
 }

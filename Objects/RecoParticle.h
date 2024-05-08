@@ -29,6 +29,7 @@ int PDG; // Pandora PDG code (11 or 13)
 int Parentage; // 1 - neutrino daughter, 2 - neutrino granddaughter, 3 - other
 int ParentIndex=-1; // -1 - neutrino candidate or no parent
 double TrackShowerScore;
+double NuScore;
 double X,Y,Z;
 double Displacement; // Distance from PV
 
@@ -49,7 +50,7 @@ double Track_Bragg_Kaon;
 double Track_Bragg_Sigma;
 double ProtonMomentum,MuonMomentum,KaonMomentum; // Track kinematics
 double TrackWiggliness;
-int NDescendents;
+//int NDescendents;
 
 // Truth info
 bool HasTruth; // False if reco particle has no corresponding MC particle

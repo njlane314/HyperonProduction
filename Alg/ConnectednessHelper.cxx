@@ -8,9 +8,9 @@ using namespace hyperon;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ConnectednessHelper::ConnectednessHelper(bool draw) :
-   C_Plane0(draw,"Plane0"),
-   C_Plane1(draw,"Plane1"),
-   C_Plane2(draw,"Plane2")
+   CPlane0(draw,"Plane0"),
+   CPlane1(draw,"Plane1"),
+   CPlane2(draw,"Plane2")
 {
    Draw = draw;
 }
@@ -19,20 +19,20 @@ ConnectednessHelper::ConnectednessHelper(bool draw) :
 
 void ConnectednessHelper::LoadWireActivity(std::vector<art::Ptr<recob::Wire>> wires){
 
-   WM_Plane0.View = 0;
-   WM_Plane0.LoadActivity(wires);
-   C_Plane0.Reset();
-   C_Plane0.ReadData(WM_Plane0.Channel,WM_Plane0.Tick,WM_Plane0.Signal);
+   WMPlane0.View = 0;
+   WMPlane0.LoadActivity(wires);
+   CPlane0.Reset();
+   CPlane0.ReadData(WMPlane0.Channel,WMPlane0.Tick,WMPlane0.Signal);
 
-   WM_Plane1.View = 1;
-   WM_Plane1.LoadActivity(wires);
-   C_Plane1.Reset();
-   C_Plane1.ReadData(WM_Plane1.Channel,WM_Plane1.Tick,WM_Plane1.Signal);
+   WMPlane1.View = 1;
+   WMPlane1.LoadActivity(wires);
+   CPlane1.Reset();
+   CPlane1.ReadData(WMPlane1.Channel,WMPlane1.Tick,WMPlane1.Signal);
 
-   WM_Plane2.View = 2;
-   WM_Plane2.LoadActivity(wires);
-   C_Plane2.Reset();
-   C_Plane2.ReadData(WM_Plane2.Channel,WM_Plane2.Tick,WM_Plane2.Signal);
+   WMPlane2.View = 2;
+   WMPlane2.LoadActivity(wires);
+   CPlane2.Reset();
+   CPlane2.ReadData(WMPlane2.Channel,WMPlane2.Tick,WMPlane2.Signal);
 
 }
 
@@ -40,18 +40,18 @@ void ConnectednessHelper::LoadWireActivity(std::vector<art::Ptr<recob::Wire>> wi
 
 void ConnectednessHelper::AddStartPositions(std::vector<TVector3> positions){
 
-   Positions_3D.clear();
-   Positions_Plane0.clear();
-   Positions_Plane1.clear();
-   Positions_Plane2.clear();
+   Positions3D.clear();
+   PositionsPlane0.clear();
+   PositionsPlane1.clear();
+   PositionsPlane2.clear();
 
-   Positions_3D = positions;
+   Positions3D = positions;
 
-   for(size_t i=0;i<Positions_3D.size();i++){
+   for(size_t i=0;i<Positions3D.size();i++){
 
-      Positions_Plane0.push_back(std::make_pair(U_wire(Positions_3D.at(i)),tick(Positions_3D.at(i))));
-      Positions_Plane1.push_back(std::make_pair(V_wire(Positions_3D.at(i)),tick(Positions_3D.at(i))));
-      Positions_Plane2.push_back(std::make_pair(Y_wire(Positions_3D.at(i)),tick(Positions_3D.at(i))));
+      PositionsPlane0.push_back(std::make_pair(U_wire(Positions3D.at(i)),tick(Positions3D.at(i))));
+      PositionsPlane1.push_back(std::make_pair(V_wire(Positions3D.at(i)),tick(Positions3D.at(i))));
+      PositionsPlane2.push_back(std::make_pair(Y_wire(Positions3D.at(i)),tick(Positions3D.at(i))));
 
    }
 
@@ -64,30 +64,30 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunClustering(std::vector<int>
 
    // Setup the output structs   
 
-   CTSingleOutcome Outcome_Plane0;
-   Outcome_Plane0.Plane = 0;
-   Outcome_Plane0.SeedIndexes = indexes;  
+   CTSingleOutcome OutcomePlane0;
+   OutcomePlane0.Plane = 0;
+   OutcomePlane0.SeedIndexes = indexes;  
 
-   CTSingleOutcome Outcome_Plane1;
-   Outcome_Plane1.Plane = 1;
-   Outcome_Plane1.SeedIndexes = indexes;  
+   CTSingleOutcome OutcomePlane1;
+   OutcomePlane1.Plane = 1;
+   OutcomePlane1.SeedIndexes = indexes;  
 
-   CTSingleOutcome Outcome_Plane2;
-   Outcome_Plane2.Plane = 2;
-   Outcome_Plane2.SeedIndexes = indexes;  
+   CTSingleOutcome OutcomePlane2;
+   OutcomePlane2.Plane = 2;
+   OutcomePlane2.SeedIndexes = indexes;  
 
    for(size_t i=0;i<indexes.size();i++){
 
       int index = indexes.at(i);
 
-      Outcome_Plane0.SeedChannels.push_back(Positions_Plane0.at(index).first);
-      Outcome_Plane0.SeedTicks.push_back(Positions_Plane0.at(index).second);
+      OutcomePlane0.SeedChannels.push_back(PositionsPlane0.at(index).first);
+      OutcomePlane0.SeedTicks.push_back(PositionsPlane0.at(index).second);
 
-      Outcome_Plane1.SeedChannels.push_back(Positions_Plane1.at(index).first);
-      Outcome_Plane1.SeedTicks.push_back(Positions_Plane1.at(index).second);
+      OutcomePlane1.SeedChannels.push_back(PositionsPlane1.at(index).first);
+      OutcomePlane1.SeedTicks.push_back(PositionsPlane1.at(index).second);
 
-      Outcome_Plane2.SeedChannels.push_back(Positions_Plane2.at(index).first);
-      Outcome_Plane2.SeedTicks.push_back(Positions_Plane2.at(index).second);
+      OutcomePlane2.SeedChannels.push_back(PositionsPlane2.at(index).first);
+      OutcomePlane2.SeedTicks.push_back(PositionsPlane2.at(index).second);
 
    }
 
@@ -95,69 +95,69 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunClustering(std::vector<int>
 
    // Plane0 //
 
-   std::string label_Plane0 = rse + "_Plane0_";
+   std::string labelPlane0 = rse + "Plane0_";
 
    for(size_t i=0;i<indexes.size();i++){
       int index = indexes.at(i);
 
-      std::pair<int,int> id_and_size =  C_Plane0.MakeCluster(Positions_Plane0.at(index).first,Positions_Plane0.at(index).second,index);
+      std::pair<int,int> id_and_size =  CPlane0.MakeCluster(PositionsPlane0.at(index).first,PositionsPlane0.at(index).second,index);
 
-      if(i < indexes.size()-1) label_Plane0 += std::to_string(indexes.at(i)) + "_";
-      else label_Plane0 += std::to_string(indexes.at(i));
+      if(i < indexes.size()-1) labelPlane0 += std::to_string(indexes.at(i)) + "_";
+      else labelPlane0 += std::to_string(indexes.at(i));
 
-      Outcome_Plane0.OutputIndexes.push_back(id_and_size.first);
-      Outcome_Plane0.OutputSizes.push_back(id_and_size.second);
+      OutcomePlane0.OutputIndexes.push_back(id_and_size.first);
+      OutcomePlane0.OutputSizes.push_back(id_and_size.second);
 
    }
 
 
-   if(Draw) C_Plane0.DrawClustered(label_Plane0,0,-1);
+   if(Draw) CPlane0.DrawClustered(labelPlane0,0,-1);
 
-   C_Plane0.ClearClusters();
+   CPlane0.ClearClusters();
 
    // Plane1 //
 
-   std::string label_Plane1 = rse + "_Plane1_";
+   std::string labelPlane1 = rse + "Plane1_";
 
    for(size_t i=0;i<indexes.size();i++){
       int index = indexes.at(i);
 
-      std::pair<int,int> id_and_size =  C_Plane1.MakeCluster(Positions_Plane1.at(index).first,Positions_Plane1.at(index).second,index);
+      std::pair<int,int> id_and_size =  CPlane1.MakeCluster(PositionsPlane1.at(index).first,PositionsPlane1.at(index).second,index);
 
-      if(i < indexes.size()-1) label_Plane1 += std::to_string(indexes.at(i)) + "_";
-      else label_Plane1 += std::to_string(indexes.at(i));
+      if(i < indexes.size()-1) labelPlane1 += std::to_string(indexes.at(i)) + "_";
+      else labelPlane1 += std::to_string(indexes.at(i));
 
-      Outcome_Plane1.OutputIndexes.push_back(id_and_size.first);
-      Outcome_Plane1.OutputSizes.push_back(id_and_size.second);
+      OutcomePlane1.OutputIndexes.push_back(id_and_size.first);
+      OutcomePlane1.OutputSizes.push_back(id_and_size.second);
 
    }
 
-   if(Draw) C_Plane1.DrawClustered(label_Plane1,1,-1);
+   if(Draw) CPlane1.DrawClustered(labelPlane1,1,-1);
 
-   C_Plane1.ClearClusters();
+   CPlane1.ClearClusters();
 
    // Plane2 //
 
-   std::string label_Plane2 = rse + "_Plane2_";
+   std::string labelPlane2 = rse + "Plane2_";
 
    for(size_t i=0;i<indexes.size();i++){
       int index = indexes.at(i);
 
-      std::pair<int,int> id_and_size =  C_Plane2.MakeCluster(Positions_Plane2.at(index).first,Positions_Plane2.at(index).second,index);
+      std::pair<int,int> id_and_size =  CPlane2.MakeCluster(PositionsPlane2.at(index).first,PositionsPlane2.at(index).second,index);
 
-      if(i < indexes.size()-1) label_Plane2 += std::to_string(indexes.at(i)) + "_";
-      else label_Plane2 += std::to_string(indexes.at(i));
+      if(i < indexes.size()-1) labelPlane2 += std::to_string(indexes.at(i)) + "_";
+      else labelPlane2 += std::to_string(indexes.at(i));
 
-      Outcome_Plane2.OutputIndexes.push_back(id_and_size.first);
-      Outcome_Plane2.OutputSizes.push_back(id_and_size.second);
+      OutcomePlane2.OutputIndexes.push_back(id_and_size.first);
+      OutcomePlane2.OutputSizes.push_back(id_and_size.second);
 
    }
 
-   if(Draw) C_Plane2.DrawClustered(label_Plane2,2,-1);
+   if(Draw) CPlane2.DrawClustered(labelPlane2,2,-1);
 
-   C_Plane2.ClearClusters();
+   CPlane2.ClearClusters();
 
-   return {Outcome_Plane0,Outcome_Plane1,Outcome_Plane2};
+   return {OutcomePlane0,OutcomePlane1,OutcomePlane2};
 
 }        
 
@@ -168,11 +168,11 @@ std::vector<CTSingleOutcome> ConnectednessHelper::RunTest(){
    std::vector<CTSingleOutcome> AllOutcomes;
 
    // Need at least three tracks for the test
-   if(Positions_3D.size() < 3) return AllOutcomes;
+   if(Positions3D.size() < 3) return AllOutcomes;
 
    // Try all 3 track combinations possible and record outcomes
 
-   int nseeds = static_cast<int>(Positions_3D.size());
+   int nseeds = static_cast<int>(Positions3D.size());
 
    for(int i=0;i<nseeds;i++){
       for(int j=i+1;j<nseeds;j++){
@@ -232,25 +232,25 @@ CTOutcome ConnectednessHelper::PrepareAndTestEvent(art::Event const& e,std::stri
       std::vector<int> this_SeedTicks = this_Outcome.SeedTicks;
 
       if(this_Outcome.Plane == 0){
-         theOutcome.SeedIndexes_Plane0.push_back(this_SeedIndexes);
-         theOutcome.OutputIndexes_Plane0.push_back(this_OutputIndexes);
-         theOutcome.OutputSizes_Plane0.push_back(this_OutputSizes);
-         theOutcome.SeedChannels_Plane0.push_back(this_SeedChannels);
-         theOutcome.SeedTicks_Plane0.push_back(this_SeedTicks);
+         theOutcome.SeedIndexesPlane0.push_back(this_SeedIndexes);
+         theOutcome.OutputIndexesPlane0.push_back(this_OutputIndexes);
+         theOutcome.OutputSizesPlane0.push_back(this_OutputSizes);
+         theOutcome.SeedChannelsPlane0.push_back(this_SeedChannels);
+         theOutcome.SeedTicksPlane0.push_back(this_SeedTicks);
       } 
       else if(this_Outcome.Plane == 1){
-         theOutcome.SeedIndexes_Plane1.push_back(this_SeedIndexes);
-         theOutcome.OutputIndexes_Plane1.push_back(this_OutputIndexes);
-         theOutcome.OutputSizes_Plane1.push_back(this_OutputSizes);
-         theOutcome.SeedChannels_Plane1.push_back(this_SeedChannels);
-         theOutcome.SeedTicks_Plane1.push_back(this_SeedTicks);
+         theOutcome.SeedIndexesPlane1.push_back(this_SeedIndexes);
+         theOutcome.OutputIndexesPlane1.push_back(this_OutputIndexes);
+         theOutcome.OutputSizesPlane1.push_back(this_OutputSizes);
+         theOutcome.SeedChannelsPlane1.push_back(this_SeedChannels);
+         theOutcome.SeedTicksPlane1.push_back(this_SeedTicks);
       } 
       else if(this_Outcome.Plane == 2){
-         theOutcome.SeedIndexes_Plane2.push_back(this_SeedIndexes);
-         theOutcome.OutputIndexes_Plane2.push_back(this_OutputIndexes);
-         theOutcome.OutputSizes_Plane2.push_back(this_OutputSizes);
-         theOutcome.SeedChannels_Plane2.push_back(this_SeedChannels);
-         theOutcome.SeedTicks_Plane2.push_back(this_SeedTicks);
+         theOutcome.SeedIndexesPlane2.push_back(this_SeedIndexes);
+         theOutcome.OutputIndexesPlane2.push_back(this_OutputIndexes);
+         theOutcome.OutputSizesPlane2.push_back(this_OutputSizes);
+         theOutcome.SeedChannelsPlane2.push_back(this_SeedChannels);
+         theOutcome.SeedTicksPlane2.push_back(this_SeedTicks);
       } 
    }
 

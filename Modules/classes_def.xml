@@ -6,6 +6,3 @@
 <class name="RecoParticle"/>
 <class name="std::vector<RecoParticle>"/>
 </lcgdict>
-
-
-

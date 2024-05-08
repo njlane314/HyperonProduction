@@ -1,18 +1,12 @@
-#ifndef RecoVariables_cxx_
-#define _RecoVariables_cxx_
+#ifndef ReconstructionAnalyser_cxx_
+#define _ReconstructionAnalyser_cxx_
 
-#include "SubModuleReco.h"
+#include "ReconstructionAnalyser.h"
 
 using namespace hyperon;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//SubModuleReco::SubModuleReco(){}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode) :
-SubModuleReco(e,isdata,
+ReconstructionAnalyser::ReconstructionAnalyser(art::Event const& e, bool isdata, fhicl::ParameterSet pset, bool particlegunmode) :
+ReconstructionAnalyser(e, isdata,
                   pset.get<std::string>("PFParticleModuleLabel"),
                   pset.get<std::string>("TrackModuleLabel"),
                   pset.get<std::string>("ShowerModuleLabel"),
@@ -28,51 +22,46 @@ SubModuleReco(e,isdata,
                   pset.get<bool>("DoGetPIDs",true),
                   pset.get<bool>("IncludeCosmics",false),
                   particlegunmode)
-{
+{}
 
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-SubModuleReco::SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
-                                     string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
-                                     string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
-                                     string g4label,bool dogetpids,bool includecosmics,bool particlegunmode) :
+ReconstructionAnalyser::ReconstructionAnalyser(art::Event const& e, bool isdata, string pfparticlelabel, string tracklabel,
+                                     string showerlabel, string vertexlabel, string pidlabel, string calolabel, string hitlabel,
+                                     string hittruthassnlabel, string trackhitassnlabel, string metadatalabel, string genlabel,
+                                     string g4label, bool dogetpids, bool includecosmics, bool particlegunmode) :
 PIDCalc(),
 DoGetPIDs(dogetpids),
 IncludeCosmics(includecosmics),
 ParticleGunMode(particlegunmode)
 {
-
    IsData = isdata;
 
    if(!e.getByLabel(pfparticlelabel,Handle_PFParticle)) 
-      throw cet::exception("SubModuleReco") << "No PFParticle Data Products Found!" << std::endl;
+      throw cet::exception("ReconstructionAnalyser") << "No PFParticle Data Products Found!" << std::endl;
 
    if(!e.getByLabel(tracklabel,Handle_Track)) 
-      throw cet::exception("SubModuleReco") << "No Track Data Products Found!" << std::endl;
+      throw cet::exception("ReconstructionAnalyser") << "No Track Data Products Found!" << std::endl;
 
    if(!e.getByLabel(showerlabel,Handle_Shower)) 
-      throw cet::exception("SubModuleReco") << "No Shower Data Products Found!" << std::endl;
+      throw cet::exception("ReconstructionAnalyser") << "No Shower Data Products Found!" << std::endl;
 
    if(!e.getByLabel(hitlabel,Handle_Hit)) 
-      throw cet::exception("SubModuleReco") << "No Hit Data Products Found!" << std::endl;
+      throw cet::exception("ReconstructionAnalyser") << "No Hit Data Products Found!" << std::endl;
 
    art::fill_ptr_vector(Vect_PFParticle,Handle_PFParticle);
    art::fill_ptr_vector(Vect_Track,Handle_Track);
    art::fill_ptr_vector(Vect_Shower,Handle_Shower);
    art::fill_ptr_vector(Vect_Hit,Handle_Hit);
 
-   Assoc_PFParticleVertex = new art::FindManyP<recob::Vertex>(Vect_PFParticle,e,vertexlabel);    
-   Assoc_PFParticleTrack = new art::FindManyP<recob::Track>(Vect_PFParticle,e,tracklabel);    
-   Assoc_PFParticleShower = new art::FindManyP<recob::Shower>(Vect_PFParticle,e,showerlabel);    
-   Assoc_PFParticleMetadata = new art::FindManyP<larpandoraobj::PFParticleMetadata>(Vect_PFParticle,e,metadatalabel);   
-   Assoc_TrackHit = new  art::FindManyP<recob::Hit>(Vect_Track,e,trackhitassnlabel);
-   ParticlesPerHit = new art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>(Handle_Hit,e,hittruthassnlabel);
+   Assoc_PFParticleVertex = new art::FindManyP<recob::Vertex>(Vect_PFParticle, e, vertexlabel);    
+   Assoc_PFParticleTrack = new art::FindManyP<recob::Track>(Vect_PFParticle, e, tracklabel);    
+   Assoc_PFParticleShower = new art::FindManyP<recob::Shower>(Vect_PFParticle, e, showerlabel);    
+   Assoc_PFParticleMetadata = new art::FindManyP<larpandoraobj::PFParticleMetadata>(Vect_PFParticle, e, metadatalabel);   
+   Assoc_TrackHit = new  art::FindManyP<recob::Hit>(Vect_Track, e, trackhitassnlabel);
+   ParticlesPerHit = new art::FindMany<simb::MCParticle,anab::BackTrackerHitMatchingData>(Handle_Hit, e, hittruthassnlabel);
 
    if(DoGetPIDs){
-      Assoc_TrackCalo = new art::FindManyP<anab::Calorimetry>(Vect_Track,e,calolabel);
-      Assoc_TrackPID = new art::FindManyP<anab::ParticleID>(Vect_Track,e,pidlabel);
+      Assoc_TrackCalo = new art::FindManyP<anab::Calorimetry>(Vect_Track, e, calolabel);
+      Assoc_TrackPID = new art::FindManyP<anab::ParticleID>(Vect_Track, e, pidlabel);
    }
 
    llr_pid_calculator.set_dedx_binning(0, protonmuon_parameters.dedx_edges_pl_0);
@@ -100,19 +89,16 @@ ParticleGunMode(particlegunmode)
    llr_pid_calculator_kaon.set_lookup_tables(2, kaonproton_parameters.dedx_pdf_pl_2);
 
    if(!IsData){
-      G4T = new SubModuleG4Truth(e,genlabel,g4label,ParticleGunMode);
+      G4T = new ParticleTrackerAnalyser(e,genlabel,g4label,ParticleGunMode);
       G4T->GetParticleLists();
    }
 
    m_PFPID_TrackIndex.clear(); 
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-void SubModuleReco::PrepareInfo(){
-
-   theData.RecoPrimaryVertex = GetPrimaryVertex();
+void ReconstructionAnalyser::PrepareInfo()
+{
+   eventReco.RecoPrimaryVertex = GetPrimaryVertex();
 
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
       if(!IncludeCosmics && pfp->Parent() != neutrinoID && m_PFPID_TrackIndex.find(pfp->Parent()) == m_PFPID_TrackIndex.end()) continue; 
@@ -127,28 +113,26 @@ void SubModuleReco::PrepareInfo(){
          P.ParentIndex = m_PFPID_TrackIndex[pfp->Parent()]; 
       }
 
+      // Pandora stores tracks as a muon, and showers as an electron
       if(P.PDG == 13){
-         theData.TrackPrimaryDaughters.push_back(P);
+         eventReco.TrackPrimaryDaughters.push_back(P);
          if(P.InNuSlice) m_PFPID_TrackIndex[pfp->Self()] = P.Index;
       }
-      else if(P.PDG == 11) theData.ShowerPrimaryDaughters.push_back(P);      
+      else if(P.PDG == 11) eventReco.ShowerPrimaryDaughters.push_back(P);      
    }
 
-   theData.NPrimaryDaughters = theData.TrackPrimaryDaughters.size() + theData.ShowerPrimaryDaughters.size();
-   theData.NPrimaryTrackDaughters = theData.TrackPrimaryDaughters.size();
-   theData.NPrimaryShowerDaughters = theData.ShowerPrimaryDaughters.size();
+   eventReco.NPrimaryDaughters = eventReco.TrackPrimaryDaughters.size() + eventReco.ShowerPrimaryDaughters.size();
+   eventReco.NPrimaryTrackDaughters = eventReco.TrackPrimaryDaughters.size();
+   eventReco.NPrimaryShowerDaughters = eventReco.ShowerPrimaryDaughters.size();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-RecoData SubModuleReco::GetInfo(){
-   return theData;
+RecoData ReconstructionAnalyser::GetInfo()
+{
+   return eventReco;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-TVector3 SubModuleReco::GetPrimaryVertex(){
-
+TVector3 ReconstructionAnalyser::GetPrimaryVertex()
+{
    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
 
    for(const art::Ptr<recob::PFParticle> &pfp : Vect_PFParticle){
@@ -164,7 +148,7 @@ TVector3 SubModuleReco::GetPrimaryVertex(){
             geo::Point_t point = { vtx->position().X() , vtx->position().Y() , vtx->position().Z() };
             geo::Vector_t sce_corr = SCE->GetPosOffsets(point);
 
-            return TVector3(vtx->position().X() + sce_corr.X(),vtx->position().Y()-sce_corr.Y(),vtx->position().Z()-sce_corr.Z());
+            return TVector3(vtx->position().X() + sce_corr.X(), vtx->position().Y() - sce_corr.Y(), vtx->position().Z() - sce_corr.Z());
          }
       }
    }
@@ -174,10 +158,8 @@ TVector3 SubModuleReco::GetPrimaryVertex(){
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp){
-
+RecoParticle ReconstructionAnalyser::MakeRecoParticle(const art::Ptr<recob::PFParticle> &pfp)
+{
    RecoParticle P;
 
    P.PDG = pfp->PdgCode();
@@ -198,10 +180,8 @@ RecoParticle SubModuleReco::MakeRecoParticle(const art::Ptr<recob::PFParticle> &
    return P;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
-
+void ReconstructionAnalyser::GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P)
+{
    std::vector<art::Ptr<larpandoraobj::PFParticleMetadata>> pfpMeta = Assoc_PFParticleMetadata->at(pfp.key());
 
    for(const art::Ptr<larpandoraobj::PFParticleMetadata> &meta : pfpMeta){
@@ -213,16 +193,17 @@ void SubModuleReco::GetPFPMetadata(const art::Ptr<recob::PFParticle> &pfp,RecoPa
             if(it->first == "TrackScore"){
                P.TrackShowerScore = it->second;
             }
+            else if(it->first == "NuScore"){
+               P.NuScore = it->second;
+            }
          }
       }	
    }
 
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
-
+void ReconstructionAnalyser::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P)
+{
    std::vector<art::Ptr<recob::Track>> pfpTracks = Assoc_PFParticleTrack->at(pfp.key());
 
    if(pfpTracks.size() != 1) return;
@@ -230,37 +211,35 @@ void SubModuleReco::GetTrackData(const art::Ptr<recob::PFParticle> &pfp,RecoPart
    art::Ptr<recob::Track> trk = pfpTracks.at(0);
 
    // Sets track length/position related variables
-   int ndesc = GetNDescendents(pfp,GetPFParticleMap(Vect_PFParticle)); 
-   SetTrackVariables(P,trk,ndesc);
+   //int ndesc = GetNDescendents(pfp, GetPFParticleMap(Vect_PFParticle)); 
+   SetTrackVariables(P,trk);
 
    if(!IsData) TruthMatch(trk,P);
    if(DoGetPIDs) GetPIDs(trk,P);
    
-   theData.TrackStarts.push_back(TVector3(trk->Start().X(),trk->Start().Y(),trk->Start().Z()));
-   P.Index = theData.TrackStarts.size() - 1;
+   eventReco.TrackStarts.push_back(TVector3(trk->Start().X(), trk->Start().Y(), trk->Start().Z()));
+   P.Index = eventReco.TrackStarts.size() - 1;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P){
-
+void ReconstructionAnalyser::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P)
+{
    std::vector<art::Ptr<recob::Hit>> hits = Assoc_TrackHit->at(trk.key());
 
    std::unordered_map<int,double>  trkide;
-   int maxhits=-1;
+   int maxhits = -1;
 
    simb::MCParticle const* matchedParticle = NULL;
 
    std::vector<simb::MCParticle const*> particleVec;
    std::vector<anab::BackTrackerHitMatchingData const*> matchVec;
 
-   for(size_t i_hit=0;i_hit<hits.size();++i_hit){
+   for(size_t i_hit = 0; i_hit < hits.size(); ++i_hit){
 
       particleVec.clear();
       matchVec.clear();
-      ParticlesPerHit->get(hits[i_hit].key(),particleVec,matchVec);
+      ParticlesPerHit->get(hits[i_hit].key(), particleVec, matchVec);
 
-      for(size_t i_particle=0;i_particle<particleVec.size();++i_particle){
+      for(size_t i_particle = 0; i_particle < particleVec.size(); ++i_particle){
 
          trkide[particleVec[i_particle]->TrackId()]++; 
 
@@ -277,7 +256,7 @@ void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P
       SimParticle SP = MakeSimParticle(*matchedParticle);
             
       SP.Origin = G4T->GetOrigin(matchedParticle->TrackId());
-      G4T->MCTruthMatch(SP,matchedParticle->TrackId());
+      G4T->MCTruthMatch(SP, matchedParticle->TrackId());
  
       P.HasTruth = true;
       P.MCTruthIndex = SP.MCTruthIndex;
@@ -301,10 +280,8 @@ void SubModuleReco::TruthMatch(const art::Ptr<recob::Track> &trk,RecoParticle &P
    else P.HasTruth = false;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
-
+void ReconstructionAnalyser::GetPIDs(const art::Ptr<recob::Track> &trk, RecoParticle &P)
+{
    std::vector<art::Ptr<anab::Calorimetry>> caloFromTrack = Assoc_TrackCalo->at(trk.key());
    std::vector<art::Ptr<anab::ParticleID>> trackPID = Assoc_TrackPID->at(trk.key());
    std::vector<anab::sParticleIDAlgScores> AlgScoresVec = trackPID.at(0)->ParticleIDAlgScores();
@@ -323,84 +300,73 @@ void SubModuleReco::GetPIDs(const art::Ptr<recob::Track> &trk,RecoParticle &P){
    P.Track_Bragg_Proton = store.BraggWeighted_Proton;
    P.Track_Bragg_Kaon = store.BraggWeighted_Kaon;
    P.Track_Bragg_Sigma = store.BraggWeighted_Sigma;
-   
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void SubModuleReco::GetVertexData(const art::Ptr<recob::PFParticle> &pfp,RecoParticle &P){
-
+void ReconstructionAnalyser::GetVertexData(const art::Ptr<recob::PFParticle> &pfp, RecoParticle &P)
+{
    std::vector<art::Ptr<recob::Vertex>> pfpVertex = Assoc_PFParticleVertex->at(pfp.key());
 
    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
 
    for(const art::Ptr<recob::Vertex> &vtx : pfpVertex){
 
-      geo::Point_t point = {vtx->position().X(),vtx->position().Y(),vtx->position().Z()};                
+      geo::Point_t point = {vtx->position().X(), vtx->position().Y(), vtx->position().Z()};                
       geo::Vector_t sce_corr = SCE->GetPosOffsets(point);
 
-      TVector3 pos(vtx->position().X()+sce_corr.X(),vtx->position().Y()-sce_corr.Y(),vtx->position().Z()-sce_corr.Z());
+      TVector3 pos(vtx->position().X() + sce_corr.X(), vtx->position().Y() - sce_corr.Y(), vtx->position().Z() - sce_corr.Z());
 
       P.SetVertex(pos);
-      P.Displacement = (pos-theData.RecoPrimaryVertex).Mag();
-
+      P.Displacement = (pos - eventReco.RecoPrimaryVertex).Mag();
    }
-
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void ReconstructionAnalyser::SetIndices(std::vector<bool> IsSignal)
+{      
+   bool ContainsSignal = std::find(IsSignal.begin(), IsSignal.end(),true) == IsSignal.end();
 
-void SubModuleReco::SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero){
-      
-   bool ContainsSignal = std::find(IsSignal.begin(),IsSignal.end(),true) == IsSignal.end() 
-                      || std::find(IsSignalSigmaZero.begin(),IsSignalSigmaZero.end(),true) == IsSignalSigmaZero.end();
+   bool found_muon = false, found_decaypionplus = false, found_decaypionminus = false;
 
-   bool found_muon=false,found_decayproton=false,found_decaypion=false;
+   for(size_t i = 0; i < eventReco.TrackPrimaryDaughters.size(); i++){
 
-   for(size_t i_tr=0;i_tr<theData.TrackPrimaryDaughters.size();i_tr++){
+      RecoParticle Particle = eventReco.TrackPrimaryDaughters.at(i);
 
-      RecoParticle P = theData.TrackPrimaryDaughters.at(i_tr);
-
-      if(!found_muon && abs(P.TrackTruePDG) == 13 && P.TrackTrueOrigin == 1){ 
-         theData.TrueMuonIndex = P.Index;
+      if(!found_muon && abs(Particle.TrackTruePDG) == 13 && Particle.TrackTrueOrigin == 1){ 
+         eventReco.TrueMuonIndex = Particle.Index;
          found_muon = true; 
       }
 
-      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
-         theData.TrueDecayProtonIndex = P.Index;
-         found_decayproton = true;
+      if(ContainsSignal && !found_decaypionplus && isPionPlus(Particle.TrackTruePDG) && Particle.TrackTrueOrigin == 3){
+         eventReco.TrueDecayPionPlusIndex = Particle.Index;
+         found_decaypionplus = true;
       }
 
-      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == -211 && P.TrackTrueOrigin == 2){
-         theData.TrueDecayPionIndex = P.Index;
-         found_decaypion = true;
+      if(ContainsSignal && !found_decaypionminus && isPionMinus(Particle.TrackTruePDG) && Particle.TrackTrueOrigin == 3){
+         eventReco.TrueDecayPionMinusIndex = Particle.Index;
+         found_decaypionminus = true;
       }
    }
 
-   for(size_t i_sh=0;i_sh<theData.ShowerPrimaryDaughters.size();i_sh++){
+   for(size_t i = 0; i < eventReco.ShowerPrimaryDaughters.size(); i++){
 
-      RecoParticle P = theData.ShowerPrimaryDaughters.at(i_sh);
+      RecoParticle Particle = eventReco.ShowerPrimaryDaughters.at(i);
 
-      if(!found_muon && abs(P.TrackTruePDG) == 13 && P.TrackTrueOrigin == 1){ 
-         theData.TrueMuonIndex = P.Index;
+      if(!found_muon && isMuon(Particle.TrackTruePDG) && Particle.TrackTrueOrigin == 1){ 
+         eventReco.TrueMuonIndex = Particle.Index;
          found_muon = true; 
       }
 
-      if(ContainsSignal && !found_decayproton && P.TrackTruePDG == 2212 && P.TrackTrueOrigin == 2){
-         theData.TrueDecayProtonIndex = P.Index;
-         found_decayproton = true;
+      if(ContainsSignal && !found_decaypionplus && isPionPlus(Particle.TrackTruePDG) && Particle.TrackTrueOrigin == 3){
+         eventReco.TrueDecayPionPlusIndex = Particle.Index;
+         found_decaypionplus = true;
       }
 
-      if(ContainsSignal && !found_decaypion && P.TrackTruePDG == -211 && P.TrackTrueOrigin == 2){
-         theData.TrueDecayPionIndex = P.Index;
-         found_decaypion = true;
+      if(ContainsSignal && !found_decaypionminus && isPionMinus(Particle.TrackTruePDG) && Particle.TrackTrueOrigin == 3){
+         eventReco.TrueDecayPionMinusIndex = Particle.Index;
+         found_decaypionminus = true;
       }
    }
 
-if(ContainsSignal && found_decayproton && found_decaypion) theData.GoodReco = true;
-
+   if(ContainsSignal && found_decaypionplus && found_decaypionminus) eventReco.GoodReco = true;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #endif

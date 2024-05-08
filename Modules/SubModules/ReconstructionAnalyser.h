@@ -1,5 +1,5 @@
-#ifndef _SubModuleReco_h_
-#define _SubModuleReco_h_
+#ifndef _ReconstructionAnalyser_h_
+#define _ReconstructionAnalyser_h_
 
 #include <string>
 #include <vector>
@@ -28,12 +28,12 @@
 #include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
 #include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
 #include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
-#include "ubana/HyperonProduction/Headers/Descendants.h"
+//#include "ubana/HyperonProduction/Headers/Descendants.h"
 
 #include "ubana/HyperonProduction/Objects/RecoParticle.h"
 #include "ubana/HyperonProduction/Objects/Helpers.h"
 #include "ubana/HyperonProduction/Alg/PIDManager.h"
-#include "ubana/HyperonProduction/Modules/SubModules/SubModuleG4Truth.h"
+#include "ubana/HyperonProduction/Modules/SubModules/ParticleTrackerAnalyser.h"
 #include "ubana/HyperonProduction/Alg/BDTHandle.h"
 
 #include "TVector3.h"
@@ -44,7 +44,7 @@ namespace hyperon {
 
 struct RecoData {
 
-   TVector3 RecoPrimaryVertex = TVector3(-1000,-1000,-1000);
+   TVector3 RecoPrimaryVertex = TVector3(-1000, -1000, -1000);
 
    int NPrimaryDaughters; 
    int NPrimaryTrackDaughters;
@@ -56,32 +56,30 @@ struct RecoData {
    std::vector<TVector3> TrackStarts;
 
    size_t TrueMuonIndex = -1;
-   size_t TrueDecayProtonIndex = -1;
-   size_t TrueDecayPionIndex = -1;
+   size_t TrueDecayPionPlusIndex = -1;
+   size_t TrueDecayPionMinusIndex = -1;
 
    bool GoodReco = false;
+
 };
 
-class SubModuleReco {
+class ReconstructionAnalyser {
 
    public:
 
-      //SubModuleReco();
-      SubModuleReco(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
+      ReconstructionAnalyser(art::Event const& e,bool isdata,string pfparticlelabel,string tracklabel,
                         string showerlabel,string vertexlabel,string pidlabel,string calolabel,string hitlabel,
                         string hittruthassnlabel,string trackhitassnlabel,string metadatalabel,string genlabel,
                         string g4label,bool dogetpids,bool includecosmics,bool particlegunmode=false);
 
-      SubModuleReco(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false);
+      ReconstructionAnalyser(art::Event const& e,bool isdata,fhicl::ParameterSet pset,bool particlegunmode=false);
 
       void PrepareInfo(); 
       TVector3 GetPrimaryVertex();
-      void SetIndices(std::vector<bool> IsSignal,std::vector<bool> IsSignalSigmaZero);
+      void SetIndices(std::vector<bool> IsSignal);
 
       RecoData GetInfo();
       void SetResRangeCutoff(double cutoff){ ResRangeCutoff = cutoff; }
-
-     
 
    private:
 
@@ -115,10 +113,10 @@ class SubModuleReco {
       searchingfornuesk::LLRPIDK llr_pid_calculator_kaon;
       searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
 
-      SubModuleG4Truth* G4T = nullptr;
+      ParticleTrackerAnalyser* G4T = nullptr;
       PIDManager PIDCalc;      
 
-      RecoData theData;
+      RecoData eventReco;
       size_t neutrinoID = 99999;
       std::map<size_t,int> m_PFPID_TrackIndex;
 
@@ -138,5 +136,3 @@ class SubModuleReco {
 }
 
 #endif
-
-

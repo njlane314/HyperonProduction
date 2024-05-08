@@ -19,22 +19,22 @@
 //root objects
 #include "TVector3.h"
 
-// Helper functions used to transform larsoft objects into SimParticle and RecoParticle
-
 namespace hyperon {
 
-inline SimParticle MakeSimParticle(simb::MCParticle Part){
-
+inline SimParticle MakeSimParticle(simb::MCParticle Part)
+{
    SimParticle S;
-   S.SetKinematics(Part.Momentum(),Part.EndMomentum(),Part.Mass());
+   S.SetKinematics(Part.Momentum(), Part.EndMomentum(), Part.Mass());
    S.PDG = Part.PdgCode();
-   S.SetPositions(Part.Position(),Part.EndPosition());
+   S.SetPositions(Part.Position(), Part.EndPosition());
+
+   S.SetScatterings();
+
    return S;
 }
 
-// Helper function for setting track variables in Reco Particle
-inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk, int ndesc){
-
+inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk)
+{
    auto const* SCE = lar::providerFrom<spacecharge::SpaceChargeService>();
 
    P.TrackLength = trk->Length();
@@ -59,7 +59,7 @@ inline void SetTrackVariables(RecoParticle &P , art::Ptr<recob::Track> trk, int 
 
    P.TrackWiggliness = GetTrackWiggliness(trk);
 
-   P.NDescendents = ndesc;
+   //P.NDescendents = ndesc;
 }
 
 }
