@@ -69,7 +69,6 @@ struct Wiremap {
 
 };
 
-
 // Result performing the test on a single set of three tracks
 
 struct CTSingleOutcome {
@@ -84,7 +83,6 @@ struct CTSingleOutcome {
    std::vector<int> SeedTicks;
 
 };
-
 
 // List of results from all the combinations of three tracks in event
 // for all three planes
@@ -111,12 +109,11 @@ struct CTOutcome {
 
 };
 
-
 class ConnectednessHelper {
 
    public:
 
-      ConnectednessHelper(bool draw);
+      ConnectednessHelper(bool Draw);
       void LoadWireActivity(std::vector<art::Ptr<recob::Wire>> wires);
       void AddStartPositions(std::vector<TVector3> positions);
   
@@ -132,7 +129,7 @@ class ConnectednessHelper {
       Connectedness::ClusterBuilder CPlane1;
       Connectedness::ClusterBuilder CPlane2;
 
-      bool Draw=false;
+      bool draw = false;
       std::string rse;
 
       Wiremap WMPlane0;
@@ -146,9 +143,7 @@ class ConnectednessHelper {
       std::vector<std::pair<int,int>> PositionsPlane0;
       std::vector<std::pair<int,int>> PositionsPlane1;
       std::vector<std::pair<int,int>> PositionsPlane2;
-
 };
-
 
 }
 
