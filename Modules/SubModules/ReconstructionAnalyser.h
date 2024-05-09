@@ -24,17 +24,14 @@
 #include "larevt/SpaceChargeServices/SpaceChargeService.h"
 
 #include "ubana/HyperonProduction/Headers/ParticleTypes.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
+#include "ubana/HyperonProduction/Headers/LLRPID.h"
+#include "ubana/HyperonProduction/Headers/LLRPID_ProtonMuonLookup.h"
 
 #include "ubana/HyperonProduction/Objects/RecoParticle.h"
 #include "ubana/HyperonProduction/Objects/RecoHelper.h"
 #include "ubana/HyperonProduction/Objects/SimHelper.h"
 #include "ubana/HyperonProduction/Alg/PIDManager.h"
 #include "ubana/HyperonProduction/Modules/SubModules/ParticleTrackerAnalyser.h"
-#include "ubana/HyperonProduction/Alg/BDTHandle.h"
 
 #include "TVector3.h"
 

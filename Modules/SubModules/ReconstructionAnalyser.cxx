@@ -271,7 +271,7 @@ void ReconstructionAnalyser::GetPIDs(const art::Ptr<recob::Track> &Trk, RecoPart
    std::vector<art::Ptr<anab::ParticleID>> TrackPID = assocTrackPID->at(Trk.key());
    std::vector<anab::sParticleIDAlgScores> AlgScoresVec = TrackPID.at(0)->ParticleIDAlgScores();
 
-   PIDStore Store = PIDCalc.GetPIDScores(Trk, CaloFromTrack, AlgScoresVec);
+   ParticleIdentifierStore Store = PIDCalc.GetPIDScores(Trk, CaloFromTrack, AlgScoresVec);
 
    Particle.Track_LLR_PID = Store.LLR;
 

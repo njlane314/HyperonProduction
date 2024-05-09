@@ -15,12 +15,9 @@ namespace Connectedness {
 struct Cluster {
 
 int ID;
-
-// Lists of bins in this cluster
-std::vector<int> bins_x;
-std::vector<int> bins_y;
-
-
+   // Lists of bins in this cluster
+   std::vector<int> bins_x;
+   std::vector<int> bins_y;
 };
 
 class ClusterBuilder {
@@ -28,31 +25,31 @@ class ClusterBuilder {
    public: 
 
       ClusterBuilder();
-      ClusterBuilder(bool draw,std::string displaydir="");
+      ClusterBuilder(bool Draw, std::string DisplayDir = "");
       ~ClusterBuilder();
 
       // Setup functions
 
-      void LoadDeadWireMaps(std::string dir="../");
+      void LoadDeadWireMaps(std::string Dir = "../");
 
-      void SetThreshold(double threshold=1.8);
-      void SetOffsets(int x_offset,int y_offset);
-      void SetSeachArea(int x_max,int y_max);
+      void SetThreshold(double Threshold = 1.8);
+      void SetOffsets(int XOffset, int YOffset);
+      void SetSeachArea(int XMax, int YMax);
 
       // Event processing functions
 
-      void ReadData(std::vector<int> channel,std::vector<int> tick,std::vector<double> signal,std::string rse="");
+      void ReadData(std::vector<int> Channel, std::vector<int> Tick, std::vector<double> Signal, std::string RSE = "");
 
       // Returns the ID of the cluster (check this against list of existing cluster IDs to
       // see if some merging has taken place). Returns -1,-1 if seed landed on empty bin 
-      std::pair<int,int> MakeCluster(int seed_channel,int seed_tick,int ID);
+      std::pair<int,int> MakeCluster(int SeedChannel, int SeedTick, int Index);
 
       std::vector<Cluster> GetClusters();
 
       // Plane quality checks
 
       // Check seeds are not separated by dead wires
-      bool SeedDeadWireCheck(std::vector<int> seeds_channel,std::vector<int> seeds_tick, int plane);
+      bool SeedDeadWireCheck(std::vector<int> SeedChannel, std::vector<int> SeedTick, int Plane);
 
 
       // Empty the list of clusters, do before running different set of clusters for same event
@@ -61,49 +58,46 @@ class ClusterBuilder {
       // Empty the list of clusters and delete histograms, do before reading a new event
       void Reset();
         
-      void SetDisplayDir(std::string dir);
+      void SetDisplayDir(std::string Dir);
 
    private:
 
-      bool DrawEverything=false;
-      int XOffset = 0;
-      int YOffset = 20;
+      bool drawEverything = false;
+      int xOffset = 0;
+      int yOffset = 20;
 
       std::vector<int> DeadChannels_Plane0;
       std::vector<int> DeadChannels_Plane1;
       std::vector<int> DeadChannels_Plane2;
 
-      double Threshold=1.8;
+      double threshold = 1.8;
 
-      TH2D *h_Raw = nullptr;
-      TH2D *h_Binary = nullptr;
-      TH2D *h_Clustered = nullptr;
+      TH2D *hRaw = nullptr;
+      TH2D *hBinary = nullptr;
+      TH2D *hClustered = nullptr;
 
       TCanvas *c = nullptr;
 
-      std::vector<Cluster> Clusters;
+      std::vector<Cluster> clusters;
 
-      std::pair<int,int> FindNearestOccupiedBin(TH2D *hist,int x, int y);
-      int MaxSearchX = 2;
-      int MaxSearchY = 15;
+      std::pair<int,int> FindNearestOccupiedBin(TH2D *Hist, int X, int Y);
+      int maxSearchX = 2;
+      int maxSearchY = 15;
 
-       void DeadWireFill(int plane);
+       void DeadWireFill(int Plane);
 
        void Focus();
 
-       std::string DisplayDir="";
+       std::string displayDir = "";
 
    public:
 
       // pass = -1 (selection not applicable) , pass = 0 = not selected plane , pass = 1 = selected plane
-      void DrawRaw(std::string rse="",int pass=-1);
-      void DrawBinary(std::string rse="",int pass=-1);
-      void DrawClustered(std::string rse="",int plane=-1,int pass=-1);
-     
+      void DrawRaw(std::string RSE = "", int Pass = -1);
+      void DrawBinary(std::string RSE = "", int Pass = -1);
+      void DrawClustered(std::string RSE = "", int Plane = -1, int Pass = -1);   
 };
 
 }
 
 #endif
-
-

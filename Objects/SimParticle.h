@@ -14,36 +14,36 @@ class SimParticle : public TObject{
 #else
 class SimParticle {
 #endif
+   public:
 
-public:
+   SimParticle() {}
+   ~SimParticle() {}
 
-SimParticle() {}
-~SimParticle() {}
+      int MCTruthIndex = -1;
 
-int MCTruthIndex = -1;
+      int PDG = 0;
+      double E = 0, Px = 0, Py = 0, Pz = 0;
+      double ModMomentum = 0;
+      double EndE = 0, EndPx = 0, EndPy = 0, EndPz = 0;
+      double EndModMomentum = 0;
+      double KE = 0;
+      double EndKE = 0;
+      double StartX = 0, StartY = 0, StartZ = 0;
+      double EndX = 0, EndY = 0, EndZ = 0;
+      double Travel = 0; 
+      double Theta = 0;
+      double Phi = 0;
+      int Origin = 0;
 
-int PDG = 0;
-double E = 0, Px = 0, Py = 0, Pz = 0;
-double ModMomentum = 0;
-double EndE = 0, EndPx = 0, EndPy = 0, EndPz = 0;
-double EndModMomentum = 0;
-double KE = 0;
-double EndKE = 0;
-double StartX = 0, StartY = 0, StartZ = 0;
-double EndX = 0, EndY = 0, EndZ = 0;
-double Travel = 0; 
-double Theta = 0;
-double Phi = 0;
-int Origin = 0;
+      double ScatterLength = 0;
 
-inline void SetKinematics(TLorentzVector P, TLorentzVector EndP, double Mass);
-inline void SetPositions(TLorentzVector Start, TLorentzVector End);
-inline void Print();
+      inline void SetKinematics(TLorentzVector P, TLorentzVector EndP, double Mass);
+      inline void SetPositions(TLorentzVector Start, TLorentzVector End);
+      inline void Print();
 
-#ifdef __MAKE_ROOT_DICT__
-ClassDef(SimParticle,1);
-#endif
-
+   #ifdef __MAKE_ROOT_DICT__
+   ClassDef(SimParticle, 1);
+   #endif
 };
 
 inline void SimParticle::SetKinematics(TLorentzVector P, TLorentzVector EndP, double Mass)
@@ -68,7 +68,6 @@ inline void SimParticle::SetKinematics(TLorentzVector P, TLorentzVector EndP, do
 
 inline void SimParticle::SetPositions(TLorentzVector Start, TLorentzVector End)
 {
-   //Vertex = {Start.X() , Start.Y() , Start.Z()};	
    StartX = Start.X();
    StartY = Start.Y();
    StartZ = Start.Z();

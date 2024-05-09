@@ -5,260 +5,216 @@
 
 using namespace hyperon;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-PIDManager::PIDManager(){
-
-   llr_pid_calculator.set_dedx_binning(0, protonmuon_parameters.dedx_edges_pl_0);
-   llr_pid_calculator.set_par_binning(0, protonmuon_parameters.parameters_edges_pl_0);
-   llr_pid_calculator.set_lookup_tables(0, protonmuon_parameters.dedx_pdf_pl_0);
-   llr_pid_calculator.set_corr_par_binning(0,correction_parameters.parameter_correction_edges_pl_0);
-   llr_pid_calculator.set_correction_tables(0,correction_parameters.correction_table_pl_0);
+PIDManager::PIDManager()
+{
+   particleIdentificationCalculator.SetdEdxBinning(0, parametersProtonMuon.dedx_edges_pl_0);
+   particleIdentificationCalculator.SetParBinning(0, parametersProtonMuon.parameters_edges_pl_0);
+   particleIdentificationCalculator.SetLookupTables(0, parametersProtonMuon.dedx_pdf_pl_0);
+   particleIdentificationCalculator.SetCorrParBinning(0, parametersCorrections.parameter_correction_edges_pl_0);
+   particleIdentificationCalculator.SetCorrectionTables(0, parametersCorrections.correction_table_pl_0);
       
-   llr_pid_calculator.set_dedx_binning(1, protonmuon_parameters.dedx_edges_pl_1);
-   llr_pid_calculator.set_par_binning(1, protonmuon_parameters.parameters_edges_pl_1);
-   llr_pid_calculator.set_lookup_tables(1, protonmuon_parameters.dedx_pdf_pl_1);
-   llr_pid_calculator.set_corr_par_binning(1,correction_parameters.parameter_correction_edges_pl_1);
-   llr_pid_calculator.set_correction_tables(1,correction_parameters.correction_table_pl_1);
+   particleIdentificationCalculator.SetdEdxBinning(1, parametersProtonMuon.dedx_edges_pl_1);
+   particleIdentificationCalculator.SetParBinning(1, parametersProtonMuon.parameters_edges_pl_1);
+   particleIdentificationCalculator.SetLookupTables(1, parametersProtonMuon.dedx_pdf_pl_1);
+   particleIdentificationCalculator.SetCorrParBinning(1, parametersCorrections.parameter_correction_edges_pl_1);
+   particleIdentificationCalculator.SetCorrectionTables(1, parametersCorrections.correction_table_pl_1);
 
-   llr_pid_calculator.set_dedx_binning(2, protonmuon_parameters.dedx_edges_pl_2);
-   llr_pid_calculator.set_par_binning(2, protonmuon_parameters.parameters_edges_pl_2);
-   llr_pid_calculator.set_lookup_tables(2, protonmuon_parameters.dedx_pdf_pl_2);
-   llr_pid_calculator.set_corr_par_binning(2,correction_parameters.parameter_correction_edges_pl_2);
-   llr_pid_calculator.set_correction_tables(2,correction_parameters.correction_table_pl_2);
-
-   llr_pid_calculator_kaon.set_dedx_binning(0, kaonproton_parameters.dedx_edges_pl_0);
-   llr_pid_calculator_kaon.set_par_binning(0, kaonproton_parameters.parameters_edges_pl_0);
-   llr_pid_calculator_kaon.set_lookup_tables(0, kaonproton_parameters.dedx_pdf_pl_0);
-
-   llr_pid_calculator_kaon.set_dedx_binning(1, kaonproton_parameters.dedx_edges_pl_1);
-   llr_pid_calculator_kaon.set_par_binning(1, kaonproton_parameters.parameters_edges_pl_1);
-   llr_pid_calculator_kaon.set_lookup_tables(1, kaonproton_parameters.dedx_pdf_pl_1);
-
-   llr_pid_calculator_kaon.set_dedx_binning(2, kaonproton_parameters.dedx_edges_pl_2);
-   llr_pid_calculator_kaon.set_par_binning(2, kaonproton_parameters.parameters_edges_pl_2);
-   llr_pid_calculator_kaon.set_lookup_tables(2, kaonproton_parameters.dedx_pdf_pl_2);
-
+   particleIdentificationCalculator.SetdEdxBinning(2, parametersProtonMuon.dedx_edges_pl_2);
+   particleIdentificationCalculator.SetParBinning(2, parametersProtonMuon.parameters_edges_pl_2);
+   particleIdentificationCalculator.SetLookupTables(2, parametersProtonMuon.dedx_pdf_pl_2);
+   particleIdentificationCalculator.SetCorrParBinning(2, parametersCorrections.parameter_correction_edges_pl_2);
+   particleIdentificationCalculator.SetCorrectionTables(2, parametersCorrections.correction_table_pl_2);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> Calo)
+{
+   double TotalE = 0;
+   double TotalX = 0;
 
-double PIDManager::GetMeandEdX(art::Ptr<anab::Calorimetry> calo){
+   if(Calo->XYZ().size() < 2) return -1;
 
-   double totalE=0;
-   double totalX=0;
+   for(size_t i_point = 0; i_point < Calo->XYZ().size()-1; i_point++){
 
-   // Sometimes this vector is empty, causes crash below, skip plane if it is
-   if(calo->XYZ().size() < 2) return -1;
+      anab::Point_t Pos = Calo->XYZ().at(i_point);
+      anab::Point_t NextPos = Calo->XYZ().at(i_point+1);
 
-   for(size_t i_point = 0;i_point < calo->XYZ().size()-1;i_point++){
+      TVector3 D(Pos.X() - NextPos.X(), Pos.X() - NextPos.X(), Pos.X() - NextPos.X());
 
-      anab::Point_t thisPos = calo->XYZ().at(i_point);
-      anab::Point_t nextPos = calo->XYZ().at(i_point+1);
-
-      // Step vector
-      TVector3 D(thisPos.X()-nextPos.X(),thisPos.X()-nextPos.X(),thisPos.X()-nextPos.X());
-
-      totalX += D.Mag();
-      totalE += calo->dEdx().at(i_point)*D.Mag();
+      TotalE += Calo->dEdx().at(i_point) * D.Mag();
+      TotalX += D.Mag();
    }
 
-   return totalE/totalX;
+   return TotalE / TotalX;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void PIDManager::SetThreePlaneMeandEdX(art::Ptr<recob::Track> Trk, std::vector<art::Ptr<anab::Calorimetry>> VectCalo, ParticleIdentifierStore &Store)
+{
+   double TotaldEdX = 0;
+   double TotalWeight = 0;
 
-void PIDManager::ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store){
+   for(size_t i_plane = 0; i_plane < VectCalo.size(); i_plane++){
 
-   double TotaldEdX=0;
-   double TotalWeight=0;
+      int Plane = VectCalo.at(i_plane)->PlaneID().Plane;
 
-   for(size_t i_pl=0;i_pl<calo_v.size();i_pl++){
+      if(Plane != 0 && Plane != 1 && Plane != 2) continue;        
 
-      int plane = calo_v.at(i_pl)->PlaneID().Plane;
+      double dEdX = GetMeandEdX(VectCalo.at(i_plane));
 
-      if(plane != 0 && plane != 1 && plane != 2) continue;        
-
-      double dEdX = GetMeandEdX(calo_v.at(i_pl));
-
-      // Catch default fills
       if(dEdX < 0) continue;
 
-      double thisPlaneWeight = PlaneWeight(track,plane);
+      double PlaneWeight = GetPlaneWeight(Trk, Plane);
 
-      if(plane == 0){
-         store.Weight_Plane0 = thisPlaneWeight;       
-         store.MeandEdX_Plane0 = dEdX;
-         store.dEdX_Plane0 = calo_v.at(i_pl)->dEdx();
-         store.ResidualRange_Plane0 = calo_v.at(i_pl)->ResidualRange();
-         store.Pitch_Plane0 = calo_v.at(i_pl)->TrkPitchVec();
-         store.dEdX_Corrected_Plane0 = llr_pid_calculator.correct_many_hits_one_plane(calo_v.at(i_pl),*track,true,true);
+      if(Plane == 0){
+         Store.Weight_Plane0 = PlaneWeight;       
+         Store.MeandEdX_Plane0 = dEdX;
+         Store.dEdX_Plane0 = VectCalo.at(i_plane)->dEdx();
+         Store.ResidualRange_Plane0 = VectCalo.at(i_plane)->ResidualRange();
+         Store.Pitch_Plane0 = VectCalo.at(i_plane)->TrkPitchVec();
+         Store.dEdX_Corrected_Plane0 = particleIdentificationCalculator.CorrectManyHitsOnePlane(VectCalo.at(i_plane), *Trk, true, true);
       }
-      if(plane == 1){
-         store.Weight_Plane1 = thisPlaneWeight;       
-         store.MeandEdX_Plane1 = dEdX;
-         store.dEdX_Plane1 = calo_v.at(i_pl)->dEdx();
-         store.ResidualRange_Plane1 = calo_v.at(i_pl)->ResidualRange();
-         store.Pitch_Plane1 = calo_v.at(i_pl)->TrkPitchVec();
-         store.dEdX_Corrected_Plane1 = llr_pid_calculator.correct_many_hits_one_plane(calo_v.at(i_pl),*track,true,true);
+      if(Plane == 1){
+         Store.Weight_Plane1 = PlaneWeight;       
+         Store.MeandEdX_Plane1 = dEdX;
+         Store.dEdX_Plane1 = VectCalo.at(i_plane)->dEdx();
+         Store.ResidualRange_Plane1 = VectCalo.at(i_plane)->ResidualRange();
+         Store.Pitch_Plane1 = VectCalo.at(i_plane)->TrkPitchVec();
+         Store.dEdX_Corrected_Plane1 = particleIdentificationCalculator.CorrectManyHitsOnePlane(VectCalo.at(i_plane), *Trk, true, true);
       }
-      if(plane == 2){
-         store.Weight_Plane2 = thisPlaneWeight;       
-         store.MeandEdX_Plane2 = dEdX;
-         store.dEdX_Plane2 = calo_v.at(i_pl)->dEdx();
-         store.ResidualRange_Plane2 = calo_v.at(i_pl)->ResidualRange();
-         store.Pitch_Plane2 = calo_v.at(i_pl)->TrkPitchVec();
-         store.dEdX_Corrected_Plane2 = llr_pid_calculator.correct_many_hits_one_plane(calo_v.at(i_pl),*track,true,true);
+      if(Plane == 2){
+         Store.Weight_Plane2 = PlaneWeight;       
+         Store.MeandEdX_Plane2 = dEdX;
+         Store.dEdX_Plane2 = VectCalo.at(i_plane)->dEdx();
+         Store.ResidualRange_Plane2 = VectCalo.at(i_plane)->ResidualRange();
+         Store.Pitch_Plane2 = VectCalo.at(i_plane)->TrkPitchVec();
+         Store.dEdX_Corrected_Plane2 = particleIdentificationCalculator.CorrectManyHitsOnePlane(VectCalo.at(i_plane), *Trk, true, true);
       }
 
-      TotaldEdX += dEdX*thisPlaneWeight;
-      TotalWeight += thisPlaneWeight;
+      TotaldEdX += dEdX * PlaneWeight;
+      TotalWeight += PlaneWeight;
    }
 
-   if(TotalWeight > 0) store.MeandEdX_3Plane = TotaldEdX/TotalWeight;
+   if(TotalWeight > 0) Store.MeandEdX_3Plane = TotaldEdX / TotalWeight;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PIDManager::LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store){
-
-   double this_llr_pid=0;
-   double this_llr_pid_score=0;
-   double this_llr_pid_kaon=0;
-   double this_llr_pid_score_kaon=0;
-
-   double this_llr_pid_kaon_partial = 0;
-   double this_llr_pid_score_kaon_partial = 0;
-
-   for(auto const &calo : calo_v){
-
-      auto const &plane = calo->PlaneID().Plane;
-      auto const &dedx_values = calo->dEdx();
-      auto const &rr = calo->ResidualRange();
-      auto const &pitch = calo->TrkPitchVec();
-      std::vector<std::vector<float>> par_values;
-      par_values.push_back(rr);
-      par_values.push_back(pitch);
-
-      // Get parital length PIDs
-      std::vector<std::vector<float>> par_values_partial;
-      std::vector<float> dedx_values_partial,rr_partial,pitch_partial;      
-      if(calo->dEdx().size() != calo->ResidualRange().size() || calo->ResidualRange().size() != calo->TrkPitchVec().size())
-         throw cet::exception("SubModuleReco") << "Track calo point list size mismatch" << std::endl;
-      for(size_t i_p=0;i_p<calo->dEdx().size();i_p++){
-         if(rr.at(i_p) > ResRangeCutoff) continue;
-         dedx_values_partial.push_back(calo->dEdx().at(i_p));
-         rr_partial.push_back(calo->ResidualRange().at(i_p));
-         pitch_partial.push_back(calo->TrkPitchVec().at(i_p));        
-      }
-      par_values_partial.push_back(rr_partial);
-      par_values_partial.push_back(pitch_partial);
-
-      if(calo->ResidualRange().size() == 0) continue;
-
-      float calo_energy = 0;
-      for(size_t i=0;i<dedx_values.size();i++)
-         calo_energy += dedx_values[i] * pitch[i];
-
-      float llr_pid = llr_pid_calculator.LLR_many_hits_one_plane(dedx_values,par_values,plane);
-      float llr_pid_kaon = llr_pid_calculator_kaon.LLR_many_hits_one_plane(dedx_values,par_values,plane);
-      this_llr_pid += llr_pid;
-      this_llr_pid_kaon += llr_pid_kaon;
-
-      // Partial length calculation
-      float calo_energy_partial = 0;
-      for(size_t i=0;i<dedx_values_partial.size();i++)
-         calo_energy_partial += dedx_values_partial[i] * pitch_partial[i];
-
-      float llr_pid_kaon_partial = llr_pid_calculator_kaon.LLR_many_hits_one_plane(dedx_values_partial,par_values_partial,plane);
-      this_llr_pid_kaon_partial += llr_pid_kaon_partial;     
-   }
-
-   this_llr_pid_score = atan(this_llr_pid/100.)*2/3.14159266;
-   this_llr_pid_score_kaon = atan(this_llr_pid_kaon/100.)*2/3.14159266;
-   this_llr_pid_score_kaon_partial = atan(this_llr_pid_kaon_partial/100.)*2/3.14159266;
-
-   store.LLR = this_llr_pid_score;
-   store.LLR_Kaon = this_llr_pid_score_kaon;
-   store.LLR_Kaon_Partial = this_llr_pid_score_kaon_partial;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-double PIDManager::GetBraggLikelihood(
-   art::Ptr<recob::Track> track, 
-   std::vector<anab::sParticleIDAlgScores> algscores_v, 
-   int pdg, 
-   anab::kTrackDir dir)
+void PIDManager::LLRPID(std::vector<art::Ptr<anab::Calorimetry>> VectCalo, ParticleIdentifierStore & Store)
 {
-   double score_plane0 = 0.0, score_plane1 = 0.0, score_plane2 = 0.0, score_weighted = 0.0;
-   for(size_t i_algscore = 0; i_algscore < algscores_v.size(); i_algscore++){
-      anab::sParticleIDAlgScores algscore = algscores_v.at(i_algscore);
-      if(algscore.fAssumedPdg == pdg && algscore.fAlgName == "BraggPeakLLH" && anab::kTrackDir(algscore.fTrackDir) == dir){
-         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 0) score_plane0 = algscore.fValue;
-         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 1) score_plane1 = algscore.fValue;
-         if(UBPID::uB_getSinglePlane(algscore.fPlaneMask) == 2) score_plane2 = algscore.fValue;
+   double LLRPID = 0;
+   double LLRPIDScore = 0;
+
+   for(auto const &Calo : VectCalo){
+
+      auto const &Plane = Calo->PlaneID().Plane;
+      auto const &dEdxValues = Calo->dEdx();
+      auto const &RR = Calo->ResidualRange();
+      auto const &Pitch = Calo->TrkPitchVec();
+
+      std::vector<std::vector<float>> ParValues;
+      ParValues.push_back(RR);
+      ParValues.push_back(Pitch);
+
+      std::vector<std::vector<float>> ParValuesPartial;
+      std::vector<float> dEdxValuesPartial, RRPartial, PitchPartial;      
+      
+      if(Calo->dEdx().size() != Calo->ResidualRange().size() || Calo->ResidualRange().size() != Calo->TrkPitchVec().size())
+         throw cet::exception("SubModuleReco") << "Track Calo point list size mismatch" << std::endl;
+
+      for(size_t Plane = 0; Plane < Calo->dEdx().size(); Plane++){
+         if(RR.at(Plane) > resRangeCutoff) continue;
+
+         dEdxValuesPartial.push_back(Calo->dEdx().at(Plane));
+         RRPartial.push_back(Calo->ResidualRange().at(Plane));
+         PitchPartial.push_back(Calo->TrkPitchVec().at(Plane));        
+      }
+
+      ParValuesPartial.push_back(RRPartial);
+      ParValuesPartial.push_back(PitchPartial);
+
+      if(Calo->ResidualRange().size() == 0) continue;
+
+      float CaloEnergy = 0;
+      for(size_t i = 0; i < dEdxValues.size(); i++)
+         CaloEnergy += dEdxValues[i] * Pitch[i];
+
+      LLRPID += particleIdentificationCalculator.LLRManyHitsOnePlane(dEdxValues,ParValues,Plane);
+
+      float CaloEnergyPartial = 0;
+      for(size_t i = 0; i < dEdxValuesPartial.size(); i++)
+         CaloEnergyPartial += dEdxValuesPartial[i] * PitchPartial[i];
+
+   }
+
+   LLRPIDScore = atan(LLRPID / 100.) * (2 / 3.14159266);
+
+   Store.LLR = LLRPIDScore;
+}
+
+double PIDManager::GetBraggLikelihood(art::Ptr<recob::Track> Trk, std::vector<anab::sParticleIDAlgScores> VectorAlgScores, int PDG, anab::kTrackDir Dir)
+{
+   double ScorePlane0 = 0.0, ScorePlane1 = 0.0, ScorePlane2 = 0.0, ScoreWeighted = 0.0;
+
+   for(size_t i_algscore = 0; i_algscore < VectorAlgScores.size(); i_algscore++){
+      anab::sParticleIDAlgScores AlgScore = VectorAlgScores.at(i_algscore);
+
+      if(AlgScore.fAssumedPdg == PDG && AlgScore.fAlgName == "BraggPeakLLH" && anab::kTrackDir(AlgScore.fTrackDir) == Dir){
+         if(UBPID::uB_getSinglePlane(AlgScore.fPlaneMask) == 0) ScorePlane0 = AlgScore.fValue;
+         if(UBPID::uB_getSinglePlane(AlgScore.fPlaneMask) == 1) ScorePlane1 = AlgScore.fValue;
+         if(UBPID::uB_getSinglePlane(AlgScore.fPlaneMask) == 2) ScorePlane2 = AlgScore.fValue;
       }
    }
 
-   score_weighted = score_plane0 * PlaneWeight(track, 0) + score_plane1 * PlaneWeight(track, 1) + score_plane2 * PlaneWeight(track, 2);
-   score_weighted /= (PlaneWeight(track, 0) + PlaneWeight(track, 1) + PlaneWeight(track, 2)); 
+   ScoreWeighted = ScorePlane0 * GetPlaneWeight(Trk, 0) + ScorePlane1 * GetPlaneWeight(Trk, 1) + ScorePlane2 * GetPlaneWeight(Trk, 2);
+   ScoreWeighted /= (GetPlaneWeight(Trk, 0) + GetPlaneWeight(Trk, 1) + GetPlaneWeight(Trk, 2)); 
 
-   return score_weighted;
+   return ScoreWeighted;
 }
 
-void PIDManager::SetBraggScores(
-   art::Ptr<recob::Track> track,
-   std::vector<anab::sParticleIDAlgScores> algscores_v,
-   PIDStore& store)
+void PIDManager::SetBraggScores(art::Ptr<recob::Track> Trk, std::vector<anab::sParticleIDAlgScores> VectorAlgScores, ParticleIdentifierStore & Store)
 {
-   store.BraggWeighted_Pion = GetBraggLikelihood(track, algscores_v, 211, anab::kForward); 
-   store.BraggWeighted_Muon = GetBraggLikelihood(track, algscores_v, 13, anab::kForward);
-   store.BraggWeighted_Proton = GetBraggLikelihood(track, algscores_v, 2212, anab::kForward);
-   store.BraggWeighted_Kaon = GetBraggLikelihood(track, algscores_v, 321, anab::kForward);
-   store.BraggWeighted_Sigma = GetBraggLikelihood(track, algscores_v, 3222, anab::kForward);
+   Store.BraggWeighted_Pion = GetBraggLikelihood(Trk, VectorAlgScores, 211, anab::kForward); 
+   Store.BraggWeighted_Muon = GetBraggLikelihood(Trk, VectorAlgScores, 13, anab::kForward);
+   Store.BraggWeighted_Proton = GetBraggLikelihood(Trk, VectorAlgScores, 2212, anab::kForward);
+   Store.BraggWeighted_Kaon = GetBraggLikelihood(Trk, VectorAlgScores, 321, anab::kForward);
+   Store.BraggWeighted_Sigma = GetBraggLikelihood(Trk, VectorAlgScores, 3222, anab::kForward);
 }
 
-PIDStore PIDManager::GetPIDScores(
-   art::Ptr<recob::Track> track,
-   std::vector<art::Ptr<anab::Calorimetry>> calo_v,
-   std::vector<anab::sParticleIDAlgScores> algscores_v)
+ParticleIdentifierStore  PIDManager::GetPIDScores(art::Ptr<recob::Track> Trk, std::vector<art::Ptr<anab::Calorimetry>> VectCalo, std::vector<anab::sParticleIDAlgScores> VectorAlgScores)
 {
-   PIDStore store;
-   ThreePlaneMeandEdX(track, calo_v, store);
-   LLRPID(calo_v, store);
-   SetBraggScores(track, algscores_v, store);
+   ParticleIdentifierStore  Store;
 
-   return store;
+   SetThreePlaneMeandEdX(Trk, VectCalo, Store);
+   LLRPID(VectCalo, Store);
+   SetBraggScores(Trk, VectorAlgScores, Store);
+
+   return Store;
 }
 
-double PIDManager::PlaneWeight(
-   art::Ptr<recob::Track> track,
-   int i_pl)
+double PIDManager::GetPlaneWeight(art::Ptr<recob::Track> Trk, int Plane)
 {
-   // returns a weight based on the angle between the track direction and wire plane
-   // perpendicular tracks are more favourably weighted
+   // Returns a weight based on the angle between the Trk direction and wire Plane
+   // Perpendicular tracks are more favourably weighted
 
-   TVector3 dir(track->End().x()-track->Start().x(),track->End().y()-track->Start().y(),track->End().z()-track->Start().z());
+   TVector3 Dir(Trk->End().x() - Trk->Start().x(), Trk->End().y() - Trk->Start().y(), Trk->End().z() - Trk->Start().z());
 
-   TVector3 trackvec(0, dir.Y(), dir.Z());
-   trackvec = trackvec.Unit();
-   TVector3 zaxis(0, 0, 1);
+   TVector3 TrackVector(0, Dir.Y(), Dir.Z());
+   TrackVector = TrackVector.Unit();
 
-   double costhetayz = trackvec.Dot(zaxis);
-   double thetayz = TMath::ACos(costhetayz);
-   if ((dir.Y() < 0) && (thetayz > 0)) thetayz *= -1;
+   TVector3 ZAxis(0, 0, 1);
 
-   double theta_towires = 0;
-   if (i_pl == 0) theta_towires = std::min(std::abs(plane0_wireangle - thetayz), std::abs((-1*(6.28-plane0_wireangle) - thetayz)));
-   if (i_pl == 1) theta_towires = std::min(std::abs(plane1_wireangle - thetayz), std::abs((-1*(6.28-plane1_wireangle) - thetayz)));
-   if (i_pl == 2) theta_towires = std::min(std::abs(plane2_wireangle - thetayz), std::abs((-1*(6.28-plane2_wireangle) - thetayz)));
+   double CosThetaYZ = TrackVector.Dot(ZAxis);
+   double ThetaYZ = TMath::ACos(CosThetaYZ);
 
-   double angle_planeweight = sin(theta_towires) * sin(theta_towires);
-   if (angle_planeweight < TophatThresh) angle_planeweight = 0;
-   if (angle_planeweight != 0) angle_planeweight = 1;
+   if ((Dir.Y() < 0) && (ThetaYZ > 0)) ThetaYZ *= -1;
 
-   return angle_planeweight;
+   double thetaToWires = 0;
+   if (Plane == 0) thetaToWires = std::min(std::abs(wireAnglePlane0 - ThetaYZ), std::abs((-1*(6.28-wireAnglePlane0) - ThetaYZ)));
+   if (Plane == 1) thetaToWires = std::min(std::abs(wireAnglePlane1 - ThetaYZ), std::abs((-1*(6.28-wireAnglePlane1) - ThetaYZ)));
+   if (Plane == 2) thetaToWires = std::min(std::abs(wireAnglePlane2 - ThetaYZ), std::abs((-1*(6.28-wireAnglePlane2) - ThetaYZ)));
+
+   double AnglePlaneWeihght = sin(thetaToWires) * sin(thetaToWires);
+   if (AnglePlaneWeihght < tophatThresh) AnglePlaneWeihght = 0;
+   if (AnglePlaneWeihght != 0) AnglePlaneWeihght = 1;
+
+   return AnglePlaneWeihght;
 }
 
 #endif

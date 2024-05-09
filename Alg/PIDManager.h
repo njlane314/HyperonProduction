@@ -10,22 +10,21 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/AnalysisBase/ParticleID.h"
 #include "ubana/ParticleID/Algorithms/uB_PlaneIDBitsetHelperFunctions.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_proton_muon_lookup.h"
-#include "ubana/HyperonProduction/Headers/LLR_PID_K.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_kaon_proton_lookup.h"
-#include "ubana/HyperonProduction/Headers/LLRPID_correction_lookup.h"
+#include "ubana/HyperonProduction/Headers/LLRPID.h"
+#include "ubana/HyperonProduction/Headers/LLRPID_ProtonMuonLookup.h"
+#include "ubana/HyperonProduction/Headers/LLRPID_CorrectionLookup.h"
 #include "TVector3.h"
 
 namespace hyperon {
 
-   //Define wire plane angles
-   const double plane0_wireangle = 30*6.28/360.0;
-   const double plane1_wireangle = -30*6.28/360.0;
-   const double plane2_wireangle = 90*6.28/360.0;
+   // Define wire plane angles
 
-   struct PIDStore {
+   const double wireAnglePlane0 = 30 * (6.28 / 360.0);
+   const double wireAnglePlane1 = -30 * (6.28 / 360.0);
+   const double wireAnglePlane2 = 90 * (6.28 / 360.0);
 
+   struct ParticleIdentifierStore 
+   {
       double Weight_Plane0 = 0;
       double Weight_Plane1 = 0;
       double Weight_Plane2 = 0;
@@ -46,19 +45,20 @@ namespace hyperon {
       double BraggWeighted_Sigma; 
 
       std::vector<float> dEdX_Plane0;
-      std::vector<float> ResidualRange_Plane0;
-      std::vector<float> Pitch_Plane0;
       std::vector<float> dEdX_Plane1;
-      std::vector<float> ResidualRange_Plane1;
-      std::vector<float> Pitch_Plane1;
       std::vector<float> dEdX_Plane2;
+
+      std::vector<float> ResidualRange_Plane0;
+      std::vector<float> ResidualRange_Plane1;
       std::vector<float> ResidualRange_Plane2;
+
+      std::vector<float> Pitch_Plane0;
+      std::vector<float> Pitch_Plane1;
       std::vector<float> Pitch_Plane2;
 
       std::vector<float> dEdX_Corrected_Plane0;
       std::vector<float> dEdX_Corrected_Plane1;
       std::vector<float> dEdX_Corrected_Plane2;
-
    };
 
    class PIDManager {
@@ -67,29 +67,27 @@ namespace hyperon {
 
          PIDManager();
 
-         double GetMeandEdX(art::Ptr<anab::Calorimetry> calo);
-         void ThreePlaneMeandEdX(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v, PIDStore &store);
-         void LLRPID(std::vector<art::Ptr<anab::Calorimetry>> calo_v,PIDStore& store);
-         double GetBraggLikelihood(art::Ptr<recob::Track> track, std::vector<anab::sParticleIDAlgScores> algscores_v, int pdg, anab::kTrackDir dir);
-         void SetBraggScores(art::Ptr<recob::Track> track, std::vector<anab::sParticleIDAlgScores> algscore_v, PIDStore &store);
-         PIDStore GetPIDScores(art::Ptr<recob::Track> track,std::vector<art::Ptr<anab::Calorimetry>> calo_v,std::vector<anab::sParticleIDAlgScores> algscores_v);   
-               
-         double PlaneWeight(art::Ptr<recob::Track> track,int i_pl);
+         double GetMeandEdX(art::Ptr<anab::Calorimetry> Calo);
+         void SetThreePlaneMeandEdX(art::Ptr<recob::Track> Trk, std::vector<art::Ptr<anab::Calorimetry>> VectCalo, ParticleIdentifierStore &Store);
+         void LLRPID(std::vector<art::Ptr<anab::Calorimetry>> VectCalo, ParticleIdentifierStore& Store);
+         double GetBraggLikelihood(art::Ptr<recob::Track> Trk, std::vector<anab::sParticleIDAlgScores> VectorAlgScores, int PDG, anab::kTrackDir Dir);
+         void SetBraggScores(art::Ptr<recob::Track> Trk, std::vector<anab::sParticleIDAlgScores> VectorAlgScores, ParticleIdentifierStore &Store);
 
-         void SetTophatThresh(double thresh){ TophatThresh = thresh; }
+         ParticleIdentifierStore GetPIDScores(art::Ptr<recob::Track> Trk, std::vector<art::Ptr<anab::Calorimetry>> VectCalo, std::vector<anab::sParticleIDAlgScores> VectorAlgScores);   
+               
+         double GetPlaneWeight(art::Ptr<recob::Track> Trk, int Plane);
+
+         void SetTophatThresh(double thresh){ tophatThresh = thresh; }
 
       private:
 
-         searchingfornues::LLRPID llr_pid_calculator;
-         searchingfornues::ProtonMuonLookUpParameters protonmuon_parameters;
-         searchingfornuesk::LLRPIDK llr_pid_calculator_kaon;
-         searchingfornuesk::KaonProtonLookUpParameters kaonproton_parameters;
-         searchingfornues::CorrectionLookUpParameters correction_parameters;
-         
+         searchingfornues::LLRPID particleIdentificationCalculator;
+         searchingfornues::ProtonMuonLookUpParameters parametersProtonMuon;
+         searchingfornues::CorrectionLookUpParameters parametersCorrections;
 
          // Miniumum value of sin2(angle between track and wires)
-         double TophatThresh = 0.175;
-         double ResRangeCutoff=5; 
+         double tophatThresh = 0.175;
+         double resRangeCutoff = 5; 
    };
 }
 
